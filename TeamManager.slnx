@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="TeamManager.Api/TeamManager.Api.csproj" Id="276ec90e-19ca-49c6-93ce-674f0ea1a9c9" />
+  <Project Path="TeamManager.Application/TeamManager.Application.csproj" />
+  <Project Path="TeamManager.Domain/TeamManager.Domain.csproj" />
+  <Project Path="TeamManager.Infrastructure/TeamManager.Infrastructure.csproj" />
+</Solution>

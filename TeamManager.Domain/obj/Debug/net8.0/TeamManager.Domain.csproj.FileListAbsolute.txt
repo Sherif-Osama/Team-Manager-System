@@ -1,0 +1,11 @@
+D:\TeamManager\TeamManager.Domain\bin\Debug\net8.0\TeamManager.Domain.deps.json
+D:\TeamManager\TeamManager.Domain\bin\Debug\net8.0\TeamManager.Domain.dll
+D:\TeamManager\TeamManager.Domain\bin\Debug\net8.0\TeamManager.Domain.pdb
+D:\TeamManager\TeamManager.Domain\obj\Debug\net8.0\TeamManager.Domain.GeneratedMSBuildEditorConfig.editorconfig
+D:\TeamManager\TeamManager.Domain\obj\Debug\net8.0\TeamManager.Domain.AssemblyInfoInputs.cache
+D:\TeamManager\TeamManager.Domain\obj\Debug\net8.0\TeamManager.Domain.AssemblyInfo.cs
+D:\TeamManager\TeamManager.Domain\obj\Debug\net8.0\TeamManager.Domain.csproj.CoreCompileInputs.cache
+D:\TeamManager\TeamManager.Domain\obj\Debug\net8.0\TeamManager.Domain.dll
+D:\TeamManager\TeamManager.Domain\obj\Debug\net8.0\refint\TeamManager.Domain.dll
+D:\TeamManager\TeamManager.Domain\obj\Debug\net8.0\TeamManager.Domain.pdb
+D:\TeamManager\TeamManager.Domain\obj\Debug\net8.0\ref\TeamManager.Domain.dll

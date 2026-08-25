@@ -1,0 +1,15 @@
+D:\TeamManager\TeamManager.Application\bin\Debug\net8.0\TeamManager.Application.deps.json
+D:\TeamManager\TeamManager.Application\bin\Debug\net8.0\TeamManager.Application.dll
+D:\TeamManager\TeamManager.Application\bin\Debug\net8.0\TeamManager.Application.pdb
+D:\TeamManager\TeamManager.Application\obj\Debug\net8.0\TeamManager.Application.GeneratedMSBuildEditorConfig.editorconfig
+D:\TeamManager\TeamManager.Application\obj\Debug\net8.0\TeamManager.Application.AssemblyInfoInputs.cache
+D:\TeamManager\TeamManager.Application\obj\Debug\net8.0\TeamManager.Application.AssemblyInfo.cs
+D:\TeamManager\TeamManager.Application\obj\Debug\net8.0\TeamManager.Application.csproj.CoreCompileInputs.cache
+D:\TeamManager\TeamManager.Application\obj\Debug\net8.0\TeamManager.Application.dll
+D:\TeamManager\TeamManager.Application\obj\Debug\net8.0\refint\TeamManager.Application.dll
+D:\TeamManager\TeamManager.Application\obj\Debug\net8.0\TeamManager.Application.pdb
+D:\TeamManager\TeamManager.Application\obj\Debug\net8.0\ref\TeamManager.Application.dll
+D:\TeamManager\TeamManager.Application\bin\Debug\net8.0\TeamManager.Domain.dll
+D:\TeamManager\TeamManager.Application\bin\Debug\net8.0\TeamManager.Domain.pdb
+D:\TeamManager\TeamManager.Application\obj\Debug\net8.0\TeamManager.Application.csproj.AssemblyReference.cache
+D:\TeamManager\TeamManager.Application\obj\Debug\net8.0\TeamMana.EA6C25A6.Up2Date
