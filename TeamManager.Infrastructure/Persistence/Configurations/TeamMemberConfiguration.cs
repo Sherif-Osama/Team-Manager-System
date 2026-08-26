@@ -26,6 +26,8 @@ public class TeamMemberConfiguration : IEntityTypeConfiguration<TeamMember>
 
         builder.Property(x => x.RemovedAtUtc).HasColumnType("datetime2(3)");
 
+        builder.Property<byte[]>("RowVersion").IsRowVersion();
+
         builder.HasOne(x => x.Team).WithMany(x => x.Members).HasForeignKey(x => x.TeamId)
             .HasConstraintName("FK_TeamMembers_Teams").OnDelete(DeleteBehavior.NoAction);
 

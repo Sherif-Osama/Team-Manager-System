@@ -17,3 +17,4 @@ D:\TeamManager\TeamManager.Infrastructure\bin\Debug\net8.0\TeamManager.Domain.pd
 D:\TeamManager\TeamManager.Infrastructure\obj\Debug\net8.0\TeamManager.Infrastructure.csproj.AssemblyReference.cache
 D:\TeamManager\TeamManager.Infrastructure\obj\Debug\net8.0\TeamMana.6A87AC56.Up2Date
 D:\TeamManager\TeamManager.Infrastructure\obj\Debug\net8.0\TeamManager.Infrastructure.genruntimeconfig.cache
+D:\TeamManager\TeamManager.Infrastructure\obj\Debug\net8.0\TeamManager.Infrastructure.sourcelink.json

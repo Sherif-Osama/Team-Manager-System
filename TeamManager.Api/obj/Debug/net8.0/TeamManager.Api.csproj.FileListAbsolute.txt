@@ -150,3 +150,16 @@ D:\TeamManager\TeamManager.Api\bin\Debug\net8.0\ru\Microsoft.CodeAnalysis.Worksp
 D:\TeamManager\TeamManager.Api\bin\Debug\net8.0\tr\Microsoft.CodeAnalysis.Workspaces.resources.dll
 D:\TeamManager\TeamManager.Api\bin\Debug\net8.0\zh-Hans\Microsoft.CodeAnalysis.Workspaces.resources.dll
 D:\TeamManager\TeamManager.Api\bin\Debug\net8.0\zh-Hant\Microsoft.CodeAnalysis.Workspaces.resources.dll
+D:\TeamManager\TeamManager.Api\bin\Debug\net8.0\FluentValidation.dll
+D:\TeamManager\TeamManager.Api\bin\Debug\net8.0\FluentValidation.DependencyInjectionExtensions.dll
+D:\TeamManager\TeamManager.Api\bin\Debug\net8.0\MediatR.dll
+D:\TeamManager\TeamManager.Api\bin\Debug\net8.0\MediatR.Contracts.dll
+D:\TeamManager\TeamManager.Api\bin\Debug\net8.0\System.Diagnostics.DiagnosticSource.dll
+D:\TeamManager\TeamManager.Api\obj\Debug\net8.0\TeamManager.Api.sourcelink.json
+D:\TeamManager\TeamManager.Api\bin\Debug\net8.0\Scrutor.dll
+D:\TeamManager\TeamManager.Api\bin\Debug\net8.0\System.IO.Pipelines.dll
+D:\TeamManager\TeamManager.Api\bin\Debug\net8.0\System.Text.Encodings.Web.dll
+D:\TeamManager\TeamManager.Api\bin\Debug\net8.0\System.Text.Json.dll
+D:\TeamManager\TeamManager.Api\bin\Debug\net8.0\runtimes\browser\lib\net8.0\System.Text.Encodings.Web.dll
+D:\TeamManager\TeamManager.Api\bin\Debug\net8.0\BCrypt-Net-Next.dll
+D:\TeamManager\TeamManager.Api\obj\Debug\net8.0\staticwebassets.upToDateCheck.txt

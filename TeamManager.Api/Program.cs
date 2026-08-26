@@ -1,6 +1,6 @@
-
-using Microsoft.EntityFrameworkCore;
-using TeamManager.Infrastructure.Persistence;
+using TeamManager.Api.Middleware;
+using TeamManager.Application;
+using TeamManager.Infrastructure;
 
 namespace TeamManager.Api
 {
@@ -10,8 +10,8 @@ namespace TeamManager.Api
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            builder.Services.AddDbContext<TeamManagerDbContext>(options =>
-            options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+            builder.Services.AddApplication();
+            builder.Services.AddInfrastructure(builder.Configuration);
             // Add services to the container.
 
             builder.Services.AddControllers();
@@ -29,12 +29,9 @@ namespace TeamManager.Api
             }
 
             app.UseHttpsRedirection();
-
+            app.UseMiddleware<GlobalExceptionHandlingMiddleware>();
             app.UseAuthorization();
-
-
             app.MapControllers();
-
             app.Run();
         }
     }
