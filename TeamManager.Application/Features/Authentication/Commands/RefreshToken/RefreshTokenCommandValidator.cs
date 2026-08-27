@@ -2,7 +2,7 @@
 
 namespace TeamManager.Application.Features.Authentication.Commands.RefreshToken
 {
-    public class RefreshTokenCommandValidator : AbstractValidator<RefreshTokenCommand>
+    public sealed class RefreshTokenCommandValidator : AbstractValidator<RefreshTokenCommand>
     {
         public RefreshTokenCommandValidator()
         {

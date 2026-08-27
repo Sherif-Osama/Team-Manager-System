@@ -1,6 +1,8 @@
+using TeamManager.Api.Authentication;
 using TeamManager.Api.Extensions;
 using TeamManager.Api.Middleware;
 using TeamManager.Application;
+using TeamManager.Application.Abstractions.Authentication;
 using TeamManager.Infrastructure;
 
 namespace TeamManager.Api
@@ -15,6 +17,10 @@ namespace TeamManager.Api
             builder.Services.AddInfrastructure(builder.Configuration);
             builder.Services.AddJwtAuthentication(builder.Configuration);
             // Add services to the container.
+
+            builder.Services.AddHttpContextAccessor();
+
+            builder.Services.AddScoped<ICurrentUser, CurrentUser>();
 
             builder.Services.AddControllers();
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle

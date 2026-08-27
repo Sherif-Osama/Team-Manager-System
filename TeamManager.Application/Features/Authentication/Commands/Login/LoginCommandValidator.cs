@@ -2,8 +2,7 @@
 
 namespace TeamManager.Application.Features.Authentication.Commands.Login;
 
-public sealed class LoginCommandValidator
-    : AbstractValidator<LoginCommand>
+public sealed class LoginCommandValidator : AbstractValidator<LoginCommand>
 {
     public LoginCommandValidator()
     {

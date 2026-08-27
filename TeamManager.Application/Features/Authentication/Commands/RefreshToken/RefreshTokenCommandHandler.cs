@@ -12,17 +12,15 @@ public sealed class RefreshTokenCommandHandler
     private readonly IRefreshTokenService _refreshTokenService;
     private readonly IAccessTokenService _accessTokenService;
     private readonly IUnitOfWork _unitOfWork;
-
-    public RefreshTokenCommandHandler(
-        IUserRepository userRepository,
-        IRefreshTokenService refreshTokenService,
-        IAccessTokenService accessTokenService,
-        IUnitOfWork unitOfWork)
+    private readonly ICurrentUser _currentUser;
+    public RefreshTokenCommandHandler(IUserRepository userRepository, IRefreshTokenService refreshTokenService,
+        IAccessTokenService accessTokenService, IUnitOfWork unitOfWork, ICurrentUser currentUser)
     {
         _userRepository = userRepository;
         _refreshTokenService = refreshTokenService;
         _accessTokenService = accessTokenService;
         _unitOfWork = unitOfWork;
+        _currentUser = currentUser;
     }
 
     public async Task<LoginResponse> Handle(RefreshTokenCommand request, CancellationToken cancellationToken)
@@ -43,7 +41,8 @@ public sealed class RefreshTokenCommandHandler
 
         var newRefreshTokenHash = _refreshTokenService.HashToken(newRefreshToken);
 
-        var newRefreshTokenEntity = new Domain.Entities.RefreshToken(Guid.NewGuid(), user.Id, newRefreshTokenHash, DateTime.UtcNow.AddDays(7));
+        var newRefreshTokenEntity = new Domain.Entities.RefreshToken(Guid.NewGuid(), user.Id, newRefreshTokenHash, _refreshTokenService.GetExpiration()
+            , _currentUser.DeviceInfo, _currentUser.IpAddress);
 
         await _userRepository.AddRefreshTokenAsync(newRefreshTokenEntity, cancellationToken);
 

@@ -1,4 +1,5 @@
-﻿using System.Security.Cryptography;
+﻿using Microsoft.Extensions.Options;
+using System.Security.Cryptography;
 using System.Text;
 using TeamManager.Application.Abstractions.Authentication;
 
@@ -7,6 +8,13 @@ namespace TeamManager.Infrastructure.Authentication
 
     public sealed class RefreshTokenService : IRefreshTokenService
     {
+        private readonly JwtOptions _options;
+
+        public RefreshTokenService(IOptions<JwtOptions> options)
+        {
+            _options = options.Value;
+        }
+
         public string GenerateToken()
         {
             var bytes = RandomNumberGenerator.GetBytes(64);
@@ -18,6 +26,11 @@ namespace TeamManager.Infrastructure.Authentication
             var bytes = SHA256.HashData(Encoding.UTF8.GetBytes(token));
 
             return Convert.ToHexString(bytes);
+        }
+
+        public DateTime GetExpiration()
+        {
+            return DateTime.UtcNow.AddDays(_options.RefreshTokenExpirationDays);
         }
     }
 }

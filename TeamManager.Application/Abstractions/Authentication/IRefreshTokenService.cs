@@ -4,5 +4,6 @@
     {
         string GenerateToken();
         string HashToken(string token);
+        DateTime GetExpiration();
     }
 }
