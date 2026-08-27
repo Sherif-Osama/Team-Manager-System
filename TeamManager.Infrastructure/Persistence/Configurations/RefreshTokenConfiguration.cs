@@ -42,5 +42,7 @@ public class RefreshTokenConfiguration
             x.UserId,
             x.ExpiresAtUtc
         }).HasDatabaseName("IX_RefreshTokens_UserId_Active").HasFilter("[RevokedAtUtc] IS NULL");
+
+        builder.Property<byte[]>("RowVersion").IsRowVersion();
     }
 }
