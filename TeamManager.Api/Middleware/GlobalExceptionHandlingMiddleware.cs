@@ -53,6 +53,8 @@ namespace TeamManager.Api.Middleware
             var statusCode = exception switch
             {
                 EmailAlreadyExistsException => StatusCodes.Status409Conflict,
+                AccountLockedException => StatusCodes.Status423Locked,
+                UnauthorizedAccessException => StatusCodes.Status401Unauthorized,
                 DomainException => StatusCodes.Status400BadRequest,
                 _ => StatusCodes.Status500InternalServerError
             };
@@ -75,7 +77,9 @@ namespace TeamManager.Api.Middleware
             statusCode switch
             {
                 StatusCodes.Status400BadRequest => "Bad Request",
+                StatusCodes.Status401Unauthorized => "Unauthorized",
                 StatusCodes.Status409Conflict => "Conflict",
+                StatusCodes.Status423Locked => "Account Locked",
                 _ => "Internal Server Error"
             };
     }

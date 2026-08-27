@@ -1,3 +1,4 @@
+using TeamManager.Api.Extensions;
 using TeamManager.Api.Middleware;
 using TeamManager.Application;
 using TeamManager.Infrastructure;
@@ -12,12 +13,13 @@ namespace TeamManager.Api
 
             builder.Services.AddApplication();
             builder.Services.AddInfrastructure(builder.Configuration);
+            builder.Services.AddJwtAuthentication(builder.Configuration);
             // Add services to the container.
 
             builder.Services.AddControllers();
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
-            builder.Services.AddSwaggerGen();
+            builder.Services.AddSwaggerDocumentation();
 
             var app = builder.Build();
 
@@ -30,6 +32,7 @@ namespace TeamManager.Api
 
             app.UseHttpsRedirection();
             app.UseMiddleware<GlobalExceptionHandlingMiddleware>();
+            app.UseAuthentication();
             app.UseAuthorization();
             app.MapControllers();
             app.Run();

@@ -5,8 +5,8 @@ D:\TeamManager\TeamManager.Domain\obj\Debug\net8.0\TeamManager.Domain.GeneratedM
 D:\TeamManager\TeamManager.Domain\obj\Debug\net8.0\TeamManager.Domain.AssemblyInfoInputs.cache
 D:\TeamManager\TeamManager.Domain\obj\Debug\net8.0\TeamManager.Domain.AssemblyInfo.cs
 D:\TeamManager\TeamManager.Domain\obj\Debug\net8.0\TeamManager.Domain.csproj.CoreCompileInputs.cache
+D:\TeamManager\TeamManager.Domain\obj\Debug\net8.0\TeamManager.Domain.sourcelink.json
 D:\TeamManager\TeamManager.Domain\obj\Debug\net8.0\TeamManager.Domain.dll
 D:\TeamManager\TeamManager.Domain\obj\Debug\net8.0\refint\TeamManager.Domain.dll
 D:\TeamManager\TeamManager.Domain\obj\Debug\net8.0\TeamManager.Domain.pdb
 D:\TeamManager\TeamManager.Domain\obj\Debug\net8.0\ref\TeamManager.Domain.dll
-D:\TeamManager\TeamManager.Domain\obj\Debug\net8.0\TeamManager.Domain.sourcelink.json
