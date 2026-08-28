@@ -25,7 +25,7 @@ namespace TeamManager.Api.Controllers
         public async Task<IActionResult> Register(RegisterCommand command, CancellationToken cancellationToken)
         {
             var userId = await _sender.Send(command, cancellationToken);
-            return Ok(userId);
+            return CreatedAtAction(nameof(Register), new { id = userId }, new { id = userId });
         }
 
         [HttpPost("login")]
@@ -44,7 +44,6 @@ namespace TeamManager.Api.Controllers
             return Ok(result);
         }
 
-        [Authorize]
         [HttpPost("logout")]
         public async Task<IActionResult> Logout(LogoutCommand command, CancellationToken cancellationToken)
         {

@@ -15,11 +15,13 @@ namespace TeamManager.Infrastructure
         {
             services.AddDbContext<TeamManagerDbContext>(
                 options => options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
-            services.AddScoped<IUnitOfWork>(sp => sp.GetRequiredService<TeamManagerDbContext>()); services.AddScoped<IUserRepository, UserRepository>();
+            services.AddScoped<IUnitOfWork>(sp => sp.GetRequiredService<TeamManagerDbContext>());
+            services.AddScoped<IUserRepository, UserRepository>();
             services.AddScoped<IPasswordHasher, PasswordHasher>();
             services.Configure<JwtOptions>(configuration.GetSection(JwtOptions.SectionName));
             services.AddScoped<IAccessTokenService, AccessTokenService>();
             services.AddScoped<IRefreshTokenService, RefreshTokenService>();
+            services.AddScoped<ITeamRepository, TeamRepository>();
             return services;
         }
     }

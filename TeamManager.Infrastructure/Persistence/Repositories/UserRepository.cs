@@ -23,11 +23,6 @@ namespace TeamManager.Infrastructure.Persistence.Repositories
             await _context.Users.AddAsync(user, cancellationToken);
         }
 
-        public Task<int> SaveChangesAsync(CancellationToken cancellationToken)
-        {
-            return _context.SaveChangesAsync(cancellationToken);
-        }
-
         public Task<User?> GetByEmailAsync(string email, CancellationToken cancellationToken)
         {
             return _context.Users.FirstOrDefaultAsync(x => x.Email == email, cancellationToken);

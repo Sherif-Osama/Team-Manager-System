@@ -60,26 +60,42 @@ public class Team : Entity<Guid>
 
     public void TransferOwnership(Guid newOwnerUserId)
     {
+        if (OwnerUserId == newOwnerUserId)
+            throw new DomainException("The specified user is already the team owner.");
+
         OwnerUserId = newOwnerUserId;
         Touch();
     }
 
     public void Deactivate()
     {
+        if (!IsActive)
+            throw new DomainException("The team is already inactive.");
+
         IsActive = false;
         Touch();
     }
 
     public void Activate()
     {
+        if (DeletedAtUtc.HasValue)
+            throw new DomainException("A deleted team cannot be activated.");
+
+        if (IsActive)
+            throw new DomainException("The team is already active.");
+
         IsActive = true;
         Touch();
     }
 
     public void SoftDelete()
     {
+        if (DeletedAtUtc.HasValue)
+            throw new DomainException("The team is already deleted.");
+
         DeletedAtUtc = DateTime.UtcNow;
         IsActive = false;
+        Touch();
     }
 
     public TeamMember AddMember(Guid userId, TeamRole role, Guid? invitedBy = null)

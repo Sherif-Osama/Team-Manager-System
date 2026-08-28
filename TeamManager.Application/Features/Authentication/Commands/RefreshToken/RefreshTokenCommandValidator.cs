@@ -6,7 +6,7 @@ namespace TeamManager.Application.Features.Authentication.Commands.RefreshToken
     {
         public RefreshTokenCommandValidator()
         {
-            RuleFor(x => x.RefreshToken).NotEmpty();
+            RuleFor(C => C.RefreshToken).NotEmpty().Must(R => !string.IsNullOrWhiteSpace(R));
         }
     }
 }

@@ -30,11 +30,8 @@ namespace TeamManager.Api.Middleware
         {
             if (exception is ValidationException validationException)
             {
-                var errors = validationException.Errors
-                    .GroupBy(x => x.PropertyName)
-                    .ToDictionary(
-                        x => x.Key,
-                        x => x.Select(e => e.ErrorMessage).ToArray());
+                var errors = validationException.Errors.GroupBy(x => x.PropertyName)
+                    .ToDictionary(x => x.Key, x => x.Select(e => e.ErrorMessage).ToArray());
 
                 var ValidationProblemDetails = new ValidationProblemDetails(errors)
                 {
@@ -53,9 +50,12 @@ namespace TeamManager.Api.Middleware
             var statusCode = exception switch
             {
                 EmailAlreadyExistsException => StatusCodes.Status409Conflict,
+                TeamNameAlreadyExistsException => StatusCodes.Status409Conflict,
                 AccountLockedException => StatusCodes.Status423Locked,
+                UserNotFoundException => StatusCodes.Status404NotFound,
                 UnauthorizedAccessException => StatusCodes.Status401Unauthorized,
                 DomainException => StatusCodes.Status400BadRequest,
+                TeamNotFoundException => StatusCodes.Status404NotFound,
                 _ => StatusCodes.Status500InternalServerError
             };
 
@@ -79,6 +79,7 @@ namespace TeamManager.Api.Middleware
                 StatusCodes.Status400BadRequest => "Bad Request",
                 StatusCodes.Status401Unauthorized => "Unauthorized",
                 StatusCodes.Status409Conflict => "Conflict",
+                StatusCodes.Status404NotFound => "Not Found",
                 StatusCodes.Status423Locked => "Account Locked",
                 _ => "Internal Server Error"
             };

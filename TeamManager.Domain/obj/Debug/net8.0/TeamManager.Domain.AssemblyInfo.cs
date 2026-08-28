@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("TeamManager.Domain")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+6e4be1c53c86738023b1502798648f2650201b96")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+af7d2adcb7e902699185ce798500fab3de33dcdd")]
 [assembly: System.Reflection.AssemblyProductAttribute("TeamManager.Domain")]
 [assembly: System.Reflection.AssemblyTitleAttribute("TeamManager.Domain")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

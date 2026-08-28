@@ -163,3 +163,4 @@ D:\TeamManager\TeamManager.Api\obj\Debug\net8.0\TeamManager.Api.pdb
 D:\TeamManager\TeamManager.Api\obj\Debug\net8.0\TeamManager.Api.genruntimeconfig.cache
 D:\TeamManager\TeamManager.Api\obj\Debug\net8.0\ref\TeamManager.Api.dll
 D:\TeamManager\TeamManager.Api\bin\Debug\net8.0\Microsoft.AspNetCore.Authentication.JwtBearer.dll
+D:\TeamManager\TeamManager.Api\obj\Debug\net8.0\staticwebassets.upToDateCheck.txt
