@@ -16,7 +16,7 @@ public class TeamConfiguration : IEntityTypeConfiguration<Team>
 
         builder.Property(x => x.Name).IsRequired().HasMaxLength(100);
 
-        builder.HasIndex(x => x.Name).IsUnique().HasDatabaseName("UQ_Teams_Name");
+        builder.HasIndex(x => x.Name).IsUnique().HasFilter("[DeletedAtUtc] IS NULL").HasDatabaseName("UQ_Teams_Name");
 
         builder.Property(x => x.Description).HasMaxLength(500);
 

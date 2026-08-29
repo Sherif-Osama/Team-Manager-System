@@ -33,6 +33,8 @@ public class TeamInvitation : Entity<Guid>
             throw new DomainException("An invitation must have a token hash.");
         if (expiresAtUtc <= DateTime.UtcNow)
             throw new DomainException("An invitation cannot be created already expired.");
+        if (teamRole == TeamRole.Owner)
+            throw new DomainException("A team invitation cannot assign the owner role.");
 
         Id = id;
         TeamId = teamId;

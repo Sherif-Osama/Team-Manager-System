@@ -13,6 +13,8 @@ namespace TeamManager.Application
                 configuration.RegisterServicesFromAssembly(typeof(DependencyInjection).Assembly);
 
                 configuration.AddOpenBehavior(typeof(ValidationBehavior<,>));
+
+                configuration.AddOpenBehavior(typeof(TeamAuthorizationBehavior<,>));
             });
 
             services.AddValidatorsFromAssembly(typeof(DependencyInjection).Assembly);

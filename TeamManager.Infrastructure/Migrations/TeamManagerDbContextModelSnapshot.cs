@@ -989,7 +989,8 @@ namespace TeamManager.Infrastructure.Migrations
 
                     b.HasIndex("Name")
                         .IsUnique()
-                        .HasDatabaseName("UQ_Teams_Name");
+                        .HasDatabaseName("UQ_Teams_Name")
+                        .HasFilter("[DeletedAtUtc] IS NULL");
 
                     b.HasIndex("OwnerUserId")
                         .HasDatabaseName("IX_Teams_OwnerUserId")

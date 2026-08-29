@@ -6,14 +6,9 @@ using TeamManager.Application.Abstractions.Authentication;
 namespace TeamManager.Infrastructure.Authentication
 {
 
-    public sealed class RefreshTokenService : IRefreshTokenService
+    public sealed class RefreshTokenService(IOptions<JwtOptions> options) : IRefreshTokenService
     {
-        private readonly JwtOptions _options;
-
-        public RefreshTokenService(IOptions<JwtOptions> options)
-        {
-            _options = options.Value;
-        }
+        private readonly JwtOptions _options = options.Value;
 
         public string GenerateToken()
         {

@@ -9,14 +9,9 @@ using TeamManager.Domain.Entities;
 namespace TeamManager.Infrastructure.Authentication
 {
 
-    public sealed class AccessTokenService : IAccessTokenService
+    public sealed class AccessTokenService(IOptions<JwtOptions> options) : IAccessTokenService
     {
-        private readonly JwtOptions _options;
-
-        public AccessTokenService(IOptions<JwtOptions> options)
-        {
-            _options = options.Value;
-        }
+        private readonly JwtOptions _options = options.Value;
 
         public string GenerateAccessToken(User user)
         {

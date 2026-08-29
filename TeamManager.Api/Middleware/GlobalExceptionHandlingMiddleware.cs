@@ -56,6 +56,9 @@ namespace TeamManager.Api.Middleware
                 UnauthorizedAccessException => StatusCodes.Status401Unauthorized,
                 DomainException => StatusCodes.Status400BadRequest,
                 TeamNotFoundException => StatusCodes.Status404NotFound,
+                UserNotMemberOfTeamException => StatusCodes.Status404NotFound,
+                ForbiddenException => StatusCodes.Status403Forbidden,
+                TeamMemberNotFoundException => StatusCodes.Status404NotFound,
                 _ => StatusCodes.Status500InternalServerError
             };
 
@@ -81,6 +84,7 @@ namespace TeamManager.Api.Middleware
                 StatusCodes.Status409Conflict => "Conflict",
                 StatusCodes.Status404NotFound => "Not Found",
                 StatusCodes.Status423Locked => "Account Locked",
+                StatusCodes.Status403Forbidden => "Forbidden",
                 _ => "Internal Server Error"
             };
     }

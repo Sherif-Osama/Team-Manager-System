@@ -19,9 +19,7 @@ public class TeamMember : Entity<long>
     public Guid? RemovedBy { get; private set; }
     public User? RemovedByUser { get; private set; }
 
-    private TeamMember()
-    {
-    }
+    private TeamMember() { }
 
     internal TeamMember(Guid teamId, Guid userId, TeamRole teamRole, Guid? invitedBy = null)
     {
@@ -38,12 +36,27 @@ public class TeamMember : Entity<long>
         if (Status != TeamMemberStatus.Active)
             throw new DomainException("Cannot change the role of a member who is not active.");
 
+        if (role == TeamRole.Owner)
+            throw new DomainException("Ownership cannot be assigned through role change. Use TransferOwnership instead.");
+
+        if (TeamRole == role)
+            throw new DomainException("The member already has this role.");
+
         TeamRole = role;
+    }
+    internal void PromoteToOwner()
+    {
+        if (Status != TeamMemberStatus.Active)
+            throw new DomainException(
+                "Only an active member can become the team owner.");
+
+        TeamRole = TeamRole.Owner;
     }
 
     public void Remove(Guid removedBy)
     {
-        if (Status == TeamMemberStatus.Removed) return;
+        if (Status == TeamMemberStatus.Removed)
+            throw new DomainException("The team member is already removed.");
 
         Status = TeamMemberStatus.Removed;
         RemovedAtUtc = DateTime.UtcNow;
