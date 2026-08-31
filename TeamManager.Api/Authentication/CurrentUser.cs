@@ -16,13 +16,13 @@ namespace TeamManager.Api.Authentication
         {
             get
             {
-                var value = _httpContextAccessor.HttpContext?.User.FindFirstValue("sub");
+                var value = _httpContextAccessor.HttpContext?.User.FindFirstValue(ClaimTypes.NameIdentifier);
 
                 return Guid.TryParse(value, out var userId) ? userId : null;
             }
         }
 
-        public string? Email => _httpContextAccessor.HttpContext?.User.FindFirstValue("email");
+        public string? Email => _httpContextAccessor.HttpContext?.User.FindFirstValue(ClaimTypes.Email);
 
         public bool IsAuthenticated => _httpContextAccessor.HttpContext?.User.Identity?.IsAuthenticated ?? false;
 

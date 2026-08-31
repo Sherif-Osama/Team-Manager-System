@@ -52,8 +52,8 @@ namespace TeamManager.Api.Controllers.Authentication
             return Ok(new
             {
                 IsAuthenticated = User.Identity?.IsAuthenticated,
-                UserId = User.FindFirst("sub")?.Value,
-                Email = User.FindFirst("email")?.Value,
+                UserId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value,
+                Email = User.FindFirst(ClaimTypes.Email)?.Value,
                 Name = User.FindFirst(ClaimTypes.Name)?.Value
             });
         }

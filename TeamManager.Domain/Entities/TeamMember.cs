@@ -44,6 +44,7 @@ public class TeamMember : Entity<long>
 
         TeamRole = role;
     }
+
     internal void PromoteToOwner()
     {
         if (Status != TeamMemberStatus.Active)

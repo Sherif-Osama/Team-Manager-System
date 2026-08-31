@@ -57,6 +57,7 @@ namespace TeamManager.Api.Middleware
                 DomainException => StatusCodes.Status400BadRequest,
                 TeamNotFoundException => StatusCodes.Status404NotFound,
                 UserNotMemberOfTeamException => StatusCodes.Status404NotFound,
+                InvitationNotFoundException => StatusCodes.Status404NotFound,
                 ForbiddenException => StatusCodes.Status403Forbidden,
                 TeamMemberNotFoundException => StatusCodes.Status404NotFound,
                 _ => StatusCodes.Status500InternalServerError

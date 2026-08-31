@@ -145,20 +145,94 @@ namespace TeamManager.Domain.Entities
             member.Remove(removedBy);
         }
 
-        public TeamInvitation Invite(Guid id, string invitedEmail, Guid invitedBy, TeamRole role, string tokenHash, DateTime expiresAtUtc)
+        public void ChangeMemberRole(long memberId, TeamRole role)
+        {
+            var member = _members.FirstOrDefault(m => m.Id == memberId && m.Status == TeamMemberStatus.Active);
+            if (member is null)
+                throw new DomainException("This member does not have an active membership in the team.");
+
+            member.ChangeRole(role);
+        }
+
+        public TeamInvitation Invite(string invitedEmail, Guid? invitedUserId, Guid invitedBy,
+            TeamRole role, string tokenHash, DateTime expiresAtUtc)
         {
             if (!IsActive)
                 throw new DomainException("Cannot invite members to an inactive team.");
+
+            if (role == TeamRole.Owner)
+                throw new DomainException("Ownership cannot be assigned via invitation. Use TransferOwnership instead.");
+
+            if (invitedUserId.HasValue && _members.Any(m => m.UserId == invitedUserId.Value &&
+            m.Status == TeamMemberStatus.Active))
+                throw new DomainException("This user is already a member of the team.");
+
 
             if (_invitations.Any(i => i.InvitedEmail.Equals(invitedEmail, StringComparison.OrdinalIgnoreCase)
                                        && i.Status == TeamInvitationStatus.Pending))
                 throw new DomainException("There is already a pending invitation for this email in the team.");
 
-            var invitation = new TeamInvitation(id, Id, invitedEmail, invitedBy, role, tokenHash, expiresAtUtc);
+            var invitation = new TeamInvitation(Id, invitedEmail, invitedUserId, invitedBy, role, tokenHash, expiresAtUtc);
             _invitations.Add(invitation);
             return invitation;
         }
 
+        public TeamMember AcceptInvitation(string tokenHash, Guid userId, string userEmail)
+        {
+            if (!IsActive)
+                throw new DomainException("Cannot accept an invitation for an inactive team.");
+
+            var invitation = _invitations.FirstOrDefault(i => i.TokenHash == tokenHash);
+
+            if (invitation is null)
+                throw new DomainException("Invitation not found.");
+
+            if (invitation.ExpiresAtUtc <= DateTime.UtcNow)
+            {
+                invitation.MarkExpired();
+                throw new DomainException("This invitation has expired.");
+            }
+
+            if (!string.Equals(invitation.InvitedEmail, userEmail, StringComparison.OrdinalIgnoreCase))
+                throw new DomainException("This invitation belongs to another user.");
+
+
+            if (invitation.InvitedUserId.HasValue && invitation.InvitedUserId != userId)
+                throw new DomainException("This invitation belongs to another user.");
+
+            var newMember = AddMember(userId, invitation.TeamRole, invitation.InvitedBy);
+
+            invitation.Accept(userId);
+
+            return newMember;
+        }
+
+        public void RejectInvitation(string tokenHash, Guid userId, string userEmail)
+        {
+            var invitation = _invitations.FirstOrDefault(i => i.TokenHash == tokenHash);
+
+            if (invitation is null)
+                throw new DomainException("Invitation not found.");
+
+            if (!string.Equals(invitation.InvitedEmail, userEmail, StringComparison.OrdinalIgnoreCase))
+                throw new DomainException("This invitation belongs to another user.");
+
+
+            if (invitation.InvitedUserId.HasValue && invitation.InvitedUserId.Value != userId)
+                throw new DomainException("This invitation belongs to another user.");
+
+            invitation.Reject();
+        }
+
+        public void CancelInvitation(Guid invitationId)
+        {
+            var invitation = _invitations.FirstOrDefault(i => i.Id == invitationId);
+
+            if (invitation is null)
+                throw new DomainException("Invitation not found.");
+
+            invitation.Cancel();
+        }
         private void Touch() => UpdatedAtUtc = DateTime.UtcNow;
     }
 }

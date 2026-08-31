@@ -19,7 +19,8 @@ namespace TeamManager.Infrastructure.Persistence.Repositories
 
         public Task<User?> GetByEmailAsync(string email, CancellationToken cancellationToken)
         {
-            return context.Users.FirstOrDefaultAsync(x => x.Email == email, cancellationToken);
+            return context.Users.FirstOrDefaultAsync(x => x.Email == email &&
+            x.DeletedAtUtc == null, cancellationToken);
         }
 
         public async Task AddRefreshTokenAsync(RefreshToken refreshToken, CancellationToken cancellationToken)

@@ -17,8 +17,8 @@ namespace TeamManager.Infrastructure.Authentication
         {
             var claims = new List<Claim>
         {
-            new(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
-            new(JwtRegisteredClaimNames.Email, user.Email),
+            new(ClaimTypes.NameIdentifier, user.Id.ToString()),
+            new(ClaimTypes.Email, user.Email),
             new(ClaimTypes.Name, user.DisplayName)
         };
 

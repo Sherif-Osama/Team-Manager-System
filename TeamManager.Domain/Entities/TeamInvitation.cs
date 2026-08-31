@@ -24,7 +24,7 @@ public class TeamInvitation : Entity<Guid>
 
     private TeamInvitation() { }
 
-    internal TeamInvitation(Guid id, Guid teamId, string invitedEmail, Guid invitedBy, TeamRole teamRole,
+    internal TeamInvitation(Guid teamId, string invitedEmail, Guid? invitedUserId, Guid invitedBy, TeamRole teamRole,
         string tokenHash, DateTime expiresAtUtc)
     {
         if (string.IsNullOrWhiteSpace(invitedEmail))
@@ -36,9 +36,9 @@ public class TeamInvitation : Entity<Guid>
         if (teamRole == TeamRole.Owner)
             throw new DomainException("A team invitation cannot assign the owner role.");
 
-        Id = id;
         TeamId = teamId;
         InvitedEmail = invitedEmail;
+        InvitedUserId = invitedUserId;
         InvitedBy = invitedBy;
         TeamRole = teamRole;
         TokenHash = tokenHash;
@@ -47,7 +47,7 @@ public class TeamInvitation : Entity<Guid>
         CreatedAtUtc = DateTime.UtcNow;
     }
 
-    public void Accept(Guid userId)
+    internal void Accept(Guid userId)
     {
         EnsurePending();
         InvitedUserId = userId;
@@ -55,14 +55,14 @@ public class TeamInvitation : Entity<Guid>
         AcceptedAtUtc = DateTime.UtcNow;
     }
 
-    public void Reject()
+    internal void Reject()
     {
         EnsurePending();
         Status = TeamInvitationStatus.Rejected;
         RejectedAtUtc = DateTime.UtcNow;
     }
 
-    public void Cancel()
+    internal void Cancel()
     {
         EnsurePending();
         Status = TeamInvitationStatus.Cancelled;

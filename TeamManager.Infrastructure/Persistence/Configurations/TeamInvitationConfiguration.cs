@@ -16,7 +16,7 @@ public class TeamInvitationConfiguration : IEntityTypeConfiguration<TeamInvitati
 
         builder.HasKey(x => x.Id).HasName("PK_TeamInvitations").IsClustered();
 
-        builder.Property(x => x.Id).HasColumnName("TeamInvitationId").ValueGeneratedOnAdd().HasDefaultValueSql("NEWSEQUENTIALID()");
+        builder.Property(x => x.Id).HasColumnName("TeamInvitationId").ValueGeneratedOnAdd().HasDefaultValueSql("NEWSEQUENTIALID()"); ;
 
         builder.Property(x => x.InvitedEmail).IsRequired().HasMaxLength(256);
 

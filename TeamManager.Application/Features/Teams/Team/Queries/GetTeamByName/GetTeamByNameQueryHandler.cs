@@ -10,9 +10,7 @@ namespace TeamManager.Application.Features.Teams.Team.Queries.GetTeamByName
 
         public async Task<GetTeamByNameResponse> Handle(GetTeamByNameQuery request, CancellationToken cancellationToken)
         {
-            var team = await teamRepository.GetByNameAsync(
-              request.Name,
-              cancellationToken);
+            var team = await teamRepository.GetByNameAsync(request.Name, cancellationToken);
 
             if (team is null)
                 throw new TeamNotFoundException(request.Name);
