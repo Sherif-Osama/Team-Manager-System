@@ -80,8 +80,9 @@ namespace TeamManager.Api.Controllers.Teams
             return NoContent();
         }
 
+        [Authorize]
         [HttpGet]
-        public async Task<IActionResult> GetTeams([FromQuery] GetTeamsRequest request, CancellationToken cancellationToken)
+        public async Task<IActionResult> GetTeams([FromQuery] GetTeamsQuery request, CancellationToken cancellationToken)
         {
             var query = new GetTeamsQuery(request.Search, request.IsActive, request.Page, request.PageSize);
 
