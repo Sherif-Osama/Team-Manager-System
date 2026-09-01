@@ -1,4 +1,4 @@
-﻿namespace TeamManager.Application.Abstractions.Communication
+﻿namespace TeamManager.Infrastructure.Communication
 {
     public interface IEmailSender
     {

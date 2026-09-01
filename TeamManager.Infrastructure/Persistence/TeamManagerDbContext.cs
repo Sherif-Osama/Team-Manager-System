@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using TeamManager.Application.Abstractions.Persistence;
 using TeamManager.Domain.Entities;
+using TeamManager.Infrastructure.Persistence.Outbox;
 
 namespace TeamManager.Infrastructure.Persistence
 {
@@ -31,6 +32,8 @@ namespace TeamManager.Infrastructure.Persistence
         public DbSet<NotificationPreference> NotificationPreferences => Set<NotificationPreference>();
         public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
         public DbSet<ActivityLog> ActivityLogs => Set<ActivityLog>();
+        public DbSet<OutboxMessage> OutboxMessages => Set<OutboxMessage>();
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);

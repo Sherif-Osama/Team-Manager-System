@@ -13,7 +13,7 @@ namespace TeamManager.Api.Controllers.Teams
     [ApiController]
     public class TeamMembersController(ISender sender) : ControllerBase
     {
-        [HttpPost("{teamId:guid}/member")]
+        [HttpPost("{teamId:guid}/members")]
         [Authorize]
         public async Task<IActionResult> AddMember(Guid teamId, AddMemberRequest request, CancellationToken cancellationToken)
         {

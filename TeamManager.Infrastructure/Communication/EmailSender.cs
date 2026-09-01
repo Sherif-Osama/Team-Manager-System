@@ -2,7 +2,6 @@
 using MailKit.Security;
 using Microsoft.Extensions.Options;
 using MimeKit;
-using TeamManager.Application.Abstractions.Communication;
 
 namespace TeamManager.Infrastructure.Communication
 {

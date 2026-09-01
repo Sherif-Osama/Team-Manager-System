@@ -1,6 +1,6 @@
 ﻿using MediatR;
+using System.Text.Json;
 using TeamManager.Application.Abstractions.Authentication;
-using TeamManager.Application.Abstractions.Communication;
 using TeamManager.Application.Abstractions.Persistence;
 using TeamManager.Application.Abstractions.Security;
 using TeamManager.Application.Common.Exceptions;
@@ -9,7 +9,7 @@ namespace TeamManager.Application.Features.Teams.Invitations.Commands.InviteMemb
 {
     public sealed class InviteMemberCommandHandler(ITeamRepository teamRepository, IUserRepository userRepository,
         IUnitOfWork unitOfWork, ICurrentUser currentUser,
-        IInvitationTokenService invitationTokenService, IEmailSender emailSender)
+        IInvitationTokenService invitationTokenService, IOutbox outbox)
         : IRequestHandler<InviteMemberCommand, Guid>
     {
         public async Task<Guid> Handle(InviteMemberCommand request, CancellationToken cancellationToken)
@@ -28,9 +28,16 @@ namespace TeamManager.Application.Features.Teams.Invitations.Commands.InviteMemb
             var invitation = team.Invite(request.Email, user?.Id, currentUser.UserId!.Value,
                 request.TeamRole, tokenHash, DateTime.UtcNow.AddDays(7));
 
-            await unitOfWork.SaveChangesAsync(cancellationToken);
+            var payload = JsonSerializer.Serialize(new
+            {
+                To = request.Email,
+                Token = token,
+                InvitedBy = currentUser.UserId!.Value
+            });
 
-            await emailSender.SendInvitationEmailAsync(request.Email, token, cancellationToken);
+            outbox.Add("Invitation Email", payload);
+
+            await unitOfWork.SaveChangesAsync(cancellationToken);
 
             return invitation.Id;
         }
