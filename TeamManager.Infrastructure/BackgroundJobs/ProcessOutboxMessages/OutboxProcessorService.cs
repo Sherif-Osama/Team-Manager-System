@@ -36,7 +36,7 @@ namespace TeamManager.Infrastructure.BackgroundJobs.ProcessOutboxMessages
                     }
 
                     await emailSender.SendInvitationEmailAsync(payload.To, payload.Token, cancellationToken);
-                    throw new Exception();
+
                     message.ProcessedOnUtc = DateTime.UtcNow;
                 }
                 catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
