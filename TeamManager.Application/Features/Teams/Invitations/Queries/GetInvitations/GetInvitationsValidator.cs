@@ -16,7 +16,7 @@ namespace TeamManager.Application.Features.Teams.Invitations.Queries.GetInvitati
 
             RuleFor(x => x.Status).IsInEnum().When(x => x.Status.HasValue);
 
-            RuleFor(x => x.role).IsInEnum().When(x => x.role.HasValue);
+            RuleFor(x => x.Role).IsInEnum().When(x => x.Role.HasValue);
         }
     }
 }

@@ -1,5 +1,7 @@
 ﻿using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using System.Data;
 using TeamManager.Application.Common.Exceptions;
 using TeamManager.Domain.Exceptions;
 
@@ -60,6 +62,7 @@ namespace TeamManager.Api.Middleware
                 InvitationNotFoundException => StatusCodes.Status404NotFound,
                 ForbiddenException => StatusCodes.Status403Forbidden,
                 TeamMemberNotFoundException => StatusCodes.Status404NotFound,
+                DbUpdateConcurrencyException => StatusCodes.Status409Conflict,
                 _ => StatusCodes.Status500InternalServerError
             };
 

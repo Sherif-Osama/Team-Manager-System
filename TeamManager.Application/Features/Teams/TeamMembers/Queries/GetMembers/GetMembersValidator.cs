@@ -11,6 +11,8 @@ namespace TeamManager.Application.Features.Teams.TeamMembers.Queries.GetMembers
             RuleFor(x => x.Page).GreaterThan(0);
 
             RuleFor(x => x.PageSize).InclusiveBetween(1, 100);
+
+            RuleFor(x => x.MemberStatus).IsInEnum().When(x => x.MemberStatus.HasValue);
         }
     }
 }

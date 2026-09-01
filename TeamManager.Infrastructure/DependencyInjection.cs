@@ -29,6 +29,7 @@ namespace TeamManager.Infrastructure
             services.AddScoped<IEmailSender, EmailSender>();
             services.Configure<EmailOptions>(configuration.GetSection(EmailOptions.SectionName));
             services.Configure<AppUrlOptions>(configuration.GetSection(AppUrlOptions.SectionName));
+            services.AddScoped<IApplicationDbContext>(sp => sp.GetRequiredService<TeamManagerDbContext>());
             return services;
         }
     }

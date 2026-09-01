@@ -24,12 +24,12 @@ namespace TeamManager.Api.Controllers.Teams
 
         [HttpGet("{teamId:guid}/members")]
         [Authorize]
-        public async Task<IActionResult> GetMembers(Guid teamId, [FromQuery] int page = 1, [FromQuery] int pageSize = 20, CancellationToken cancellationToken = default)
+        public async Task<IActionResult> GetMembers(Guid teamId, [FromQuery] GetMembersRequest request, CancellationToken cancellationToken)
         {
-            var result = await sender.Send(new GetMembersQuery(teamId, page, pageSize), cancellationToken);
+            var result = await sender.Send(new GetMembersQuery(teamId, request.Status, request.Page, request.PageSize)
+                , cancellationToken);
             return Ok(result);
         }
-
 
         [HttpGet("{teamId:guid}/members/{memberId:long}")]
         [Authorize]

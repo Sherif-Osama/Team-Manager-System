@@ -13,7 +13,6 @@ namespace TeamManager.Api.Controllers.Teams
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize]
     public class TeamInvitationsController(ISender sender) : ControllerBase
     {
         [HttpPost("{teamId:guid}")]
@@ -52,11 +51,11 @@ namespace TeamManager.Api.Controllers.Teams
             return NoContent();
         }
 
-        [HttpGet]
+        [HttpGet("{teamId:guid}")]
         [Authorize]
-        public async Task<IActionResult> GetInvitations([FromQuery] GetInvitationsRequest request, CancellationToken cancellationToken)
+        public async Task<IActionResult> GetInvitations(Guid teamId, [FromQuery] GetInvitationsRequest request, CancellationToken cancellationToken)
         {
-            var query = new GetInvitationsQuery(request.TeamId, request.Search, request.Status,
+            var query = new GetInvitationsQuery(teamId, request.Search, request.Status,
                 request.Role, request.Page, request.PageSize);
 
             var result = await sender.Send(query, cancellationToken);

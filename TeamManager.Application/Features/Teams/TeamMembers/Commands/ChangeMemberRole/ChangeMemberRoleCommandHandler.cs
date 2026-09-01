@@ -1,7 +1,6 @@
 ﻿using MediatR;
 using TeamManager.Application.Abstractions.Persistence;
 using TeamManager.Application.Common.Exceptions;
-using TeamManager.Domain.Enums;
 
 namespace TeamManager.Application.Features.Teams.TeamMembers.Commands.ChangeMemberRole
 {
@@ -14,11 +13,6 @@ namespace TeamManager.Application.Features.Teams.TeamMembers.Commands.ChangeMemb
 
             if (team is null)
                 throw new TeamNotFoundException(request.TeamId);
-
-            var memberExists = team.Members.Any(m => m.Id == request.MemberId && m.Status == TeamMemberStatus.Active);
-
-            if (!memberExists)
-                throw new TeamMemberNotFoundException(request.TeamId, request.MemberId);
 
             team.ChangeMemberRole(request.MemberId, request.Role);
 

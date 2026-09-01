@@ -5,7 +5,7 @@ using TeamManager.Domain.Entities;
 namespace TeamManager.Infrastructure.Persistence
 {
 
-    public class TeamManagerDbContext : DbContext, IUnitOfWork
+    public class TeamManagerDbContext : DbContext, IUnitOfWork, IApplicationDbContext
     {
         public TeamManagerDbContext(DbContextOptions<TeamManagerDbContext> options) : base(options) { }
         public DbSet<User> Users => Set<User>();

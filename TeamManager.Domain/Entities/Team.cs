@@ -133,9 +133,10 @@ namespace TeamManager.Domain.Entities
             return member;
         }
 
-        public void RemoveMember(Guid userId, Guid removedBy)
+        public void RemoveMember(long memberId, Guid removedBy)
         {
-            var member = _members.FirstOrDefault(m => m.UserId == userId && m.Status == TeamMemberStatus.Active);
+            var member = _members.FirstOrDefault(m => m.Id == memberId && m.Status == TeamMemberStatus.Active);
+
             if (member is null)
                 throw new DomainException("This user does not have an active membership in the team.");
 
@@ -148,8 +149,12 @@ namespace TeamManager.Domain.Entities
         public void ChangeMemberRole(long memberId, TeamRole role)
         {
             var member = _members.FirstOrDefault(m => m.Id == memberId && m.Status == TeamMemberStatus.Active);
+
             if (member is null)
                 throw new DomainException("This member does not have an active membership in the team.");
+
+            if (member.TeamRole == TeamRole.Owner)
+                throw new DomainException("Ownership cannot be changed");
 
             member.ChangeRole(role);
         }
@@ -163,8 +168,7 @@ namespace TeamManager.Domain.Entities
             if (role == TeamRole.Owner)
                 throw new DomainException("Ownership cannot be assigned via invitation. Use TransferOwnership instead.");
 
-            if (invitedUserId.HasValue && _members.Any(m => m.UserId == invitedUserId.Value &&
-            m.Status == TeamMemberStatus.Active))
+            if (invitedUserId.HasValue && _members.Any(m => m.UserId == invitedUserId.Value && m.Status == TeamMemberStatus.Active))
                 throw new DomainException("This user is already a member of the team.");
 
 
@@ -173,7 +177,9 @@ namespace TeamManager.Domain.Entities
                 throw new DomainException("There is already a pending invitation for this email in the team.");
 
             var invitation = new TeamInvitation(Id, invitedEmail, invitedUserId, invitedBy, role, tokenHash, expiresAtUtc);
+
             _invitations.Add(invitation);
+
             return invitation;
         }
 
@@ -186,6 +192,10 @@ namespace TeamManager.Domain.Entities
 
             if (invitation is null)
                 throw new DomainException("Invitation not found.");
+
+
+            if (invitation.Status != TeamInvitationStatus.Pending)
+                throw new DomainException($"This invitation is already {invitation.Status}.");
 
             if (invitation.ExpiresAtUtc <= DateTime.UtcNow)
             {
@@ -233,6 +243,7 @@ namespace TeamManager.Domain.Entities
 
             invitation.Cancel();
         }
+
         private void Touch() => UpdatedAtUtc = DateTime.UtcNow;
     }
 }
