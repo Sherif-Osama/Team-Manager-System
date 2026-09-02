@@ -4,9 +4,9 @@ using Microsoft.AspNetCore.Mvc;
 using TeamManager.Application.Features.Users.Commands.ChangeEmail;
 using TeamManager.Application.Features.Users.Commands.ChangePassword;
 using TeamManager.Application.Features.Users.Commands.ConfirmEmail;
+using TeamManager.Application.Features.Users.Commands.DeleteMyAccount;
 using TeamManager.Application.Features.Users.Commands.ResendEmailConfirmation;
 using TeamManager.Application.Features.Users.Commands.UpdateMyProfile;
-using TeamManager.Application.Features.Users.DeleteMyAccount;
 using TeamManager.Application.Features.Users.Queries.GetMyProfile;
 using TeamManager.Application.Features.Users.Queries.GetUsers;
 
