@@ -5,6 +5,7 @@ using TeamManager.Application.Abstractions.Authentication;
 using TeamManager.Application.Abstractions.Persistence;
 using TeamManager.Application.Abstractions.Security;
 using TeamManager.Infrastructure.Authentication;
+using TeamManager.Infrastructure.BackgroundJobs.DeleteInactiveUsers;
 using TeamManager.Infrastructure.BackgroundJobs.InvitationExpiration;
 using TeamManager.Infrastructure.BackgroundJobs.ProcessOutboxMessages.MessageHandlers;
 using TeamManager.Infrastructure.BackgroundJobs.ProcessOutboxMessages.OutboxMessages;
@@ -45,6 +46,8 @@ namespace TeamManager.Infrastructure
             services.AddScoped<IOutboxMessageHandler, AccountDeletedEmailHandler>();
             services.AddScoped<IOutboxMessageHandler, AccountDeactivatedEmailHandler>();
             services.AddScoped<IOutboxMessageHandler, AccountActivatedEmailHandler>();
+            services.AddScoped<InactiveUserDeletionService>();
+            services.AddHostedService<DeleteInactiveUsersJob>();
             return services;
         }
     }

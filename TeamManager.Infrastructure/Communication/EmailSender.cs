@@ -76,13 +76,22 @@ namespace TeamManager.Infrastructure.Communication
         public async Task SendAccountDeactivatedAsync(string to, DateTime deactivatedAtUtc, string? deviceInfo, CancellationToken cancellationToken)
         {
             var subject = "Your account has been deactivated";
-
             var body = $"""
-                            <h2>Account Deactivated</h2>
-                            <p>Your TeamManager account has been deactivated successfully.</p>
-                            <p><strong>Deactivated at:</strong> {deactivatedAtUtc:yyyy-MM-dd HH:mm:ss} UTC</p>
-                            <p><strong>Device:</strong> {deviceInfo ?? "Unknown"}</p>
-                        """;
+                <h2>Account Deactivated</h2>
+                <p>Your TeamManager account has been deactivated successfully.</p>
+                <p><strong>Deactivated at:</strong> {deactivatedAtUtc:yyyy-MM-dd HH:mm:ss} UTC</p>
+                <p><strong>Device:</strong> {deviceInfo ?? "Unknown"}</p>
+
+                <p>
+                    Your account will remain deactivated for <strong>30 days</strong>.
+                    If you do not log in during this period, your account will be
+                    <strong>permanently deleted automatically</strong>.
+                </p>
+
+                <p>
+                    To keep your account, simply log in again within 30 days.
+                </p>
+                """;
 
             await SendAsync(to, subject, body, cancellationToken);
         }

@@ -58,6 +58,9 @@ public class User : Entity<Guid>
         if (DeletedAtUtc.HasValue)
             throw new DomainException("Cannot change display name for a deleted user.");
 
+        if (!IsActive)
+            throw new DomainException("Cannot change display name for an inactive user.");
+
         if (string.IsNullOrWhiteSpace(displayName))
             throw new DomainException("A user must have a display name.");
 
@@ -69,7 +72,8 @@ public class User : Entity<Guid>
     {
         if (DeletedAtUtc.HasValue)
             throw new DomainException("Cannot change email for a deleted user.");
-
+        if (!IsActive)
+            throw new DomainException("Cannot change email for an inactive user.");
         if (string.IsNullOrWhiteSpace(newEmail))
             throw new DomainException("A user must have an email address.");
         if (string.IsNullOrWhiteSpace(confirmationTokenHash))
@@ -115,7 +119,8 @@ public class User : Entity<Guid>
     {
         if (DeletedAtUtc.HasValue)
             throw new DomainException("Cannot request email confirmation for a deleted user.");
-
+        if (!IsActive)
+            throw new DomainException("Cannot request email confirmation for an inactive user.");
         if (IsEmailConfirmed)
             throw new DomainException("Email is already confirmed.");
         if (string.IsNullOrWhiteSpace(confirmationTokenHash))
@@ -132,7 +137,8 @@ public class User : Entity<Guid>
     {
         if (DeletedAtUtc.HasValue)
             throw new DomainException("Cannot change password for a deleted user.");
-
+        if (!IsActive)
+            throw new DomainException("Cannot change password for an inactive user.");
         if (string.IsNullOrWhiteSpace(newPasswordHash))
             throw new DomainException("A password hash cannot be empty.");
 
