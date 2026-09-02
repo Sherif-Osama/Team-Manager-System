@@ -6,10 +6,8 @@ using TeamManager.Application.Abstractions.Persistence;
 using TeamManager.Application.Abstractions.Security;
 using TeamManager.Infrastructure.Authentication;
 using TeamManager.Infrastructure.BackgroundJobs.InvitationExpiration;
-using TeamManager.Infrastructure.BackgroundJobs.ProcessOutboxMessages.EmailConfirmationOutboxMessage;
-using TeamManager.Infrastructure.BackgroundJobs.ProcessOutboxMessages.InvitationEmailOutboxMessage;
+using TeamManager.Infrastructure.BackgroundJobs.ProcessOutboxMessages.MessageHandlers;
 using TeamManager.Infrastructure.BackgroundJobs.ProcessOutboxMessages.OutboxMessages;
-using TeamManager.Infrastructure.BackgroundJobs.ProcessOutboxMessages.PasswordChangedNotificationOutboxMessage;
 using TeamManager.Infrastructure.Communication;
 using TeamManager.Infrastructure.Persistence;
 using TeamManager.Infrastructure.Persistence.Outbox;
@@ -44,6 +42,9 @@ namespace TeamManager.Infrastructure
             services.AddScoped<IOutboxMessageHandler, InvitationEmailOutboxMessageHandler>();
             services.AddScoped<IOutboxMessageHandler, EmailConfirmationOutboxMessageHandler>();
             services.AddScoped<IOutboxMessageHandler, PasswordChangedNotificationOutboxMessageHandler>();
+            services.AddScoped<IOutboxMessageHandler, AccountDeletedEmailHandler>();
+            services.AddScoped<IOutboxMessageHandler, AccountDeactivatedEmailHandler>();
+            services.AddScoped<IOutboxMessageHandler, AccountActivatedEmailHandler>();
             return services;
         }
     }

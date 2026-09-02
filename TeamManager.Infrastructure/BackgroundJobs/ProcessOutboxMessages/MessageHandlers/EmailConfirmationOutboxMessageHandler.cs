@@ -3,7 +3,7 @@ using TeamManager.Application.Common.Outbox;
 using TeamManager.Infrastructure.BackgroundJobs.ProcessOutboxMessages.OutboxMessages;
 using TeamManager.Infrastructure.Communication;
 
-namespace TeamManager.Infrastructure.BackgroundJobs.ProcessOutboxMessages.EmailConfirmationOutboxMessage
+namespace TeamManager.Infrastructure.BackgroundJobs.ProcessOutboxMessages.MessageHandlers
 {
     public sealed class EmailConfirmationOutboxMessageHandler(IEmailSender emailSender) : IOutboxMessageHandler
     {

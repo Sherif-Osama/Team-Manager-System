@@ -58,5 +58,47 @@ namespace TeamManager.Infrastructure.Communication
 
             await SendAsync(to, "Your Password Was Changed", body, cancellationToken);
         }
+
+        public async Task SendAccountDeletedAsync(string to, DateTime deletedAtUtc, string? deviceInfo, CancellationToken cancellationToken)
+        {
+            var subject = "Your account has been deleted";
+
+            var body = $"""
+                        <h2>Account Deleted</h2>
+                        <p>Your TeamManager account has been deleted successfully.</p>
+                        <p><strong>Deleted at:</strong> {deletedAtUtc:yyyy-MM-dd HH:mm:ss} UTC</p>
+                        <p><strong>Device:</strong> {deviceInfo ?? "Unknown"}</p>
+                    """;
+
+            await SendAsync(to, subject, body, cancellationToken);
+        }
+
+        public async Task SendAccountDeactivatedAsync(string to, DateTime deactivatedAtUtc, string? deviceInfo, CancellationToken cancellationToken)
+        {
+            var subject = "Your account has been deactivated";
+
+            var body = $"""
+                            <h2>Account Deactivated</h2>
+                            <p>Your TeamManager account has been deactivated successfully.</p>
+                            <p><strong>Deactivated at:</strong> {deactivatedAtUtc:yyyy-MM-dd HH:mm:ss} UTC</p>
+                            <p><strong>Device:</strong> {deviceInfo ?? "Unknown"}</p>
+                        """;
+
+            await SendAsync(to, subject, body, cancellationToken);
+        }
+
+        public async Task SendAccountActivatedAsync(string to, DateTime activatedAtUtc, string? deviceInfo, CancellationToken cancellationToken)
+        {
+            var subject = "Your account has been activated";
+
+            var body = $"""
+                            <h2>Account Activated</h2>
+                            <p>Your TeamManager account has been activated successfully.</p>
+                            <p><strong>Activated at:</strong> {activatedAtUtc:yyyy-MM-dd HH:mm:ss} UTC</p>
+                            <p><strong>Device:</strong> {deviceInfo ?? "Unknown"}</p>
+                        """;
+
+            await SendAsync(to, subject, body, cancellationToken);
+        }
     }
 }

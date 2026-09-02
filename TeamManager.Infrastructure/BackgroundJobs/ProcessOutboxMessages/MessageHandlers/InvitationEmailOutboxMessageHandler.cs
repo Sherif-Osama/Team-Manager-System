@@ -3,7 +3,7 @@ using TeamManager.Application.Common.Outbox;
 using TeamManager.Infrastructure.BackgroundJobs.ProcessOutboxMessages.OutboxMessages;
 using TeamManager.Infrastructure.Communication;
 
-namespace TeamManager.Infrastructure.BackgroundJobs.ProcessOutboxMessages.InvitationEmailOutboxMessage
+namespace TeamManager.Infrastructure.BackgroundJobs.ProcessOutboxMessages.MessageHandlers
 {
     public sealed class InvitationEmailOutboxMessageHandler(IEmailSender emailSender) : IOutboxMessageHandler
     {

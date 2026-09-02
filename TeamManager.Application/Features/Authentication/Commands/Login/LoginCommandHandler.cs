@@ -1,13 +1,15 @@
 ﻿using MediatR;
+using System.Text.Json;
 using TeamManager.Application.Abstractions.Authentication;
 using TeamManager.Application.Abstractions.Persistence;
 using TeamManager.Application.Common.Exceptions;
+using TeamManager.Application.Common.Outbox;
 
 namespace TeamManager.Application.Features.Authentication.Commands.Login;
 
 public sealed class LoginCommandHandler(IUserRepository userRepository, IPasswordHasher passwordHasher,
         IAccessTokenService accessTokenService, IRefreshTokenService refreshTokenService, IUnitOfWork unitOfWork,
-        ICurrentUser currentUser) : IRequestHandler<LoginCommand, LoginResponse>
+        ICurrentUser currentUser, IOutbox outbox) : IRequestHandler<LoginCommand, LoginResponse>
 {
 
 
@@ -31,6 +33,8 @@ public sealed class LoginCommandHandler(IUserRepository userRepository, IPasswor
             throw new UnauthorizedAccessException("Invalid email or password");
         }
 
+        var wasInactive = !user.IsActive;
+
         user.RecordSuccessfulLogin();
 
         var accessToken = accessTokenService.GenerateAccessToken(user);
@@ -43,6 +47,18 @@ public sealed class LoginCommandHandler(IUserRepository userRepository, IPasswor
             refreshTokenHash, refreshTokenService.GetExpiration(), currentUser.DeviceInfo, currentUser.IpAddress);
 
         await userRepository.AddRefreshTokenAsync(refreshTokenEntity, cancellationToken);
+
+        if (wasInactive)
+        {
+            var payload = JsonSerializer.Serialize(new
+            {
+                To = user.Email,
+                ActivatedAtUtc = DateTime.UtcNow,
+                DeviceInfo = currentUser.DeviceInfo
+            });
+
+            outbox.Add(OutboxMessageType.AccountActivationEmail, payload);
+        }
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
