@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("TeamManager.Infrastructure")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+87c0fb289b25d4b449d78e8dacd227ae6499621a")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+d76d9214791a928ef6f0bc62d8b0d1e79b270419")]
 [assembly: System.Reflection.AssemblyProductAttribute("TeamManager.Infrastructure")]
 [assembly: System.Reflection.AssemblyTitleAttribute("TeamManager.Infrastructure")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

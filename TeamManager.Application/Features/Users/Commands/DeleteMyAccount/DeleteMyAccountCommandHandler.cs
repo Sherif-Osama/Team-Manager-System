@@ -6,7 +6,7 @@ using TeamManager.Application.Common.Exceptions;
 namespace TeamManager.Application.Features.Users.Commands.DeleteMyAccount
 {
     public sealed class DeleteMyAccountCommandHandler(ICurrentUser currentUser, IUserRepository userRepository,
-        ITeamRepository teamRepository, IUnitOfWork unitOfWork) : IRequestHandler<DeleteMyAccountCommand>
+        ITeamRepository teamRepository, IPasswordHasher passwordHasher, IUnitOfWork unitOfWork) : IRequestHandler<DeleteMyAccountCommand>
     {
         public async Task Handle(DeleteMyAccountCommand request, CancellationToken cancellationToken)
         {
@@ -19,6 +19,9 @@ namespace TeamManager.Application.Features.Users.Commands.DeleteMyAccount
 
             if (user is null)
                 throw new UserNotFoundException(userId);
+
+            if (!passwordHasher.Verify(request.CurrentPassword, user.PasswordHash))
+                throw new ForbiddenException("Invalid password.");
 
             var hasActiveOwnedTeams = await teamRepository.HasActiveOwnedTeamsAsync(userId, cancellationToken);
 

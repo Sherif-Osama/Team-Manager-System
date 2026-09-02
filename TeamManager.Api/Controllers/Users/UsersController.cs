@@ -71,9 +71,9 @@ namespace TeamManager.Api.Controllers.Users
         }
 
         [HttpDelete("me")]
-        public async Task<IActionResult> DeleteMyAccount(CancellationToken cancellationToken)
+        public async Task<IActionResult> DeleteMyAccount(DeleteMyAccountCommand command, CancellationToken cancellationToken)
         {
-            await sender.Send(new DeleteMyAccountCommand(), cancellationToken);
+            await sender.Send(command, cancellationToken);
             return NoContent();
         }
 
@@ -92,9 +92,9 @@ namespace TeamManager.Api.Controllers.Users
         }
 
         [HttpPost("me/deactivate")]
-        public async Task<IActionResult> DeactivateMyAccount(CancellationToken cancellationToken)
+        public async Task<IActionResult> DeactivateMyAccount(DeactivateMyAccountCommand command, CancellationToken cancellationToken)
         {
-            await sender.Send(new DeactivateMyAccountCommand(), cancellationToken);
+            await sender.Send(command, cancellationToken);
             return NoContent();
         }
     }
