@@ -1178,6 +1178,13 @@ namespace TeamManager.Infrastructure.Migrations
                         .HasMaxLength(256)
                         .HasColumnType("nvarchar(256)");
 
+                    b.Property<DateTime?>("EmailConfirmationTokenExpiresAtUtc")
+                        .HasColumnType("datetime2(3)");
+
+                    b.Property<string>("EmailConfirmationTokenHash")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
                     b.Property<short>("FailedLoginAttempts")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("smallint")
@@ -1201,6 +1208,10 @@ namespace TeamManager.Infrastructure.Migrations
 
                     b.Property<string>("PasswordHash")
                         .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<string>("PendingEmail")
                         .HasMaxLength(256)
                         .HasColumnType("nvarchar(256)");
 

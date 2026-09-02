@@ -42,5 +42,21 @@ namespace TeamManager.Infrastructure.Communication
 
             await SendAsync(to, "Team Invitation", body, cancellationToken);
         }
+
+        public async Task SendEmailConfirmationAsync(string to, string confirmationToken, CancellationToken cancellationToken)
+        {
+            var link = $"{_options.BaseUrl}/account/confirm-email?token={Uri.EscapeDataString(confirmationToken)}";
+
+            var body = $"""<p>Please confirm your new email address.</p> <p><a href="{link}">Confirm Email</a></p>""";
+
+            await SendAsync(to, "Confirm Your Email", body, cancellationToken);
+        }
+
+        public async Task SendPasswordChangedNotificationAsync(string to, CancellationToken cancellationToken)
+        {
+            const string body = "<p>Your password was just changed. If this wasn't you, please contact support immediately.</p>";
+
+            await SendAsync(to, "Your Password Was Changed", body, cancellationToken);
+        }
     }
 }

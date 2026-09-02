@@ -4,6 +4,7 @@ using TeamManager.Application.Abstractions.Authentication;
 using TeamManager.Application.Abstractions.Persistence;
 using TeamManager.Application.Abstractions.Security;
 using TeamManager.Application.Common.Exceptions;
+using TeamManager.Application.Common.Outbox;
 
 namespace TeamManager.Application.Features.Teams.Invitations.Commands.InviteMember
 {
@@ -35,7 +36,7 @@ namespace TeamManager.Application.Features.Teams.Invitations.Commands.InviteMemb
                 InvitedBy = currentUser.UserId!.Value
             });
 
-            outbox.Add("Invitation Email", payload);
+            outbox.Add(OutboxMessageType.InvitationEmail, payload);
 
             await unitOfWork.SaveChangesAsync(cancellationToken);
 

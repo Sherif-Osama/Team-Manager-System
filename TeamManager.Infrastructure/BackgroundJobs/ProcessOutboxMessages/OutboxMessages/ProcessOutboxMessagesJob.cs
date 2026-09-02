@@ -1,9 +1,8 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using TeamManager.Infrastructure.BackgroundJobs.ProcessOutboxMessages;
 
-namespace TeamManager.Infrastructure.BackgroundJobs.ProcessOutboxMessagesJob
+namespace TeamManager.Infrastructure.BackgroundJobs.ProcessOutboxMessages.OutboxMessages
 {
     public sealed class ProcessOutboxMessagesJob(IServiceScopeFactory scopeFactory,
         ILogger<ProcessOutboxMessagesJob> logger) : BackgroundService

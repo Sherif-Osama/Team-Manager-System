@@ -227,7 +227,6 @@ namespace TeamManager.Domain.Entities
             if (!string.Equals(invitation.InvitedEmail, userEmail, StringComparison.OrdinalIgnoreCase))
                 throw new DomainException("This invitation belongs to another user.");
 
-
             if (invitation.InvitedUserId.HasValue && invitation.InvitedUserId.Value != userId)
                 throw new DomainException("This invitation belongs to another user.");
 

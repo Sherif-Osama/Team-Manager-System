@@ -10,10 +10,10 @@ namespace TeamManager.Application.Features.Teams.Invitations.Queries.GetMyInvita
     {
         public async Task<GetMyInvitationsResponse> Handle(GetMyInvitationsQuery request, CancellationToken cancellationToken)
         {
-            if (string.IsNullOrWhiteSpace(currentUser.Email))
-                throw new UnauthorizedAccessException("User email is not available.");
+            if (!currentUser.UserId.HasValue)
+                throw new UnauthorizedAccessException("User is not authenticated.");
 
-            var invitations = context.TeamInvitations.AsNoTracking().Where(x => x.InvitedEmail == currentUser.Email);
+            var invitations = context.TeamInvitations.AsNoTracking().Where(x => x.InvitedUserId == currentUser.UserId.Value);
 
             if (request.Status.HasValue)
                 invitations = invitations.Where(x => x.Status == request.Status.Value);

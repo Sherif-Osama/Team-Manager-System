@@ -35,7 +35,13 @@ namespace TeamManager.Infrastructure.Persistence.Repositories
 
         public Task<User?> GetByIdAsync(Guid userId, CancellationToken cancellationToken)
         {
-            return context.Users.FirstOrDefaultAsync(x => x.Id == userId, cancellationToken);
+            return context.Users.FirstOrDefaultAsync(x => x.Id == userId && x.DeletedAtUtc == null, cancellationToken);
+        }
+
+        public Task RevokeAllRefreshTokensAsync(Guid userId, CancellationToken cancellationToken)
+        {
+            return context.RefreshTokens.Where(x => x.UserId == userId && x.RevokedAtUtc == null)
+                .ExecuteUpdateAsync(s => s.SetProperty(x => x.RevokedAtUtc, DateTime.UtcNow), cancellationToken);
         }
     }
 }

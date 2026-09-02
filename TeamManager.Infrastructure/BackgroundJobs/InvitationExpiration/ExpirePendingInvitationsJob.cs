@@ -9,7 +9,7 @@ namespace TeamManager.Infrastructure.BackgroundJobs.InvitationExpiration
     {
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            var timer = new PeriodicTimer(TimeSpan.FromMinutes(10));
+            using var timer = new PeriodicTimer(TimeSpan.FromMinutes(10));
 
             while (await timer.WaitForNextTickAsync(stoppingToken))
             {

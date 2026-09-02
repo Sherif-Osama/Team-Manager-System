@@ -57,6 +57,9 @@ public class TeamInvitation : Entity<Guid>
 
     internal void Reject()
     {
+        if (ExpiresAtUtc >= DateTime.UtcNow)
+            throw new DomainException("Cannot reject an invitation that has already expired.");
+
         EnsurePending();
         Status = TeamInvitationStatus.Rejected;
         RejectedAtUtc = DateTime.UtcNow;

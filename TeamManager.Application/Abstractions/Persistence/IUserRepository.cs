@@ -10,5 +10,7 @@ namespace TeamManager.Application.Abstractions.Persistence
         Task AddRefreshTokenAsync(RefreshToken refreshToken, CancellationToken cancellationToken);
         Task<RefreshToken?> GetRefreshTokenByHashAsync(string tokenHash, CancellationToken cancellationToken);
         Task<User?> GetByIdAsync(Guid userId, CancellationToken cancellationToken);
+        Task RevokeAllRefreshTokensAsync(Guid userId, CancellationToken cancellationToken);
+
     }
 }

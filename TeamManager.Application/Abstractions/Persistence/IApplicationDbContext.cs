@@ -8,5 +8,6 @@ namespace TeamManager.Application.Abstractions.Persistence
         DbSet<Team> Teams { get; }
         DbSet<TeamMember> TeamMembers { get; }
         DbSet<TeamInvitation> TeamInvitations { get; }
+        DbSet<User> Users { get; }
     }
 }

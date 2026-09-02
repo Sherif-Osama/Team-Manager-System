@@ -22,6 +22,10 @@ public class User : Entity<Guid>
     public DateTime CreatedAtUtc { get; private set; }
     public DateTime? UpdatedAtUtc { get; private set; }
     public DateTime? DeletedAtUtc { get; private set; }
+    public string? PendingEmail { get; private set; }
+
+    public string? EmailConfirmationTokenHash { get; private set; }
+    public DateTime? EmailConfirmationTokenExpiresAtUtc { get; private set; }
 
     public IReadOnlyCollection<RefreshToken> RefreshTokens => _refreshTokens.AsReadOnly();
     public IReadOnlyCollection<UserRole> UserRoles => _userRoles.AsReadOnly();
@@ -49,18 +53,67 @@ public class User : Entity<Guid>
         CreatedAtUtc = DateTime.UtcNow;
     }
 
-    public void ConfirmEmail()
-    {
-        IsEmailConfirmed = true;
-        Touch();
-    }
-
     public void ChangeDisplayName(string displayName)
     {
         if (string.IsNullOrWhiteSpace(displayName))
             throw new DomainException("A user must have a display name.");
 
         DisplayName = displayName;
+        Touch();
+    }
+
+    public void ChangeEmail(string newEmail, string confirmationTokenHash, DateTime confirmationTokenExpiresAtUtc)
+    {
+        if (string.IsNullOrWhiteSpace(newEmail))
+            throw new DomainException("A user must have an email address.");
+        if (string.IsNullOrWhiteSpace(confirmationTokenHash))
+            throw new DomainException("A confirmation token hash is required.");
+        if (confirmationTokenExpiresAtUtc <= DateTime.UtcNow)
+            throw new DomainException("A confirmation token cannot be created already expired.");
+
+        if (string.Equals(Email, newEmail, StringComparison.OrdinalIgnoreCase))
+            return;
+
+        PendingEmail = newEmail;
+        EmailConfirmationTokenHash = confirmationTokenHash;
+        EmailConfirmationTokenExpiresAtUtc = confirmationTokenExpiresAtUtc;
+        Touch();
+    }
+
+    public void ConfirmEmail(string tokenHash)
+    {
+        if (EmailConfirmationTokenHash is null || EmailConfirmationTokenExpiresAtUtc is null)
+            throw new DomainException("There is no pending email confirmation.");
+
+        if (EmailConfirmationTokenExpiresAtUtc <= DateTime.UtcNow)
+            throw new DomainException("The email confirmation link has expired.");
+
+        if (!string.Equals(EmailConfirmationTokenHash, tokenHash, StringComparison.Ordinal))
+            throw new DomainException("Invalid confirmation token.");
+
+        if (PendingEmail is not null)
+        {
+            Email = PendingEmail;
+            PendingEmail = null;
+        }
+
+        IsEmailConfirmed = true;
+        EmailConfirmationTokenHash = null;
+        EmailConfirmationTokenExpiresAtUtc = null;
+        Touch();
+    }
+
+    public void RequestEmailConfirmation(string confirmationTokenHash, DateTime confirmationTokenExpiresAtUtc)
+    {
+        if (IsEmailConfirmed)
+            throw new DomainException("Email is already confirmed.");
+        if (string.IsNullOrWhiteSpace(confirmationTokenHash))
+            throw new DomainException("A confirmation token hash is required.");
+        if (confirmationTokenExpiresAtUtc <= DateTime.UtcNow)
+            throw new DomainException("A confirmation token cannot be created already expired.");
+
+        EmailConfirmationTokenHash = confirmationTokenHash;
+        EmailConfirmationTokenExpiresAtUtc = confirmationTokenExpiresAtUtc;
         Touch();
     }
 
@@ -91,18 +144,27 @@ public class User : Entity<Guid>
 
     public void Deactivate()
     {
+        if (!IsActive)
+            throw new DomainException("User is already deactivated.");
+
         IsActive = false;
         Touch();
     }
 
     public void Activate()
     {
+        if (IsActive)
+            throw new DomainException("User is already active.");
+
         IsActive = true;
         Touch();
     }
 
     public void SoftDelete()
     {
+        if (DeletedAtUtc.HasValue)
+            throw new DomainException("The user is already deleted.");
+
         DeletedAtUtc = DateTime.UtcNow;
         IsActive = false;
     }

@@ -84,9 +84,9 @@ namespace TeamManager.Api.Controllers.Teams
         [HttpGet]
         public async Task<IActionResult> GetTeams([FromQuery] GetTeamsQuery request, CancellationToken cancellationToken)
         {
-            var query = new GetTeamsQuery(request.Search, request.IsActive, request.Page, request.PageSize);
 
-            var result = await sender.Send(query, cancellationToken);
+
+            var result = await sender.Send(request, cancellationToken);
 
             return Ok(result);
         }

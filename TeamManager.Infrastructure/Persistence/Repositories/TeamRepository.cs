@@ -53,6 +53,11 @@ namespace TeamManager.Infrastructure.Persistence.Repositories
                 t.DeletedAtUtc == null, cancellationToken);
         }
         #endregion
+        public Task LinkPendingInvitationsToUserAsync(string email, Guid userId, CancellationToken cancellationToken)
+        {
+            return context.TeamInvitations.Where(x => x.InvitedEmail == email && x.Status == TeamInvitationStatus.Pending
+            && x.InvitedUserId == null).ExecuteUpdateAsync(s => s.SetProperty(x => x.InvitedUserId, userId), cancellationToken);
+        }
 
         #region Ensure methods
         public Task<bool> HasActiveRoleAsync(Guid teamId, Guid userId, IReadOnlyCollection<TeamRole> roles, CancellationToken cancellationToken)
