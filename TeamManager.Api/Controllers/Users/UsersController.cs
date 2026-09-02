@@ -7,6 +7,7 @@ using TeamManager.Application.Features.Users.Commands.ConfirmEmail;
 using TeamManager.Application.Features.Users.Commands.ResendEmailConfirmation;
 using TeamManager.Application.Features.Users.Commands.UpdateMyProfile;
 using TeamManager.Application.Features.Users.Queries.GetMyProfile;
+using TeamManager.Application.Features.Users.Queries.GetUsers;
 
 namespace TeamManager.Api.Controllers.Users
 {
@@ -56,6 +57,13 @@ namespace TeamManager.Api.Controllers.Users
         {
             await sender.Send(command, cancellationToken);
             return NoContent();
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetUsers([FromQuery] GetUsersQuery query, CancellationToken cancellationToken)
+        {
+            var result = await sender.Send(query, cancellationToken);
+            return Ok(result);
         }
     }
 }
