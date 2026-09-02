@@ -67,6 +67,11 @@ namespace TeamManager.Infrastructure.Persistence.Repositories
             && m.User.IsActive
             && m.Status == TeamMemberStatus.Active && roles.Contains(m.TeamRole), cancellationToken);
         }
+
+        public Task<bool> HasActiveOwnedTeamsAsync(Guid userId, CancellationToken cancellationToken)
+        {
+            return context.Teams.AnyAsync(t => t.OwnerUserId == userId && t.DeletedAtUtc == null, cancellationToken);
+        }
         #endregion
     }
 }

@@ -63,6 +63,7 @@ namespace TeamManager.Api.Middleware
                 ForbiddenException => StatusCodes.Status403Forbidden,
                 TeamMemberNotFoundException => StatusCodes.Status404NotFound,
                 DbUpdateConcurrencyException => StatusCodes.Status409Conflict,
+                UserOwnsActiveTeamException => StatusCodes.Status409Conflict,
                 _ => StatusCodes.Status500InternalServerError
             };
 

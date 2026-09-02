@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using TeamManager.Application.Abstractions.Persistence;
 using TeamManager.Domain.Entities;
+using TeamManager.Domain.Enums;
 
 namespace TeamManager.Infrastructure.Persistence.Repositories
 {
@@ -42,6 +43,18 @@ namespace TeamManager.Infrastructure.Persistence.Repositories
         {
             return context.RefreshTokens.Where(x => x.UserId == userId && x.RevokedAtUtc == null)
                 .ExecuteUpdateAsync(s => s.SetProperty(x => x.RevokedAtUtc, DateTime.UtcNow), cancellationToken);
+        }
+
+        public Task<bool> HasActiveOwnedTeamsAsync(Guid userId, CancellationToken cancellationToken)
+        {
+            return context.Teams.AllAsync(x => x.OwnerUserId == userId && x.DeletedAtUtc == null, cancellationToken);
+        }
+
+        public Task DeactivateActiveMembershipsAsync(Guid userId, CancellationToken cancellationToken)
+        {
+            return context.TeamMembers.Where(x => x.UserId == userId && x.Status == TeamMemberStatus.Active &&
+            x.TeamRole != TeamRole.Owner).ExecuteUpdateAsync(s => s.SetProperty(x => x.Status, TeamMemberStatus.Removed)
+                .SetProperty(x => x.RemovedAtUtc, DateTime.UtcNow), cancellationToken);
         }
     }
 }

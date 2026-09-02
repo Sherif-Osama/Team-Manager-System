@@ -6,6 +6,7 @@ using TeamManager.Application.Features.Users.Commands.ChangePassword;
 using TeamManager.Application.Features.Users.Commands.ConfirmEmail;
 using TeamManager.Application.Features.Users.Commands.ResendEmailConfirmation;
 using TeamManager.Application.Features.Users.Commands.UpdateMyProfile;
+using TeamManager.Application.Features.Users.DeleteMyAccount;
 using TeamManager.Application.Features.Users.Queries.GetMyProfile;
 using TeamManager.Application.Features.Users.Queries.GetUsers;
 
@@ -64,6 +65,14 @@ namespace TeamManager.Api.Controllers.Users
         {
             var result = await sender.Send(query, cancellationToken);
             return Ok(result);
+        }
+
+        [HttpDelete("me")]
+        public async Task<IActionResult> DeleteMyAccount(CancellationToken cancellationToken)
+        {
+            await sender.Send(new DeleteMyAccountCommand(), cancellationToken);
+
+            return NoContent();
         }
     }
 }
