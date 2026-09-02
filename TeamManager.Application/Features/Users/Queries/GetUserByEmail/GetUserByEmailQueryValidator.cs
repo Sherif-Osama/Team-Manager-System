@@ -1,7 +1,6 @@
 ﻿using FluentValidation;
-using TeamManager.Application.Features.Users.Queries.GetUserByEmail;
 
-namespace TeamManager.Application.Features.Users.Queries.GetUserById
+namespace TeamManager.Application.Features.Users.Queries.GetUserByEmail
 {
     public sealed class GetUserByEmailQueryValidator : AbstractValidator<GetUserByEmailQuery>
     {

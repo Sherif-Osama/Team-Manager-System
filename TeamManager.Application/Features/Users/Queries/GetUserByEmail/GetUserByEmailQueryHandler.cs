@@ -2,10 +2,9 @@
 using Microsoft.EntityFrameworkCore;
 using TeamManager.Application.Abstractions.Persistence;
 using TeamManager.Application.Common.Exceptions;
-using TeamManager.Application.Features.Users.Queries.GetUserByEmail;
 using TeamManager.Domain.Enums;
 
-namespace TeamManager.Application.Features.Users.Queries.GetUserById
+namespace TeamManager.Application.Features.Users.Queries.GetUserByEmail
 {
     public sealed class GetUserByEmailQueryHandler(IApplicationDbContext context)
         : IRequestHandler<GetUserByEmailQuery, GetUserByEmailResponse>
