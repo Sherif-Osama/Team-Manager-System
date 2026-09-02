@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("TeamManager.Application")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+76a0a35a0cee8a8bdffa17e0179619e05878dd50")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+87c0fb289b25d4b449d78e8dacd227ae6499621a")]
 [assembly: System.Reflection.AssemblyProductAttribute("TeamManager.Application")]
 [assembly: System.Reflection.AssemblyTitleAttribute("TeamManager.Application")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

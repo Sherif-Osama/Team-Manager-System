@@ -1,7 +1,6 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using TeamManager.Application.Features.Users.Commands.ActivateMyAccount;
 using TeamManager.Application.Features.Users.Commands.ChangeEmail;
 using TeamManager.Application.Features.Users.Commands.ChangePassword;
 using TeamManager.Application.Features.Users.Commands.ConfirmEmail;
@@ -96,13 +95,6 @@ namespace TeamManager.Api.Controllers.Users
         public async Task<IActionResult> DeactivateMyAccount(CancellationToken cancellationToken)
         {
             await sender.Send(new DeactivateMyAccountCommand(), cancellationToken);
-            return NoContent();
-        }
-
-        [HttpPost("me/activate")]
-        public async Task<IActionResult> ActivateMyAccount(CancellationToken cancellationToken)
-        {
-            await sender.Send(new ActivateMyAccountCommand(), cancellationToken);
             return NoContent();
         }
     }

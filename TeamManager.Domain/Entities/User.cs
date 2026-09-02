@@ -55,6 +55,9 @@ public class User : Entity<Guid>
 
     public void ChangeDisplayName(string displayName)
     {
+        if (DeletedAtUtc.HasValue)
+            throw new DomainException("Cannot change display name for a deleted user.");
+
         if (string.IsNullOrWhiteSpace(displayName))
             throw new DomainException("A user must have a display name.");
 
@@ -64,13 +67,15 @@ public class User : Entity<Guid>
 
     public void ChangeEmail(string newEmail, string confirmationTokenHash, DateTime confirmationTokenExpiresAtUtc)
     {
+        if (DeletedAtUtc.HasValue)
+            throw new DomainException("Cannot change email for a deleted user.");
+
         if (string.IsNullOrWhiteSpace(newEmail))
             throw new DomainException("A user must have an email address.");
         if (string.IsNullOrWhiteSpace(confirmationTokenHash))
             throw new DomainException("A confirmation token hash is required.");
         if (confirmationTokenExpiresAtUtc <= DateTime.UtcNow)
             throw new DomainException("A confirmation token cannot be created already expired.");
-
         if (string.Equals(Email, newEmail, StringComparison.OrdinalIgnoreCase))
             return;
 
@@ -82,6 +87,9 @@ public class User : Entity<Guid>
 
     public void ConfirmEmail(string tokenHash)
     {
+        if (DeletedAtUtc.HasValue)
+            throw new DomainException("Cannot confirm email for a deleted user.");
+
         if (EmailConfirmationTokenHash is null || EmailConfirmationTokenExpiresAtUtc is null)
             throw new DomainException("There is no pending email confirmation.");
 
@@ -105,6 +113,9 @@ public class User : Entity<Guid>
 
     public void RequestEmailConfirmation(string confirmationTokenHash, DateTime confirmationTokenExpiresAtUtc)
     {
+        if (DeletedAtUtc.HasValue)
+            throw new DomainException("Cannot request email confirmation for a deleted user.");
+
         if (IsEmailConfirmed)
             throw new DomainException("Email is already confirmed.");
         if (string.IsNullOrWhiteSpace(confirmationTokenHash))
@@ -119,6 +130,9 @@ public class User : Entity<Guid>
 
     public void ChangePasswordHash(string newPasswordHash)
     {
+        if (DeletedAtUtc.HasValue)
+            throw new DomainException("Cannot change password for a deleted user.");
+
         if (string.IsNullOrWhiteSpace(newPasswordHash))
             throw new DomainException("A password hash cannot be empty.");
 
@@ -128,6 +142,15 @@ public class User : Entity<Guid>
 
     public void RecordSuccessfulLogin()
     {
+        if (DeletedAtUtc.HasValue)
+            throw new DomainException("Cannot record login for a deleted user.");
+
+        if (!IsActive)
+        {
+            IsActive = true;
+            Touch();
+        }
+
         FailedLoginAttempts = 0;
         LockoutEndUtc = null;
         LastLoginUtc = DateTime.UtcNow;
@@ -153,6 +176,9 @@ public class User : Entity<Guid>
 
     public void Activate()
     {
+        if (DeletedAtUtc.HasValue)
+            throw new DomainException("Cannot activate a deleted user.");
+
         if (IsActive)
             throw new DomainException("User is already active.");
 

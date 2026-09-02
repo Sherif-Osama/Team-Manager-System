@@ -15,7 +15,7 @@ public sealed class LoginCommandHandler(IUserRepository userRepository, IPasswor
     {
         var user = await userRepository.GetByEmailAsync(request.Email, cancellationToken);
 
-        if (user is null || !user.IsActive)
+        if (user is null)
             throw new UnauthorizedAccessException("Invalid email or password.");
 
 
@@ -31,6 +31,8 @@ public sealed class LoginCommandHandler(IUserRepository userRepository, IPasswor
             throw new UnauthorizedAccessException("Invalid email or password");
         }
 
+        user.RecordSuccessfulLogin();
+
         var accessToken = accessTokenService.GenerateAccessToken(user);
 
         var refreshToken = refreshTokenService.GenerateToken();
@@ -41,8 +43,6 @@ public sealed class LoginCommandHandler(IUserRepository userRepository, IPasswor
             refreshTokenHash, refreshTokenService.GetExpiration(), currentUser.DeviceInfo, currentUser.IpAddress);
 
         await userRepository.AddRefreshTokenAsync(refreshTokenEntity, cancellationToken);
-
-        user.RecordSuccessfulLogin();
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
