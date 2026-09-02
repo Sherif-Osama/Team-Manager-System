@@ -8,6 +8,7 @@ using TeamManager.Application.Features.Users.Commands.DeleteMyAccount;
 using TeamManager.Application.Features.Users.Commands.ResendEmailConfirmation;
 using TeamManager.Application.Features.Users.Commands.UpdateMyProfile;
 using TeamManager.Application.Features.Users.Queries.GetMyProfile;
+using TeamManager.Application.Features.Users.Queries.GetUserByEmail;
 using TeamManager.Application.Features.Users.Queries.GetUserById;
 using TeamManager.Application.Features.Users.Queries.GetUsers;
 
@@ -79,6 +80,13 @@ namespace TeamManager.Api.Controllers.Users
         public async Task<IActionResult> GetUserById(Guid userId, CancellationToken cancellationToken)
         {
             var result = await sender.Send(new GetUserByIdQuery(userId), cancellationToken);
+            return Ok(result);
+        }
+
+        [HttpGet("by-email/{email}")]
+        public async Task<IActionResult> GetUserByEmail(string email, CancellationToken cancellationToken)
+        {
+            var result = await sender.Send(new GetUserByEmailQuery(email), cancellationToken);
             return Ok(result);
         }
     }
