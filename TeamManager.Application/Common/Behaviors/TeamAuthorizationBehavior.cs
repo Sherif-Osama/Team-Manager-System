@@ -23,6 +23,7 @@ namespace TeamManager.Application.Common.Behaviors
             if (!isAuthorized)
                 throw new ForbiddenException("You do not have permission to perform this action on this team.");
 
+
             return await next();
         }
     }

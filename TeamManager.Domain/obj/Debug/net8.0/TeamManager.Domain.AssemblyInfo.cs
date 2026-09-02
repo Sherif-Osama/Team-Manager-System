@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("TeamManager.Domain")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+4930651d5e4f4f6268162af258642e159dd04f23")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+76a0a35a0cee8a8bdffa17e0179619e05878dd50")]
 [assembly: System.Reflection.AssemblyProductAttribute("TeamManager.Domain")]
 [assembly: System.Reflection.AssemblyTitleAttribute("TeamManager.Domain")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

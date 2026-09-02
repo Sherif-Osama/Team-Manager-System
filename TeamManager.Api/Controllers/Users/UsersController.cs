@@ -1,9 +1,11 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using TeamManager.Application.Features.Users.Commands.ActivateMyAccount;
 using TeamManager.Application.Features.Users.Commands.ChangeEmail;
 using TeamManager.Application.Features.Users.Commands.ChangePassword;
 using TeamManager.Application.Features.Users.Commands.ConfirmEmail;
+using TeamManager.Application.Features.Users.Commands.DeactivateMyAccount;
 using TeamManager.Application.Features.Users.Commands.DeleteMyAccount;
 using TeamManager.Application.Features.Users.Commands.ResendEmailConfirmation;
 using TeamManager.Application.Features.Users.Commands.UpdateMyProfile;
@@ -88,6 +90,20 @@ namespace TeamManager.Api.Controllers.Users
         {
             var result = await sender.Send(new GetUserByEmailQuery(email), cancellationToken);
             return Ok(result);
+        }
+
+        [HttpPost("me/deactivate")]
+        public async Task<IActionResult> DeactivateMyAccount(CancellationToken cancellationToken)
+        {
+            await sender.Send(new DeactivateMyAccountCommand(), cancellationToken);
+            return NoContent();
+        }
+
+        [HttpPost("me/activate")]
+        public async Task<IActionResult> ActivateMyAccount(CancellationToken cancellationToken)
+        {
+            await sender.Send(new ActivateMyAccountCommand(), cancellationToken);
+            return NoContent();
         }
     }
 }

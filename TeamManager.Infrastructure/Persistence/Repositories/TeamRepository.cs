@@ -59,6 +59,14 @@ namespace TeamManager.Infrastructure.Persistence.Repositories
             && x.InvitedUserId == null).ExecuteUpdateAsync(s => s.SetProperty(x => x.InvitedUserId, userId), cancellationToken);
         }
 
+        public Task DeactivateOwnedTeamsAsync(Guid userId, CancellationToken cancellationToken)
+        {
+            return context.Teams.Where(x => x.OwnerUserId == userId && x.IsActive
+            && x.DeletedAtUtc == null)
+                .ExecuteUpdateAsync(s => s.SetProperty(x => x.IsActive, false)
+                .SetProperty(x => x.UpdatedAtUtc, DateTime.UtcNow), cancellationToken);
+        }
+
         #region Ensure methods
         public Task<bool> HasActiveRoleAsync(Guid teamId, Guid userId, IReadOnlyCollection<TeamRole> roles, CancellationToken cancellationToken)
         {
