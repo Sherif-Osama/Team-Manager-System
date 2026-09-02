@@ -9,7 +9,7 @@ namespace TeamManager.Infrastructure.Persistence.Repositories
 
         public Task<bool> ExistsByEmailAsync(string email, CancellationToken cancellationToken)
         {
-            return context.Users.AnyAsync(x => x.Email == email, cancellationToken);
+            return context.Users.AnyAsync(x => x.Email == email && x.DeletedAtUtc == null, cancellationToken);
         }
 
         public async Task AddAsync(User user, CancellationToken cancellationToken)

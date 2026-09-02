@@ -44,7 +44,6 @@ namespace TeamManager.Infrastructure
             services.AddScoped<IOutboxMessageHandler, InvitationEmailOutboxMessageHandler>();
             services.AddScoped<IOutboxMessageHandler, EmailConfirmationOutboxMessageHandler>();
             services.AddScoped<IOutboxMessageHandler, PasswordChangedNotificationOutboxMessageHandler>();
-            services.AddScoped<OutboxProcessorService>();
             return services;
         }
     }
