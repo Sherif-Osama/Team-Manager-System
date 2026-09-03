@@ -11,8 +11,6 @@ namespace TeamManager.Application.Abstractions.Persistence
         Task<RefreshToken?> GetRefreshTokenByHashAsync(string tokenHash, CancellationToken cancellationToken);
         Task<User?> GetByIdAsync(Guid userId, CancellationToken cancellationToken);
         Task RevokeAllRefreshTokensAsync(Guid userId, CancellationToken cancellationToken);
-        Task<bool> HasActiveOwnedTeamsAsync(Guid userId, CancellationToken cancellationToken);
         Task DeactivateActiveMembershipsAsync(Guid userId, CancellationToken cancellationToken);
-
     }
 }

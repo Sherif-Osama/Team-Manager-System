@@ -45,11 +45,6 @@ namespace TeamManager.Infrastructure.Persistence.Repositories
                 .ExecuteUpdateAsync(s => s.SetProperty(x => x.RevokedAtUtc, DateTime.UtcNow), cancellationToken);
         }
 
-        public Task<bool> HasActiveOwnedTeamsAsync(Guid userId, CancellationToken cancellationToken)
-        {
-            return context.Teams.AllAsync(x => x.OwnerUserId == userId && x.DeletedAtUtc == null, cancellationToken);
-        }
-
         public Task DeactivateActiveMembershipsAsync(Guid userId, CancellationToken cancellationToken)
         {
             return context.TeamMembers.Where(x => x.UserId == userId && x.Status == TeamMemberStatus.Active &&

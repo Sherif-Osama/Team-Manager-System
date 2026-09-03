@@ -10,6 +10,7 @@ namespace TeamManager.Infrastructure.BackgroundJobs.DeleteInactiveUsers
         {
             var cutoffDate = DateTime.UtcNow.AddDays(-30);
 
+            // soft delete users that are inactive, not deleted, and have not logged in for 30 days or more
             var users = await context.Users.Where(x => !x.IsActive && x.DeletedAtUtc ==
             null && x.UpdatedAtUtc <= cutoffDate && (x.LastLoginUtc == null ||
             x.LastLoginUtc <= cutoffDate)).ToListAsync(cancellationToken);
@@ -19,6 +20,8 @@ namespace TeamManager.Infrastructure.BackgroundJobs.DeleteInactiveUsers
 
             var userIds = users.Select(x => x.Id).ToList();
 
+            // Remove team members and revoke refresh tokens for the users being deleted
+            // cant not delete team owners, so we only remove team members that are not owners
             await context.TeamMembers.Where(x => userIds.Contains(x.UserId) &&
                     x.Status == TeamMemberStatus.Active &&
                     x.TeamRole != TeamRole.Owner).ExecuteUpdateAsync(s => s.SetProperty(x => x.Status, TeamMemberStatus.Removed)

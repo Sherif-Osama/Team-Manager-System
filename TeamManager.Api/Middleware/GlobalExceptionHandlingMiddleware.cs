@@ -7,20 +7,13 @@ using TeamManager.Domain.Exceptions;
 
 namespace TeamManager.Api.Middleware
 {
-    public class GlobalExceptionHandlingMiddleware
+    public class GlobalExceptionHandlingMiddleware(ILogger<GlobalExceptionHandlingMiddleware> logger, RequestDelegate next)
     {
-        private readonly RequestDelegate _next;
-
-        public GlobalExceptionHandlingMiddleware(RequestDelegate next)
-        {
-            _next = next;
-        }
-
         public async Task InvokeAsync(HttpContext context)
         {
             try
             {
-                await _next(context);
+                await next(context);
             }
             catch (Exception exception)
             {
@@ -28,7 +21,7 @@ namespace TeamManager.Api.Middleware
             }
         }
 
-        private static async Task HandleExceptionAsync(HttpContext context, Exception exception)
+        private async Task HandleExceptionAsync(HttpContext context, Exception exception)
         {
             if (exception is ValidationException validationException)
             {
@@ -67,11 +60,18 @@ namespace TeamManager.Api.Middleware
                 _ => StatusCodes.Status500InternalServerError
             };
 
+            //to prevent exposing sensitive information,
+            //we can log the exception details and return a generic error message to the client for unhandled exceptions.
+            var isUnhandled = statusCode == StatusCodes.Status500InternalServerError;
+
+            if (isUnhandled)
+                logger.LogError(exception, "An unhandled error occurred.");
+
             var problemDetails = new ProblemDetails
             {
                 Status = statusCode,
                 Title = GetTitle(statusCode),
-                Detail = exception.Message,
+                Detail = isUnhandled ? "An unhandled error occurred." : exception.Message,
                 Instance = context.Request.Path
             };
 
@@ -81,7 +81,7 @@ namespace TeamManager.Api.Middleware
             await context.Response.WriteAsJsonAsync(problemDetails);
         }
 
-        private static string GetTitle(int statusCode) =>
+        private string GetTitle(int statusCode) =>
             statusCode switch
             {
                 StatusCodes.Status400BadRequest => "Bad Request",
