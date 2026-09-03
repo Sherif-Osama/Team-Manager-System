@@ -18,6 +18,16 @@ namespace TeamManager.Infrastructure.BackgroundJobs.DeleteInactiveUsers
             if (users.Count == 0)
                 return;
 
+            var candidateForDeletionIds = users.Select(x => x.Id).ToList();
+
+            var ownerIdsWithActiveTeams = await context.Teams.Where(t => candidateForDeletionIds.Contains(t.OwnerUserId)
+            && t.DeletedAtUtc == null).Select(t => t.OwnerUserId).Distinct().ToListAsync(cancellationToken);
+
+            users = users.Where(u => !ownerIdsWithActiveTeams.Contains(u.Id)).ToList();
+
+            if (users.Count == 0)
+                return;
+
             var userIds = users.Select(x => x.Id).ToList();
 
             // Remove team members and revoke refresh tokens for the users being deleted
