@@ -201,5 +201,32 @@ public class User : Entity<Guid>
         IsActive = false;
     }
 
+    public void AssignRole(int roleId)
+    {
+        if (DeletedAtUtc.HasValue)
+            throw new DomainException("Cannot assign a role to a deleted user.");
+
+        if (_userRoles.Any(x => x.RoleId == roleId))
+            throw new DomainException("User already has this role.");
+
+        _userRoles.Add(new UserRole(Id, roleId));
+    }
+
+    public void RemoveRole(int roleId)
+    {
+        if (DeletedAtUtc.HasValue)
+            throw new DomainException("Cannot remove a role from a deleted user.");
+
+        var userRole = _userRoles.FirstOrDefault(x => x.RoleId == roleId && x.UserId == Id);
+
+        if (userRole is null)
+            throw new DomainException("User does not have this role.");
+
+        if (_userRoles.Count == 1)
+            throw new DomainException("User must have at least one role.");
+
+        _userRoles.RemoveAll(x => x.RoleId == roleId);
+    }
+
     private void Touch() => UpdatedAtUtc = DateTime.UtcNow;
 }
