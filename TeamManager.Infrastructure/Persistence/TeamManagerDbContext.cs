@@ -1,14 +1,14 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using System.Data;
 using TeamManager.Application.Abstractions.Persistence;
 using TeamManager.Domain.Entities;
 using TeamManager.Infrastructure.Persistence.Outbox;
-
 namespace TeamManager.Infrastructure.Persistence
 {
 
-    public class TeamManagerDbContext : DbContext, IUnitOfWork, IApplicationDbContext
+    public class TeamManagerDbContext(DbContextOptions<TeamManagerDbContext> options)
+        : DbContext(options), IUnitOfWork, IApplicationDbContext
     {
-        public TeamManagerDbContext(DbContextOptions<TeamManagerDbContext> options) : base(options) { }
         public DbSet<User> Users => Set<User>();
         public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
         public DbSet<Role> Roles => Set<Role>();
@@ -33,6 +33,36 @@ namespace TeamManager.Infrastructure.Persistence
         public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
         public DbSet<ActivityLog> ActivityLogs => Set<ActivityLog>();
         public DbSet<OutboxMessage> OutboxMessages => Set<OutboxMessage>();
+
+        public Task ExecuteInTransactionAsync(Func<CancellationToken, Task> action, CancellationToken cancellationToken)
+        {
+            return ExecuteInTransactionAsync(action, IsolationLevel.ReadCommitted, cancellationToken);
+        }
+
+        public Task ExecuteInSerializableTransactionAsync(Func<CancellationToken, Task> action, CancellationToken cancellationToken)
+        {
+            return ExecuteInTransactionAsync(action, IsolationLevel.Serializable, cancellationToken);
+        }
+
+        private async Task ExecuteInTransactionAsync(Func<CancellationToken, Task> action,
+            IsolationLevel isolationLevel, CancellationToken cancellationToken)
+        {
+            await using var transaction = await Database.BeginTransactionAsync(isolationLevel, cancellationToken);
+
+            try
+            {
+                await action(cancellationToken);
+
+                await SaveChangesAsync(cancellationToken);
+
+                await transaction.CommitAsync(cancellationToken);
+            }
+            catch
+            {
+                await transaction.RollbackAsync(cancellationToken);
+                throw;
+            }
+        }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

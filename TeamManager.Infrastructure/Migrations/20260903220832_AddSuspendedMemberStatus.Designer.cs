@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using TeamManager.Infrastructure.Persistence;
 
@@ -11,9 +12,11 @@ using TeamManager.Infrastructure.Persistence;
 namespace TeamManager.Infrastructure.Migrations
 {
     [DbContext(typeof(TeamManagerDbContext))]
-    partial class TeamManagerDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260903220832_AddSuspendedMemberStatus")]
+    partial class AddSuspendedMemberStatus
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1230,8 +1233,7 @@ namespace TeamManager.Infrastructure.Migrations
 
                     b.HasIndex("Email")
                         .IsUnique()
-                        .HasDatabaseName("UQ_Users_Email")
-                        .HasFilter("[DeletedAtUtc] IS NULL");
+                        .HasDatabaseName("UQ_Users_Email");
 
                     b.HasIndex("IsActive")
                         .HasDatabaseName("IX_Users_IsActive")

@@ -31,10 +31,10 @@ public class TeamMember : Entity<long>
         JoinedAtUtc = DateTime.UtcNow;
     }
 
-    public void ChangeRole(TeamRole role)
+    internal void ChangeRole(TeamRole role)
     {
-        if (Status != TeamMemberStatus.Active)
-            throw new DomainException("Cannot change the role of a member who is not active.");
+        if (Status == TeamMemberStatus.Removed)
+            throw new DomainException("Cannot change the role of a removed member.");
 
         if (role == TeamRole.Owner)
             throw new DomainException("Ownership cannot be assigned through role change. Use TransferOwnership instead.");
@@ -54,7 +54,7 @@ public class TeamMember : Entity<long>
         TeamRole = TeamRole.Owner;
     }
 
-    public void Remove(Guid removedBy)
+    internal void Remove(Guid removedBy)
     {
         if (Status == TeamMemberStatus.Removed)
             throw new DomainException("The team member is already removed.");
@@ -62,5 +62,17 @@ public class TeamMember : Entity<long>
         Status = TeamMemberStatus.Removed;
         RemovedAtUtc = DateTime.UtcNow;
         RemovedBy = removedBy;
+    }
+
+    //you cannot change the status of a removed member or an owner from here.
+    internal void changeStatus(TeamMemberStatus status)
+    {
+        if (Status == TeamMemberStatus.Removed)
+            throw new DomainException("Cannot change the status of a removed member.");
+
+        if (TeamRole == TeamRole.Owner)
+            throw new DomainException("Cannot change the status of the team owner.");
+
+        Status = status;
     }
 }

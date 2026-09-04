@@ -41,7 +41,7 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
 
         builder.Property<byte[]>("RowVersion").IsRowVersion();
 
-        builder.HasIndex(x => x.Email).IsUnique().HasDatabaseName("UQ_Users_Email");
+        builder.HasIndex(x => x.Email).IsUnique().HasDatabaseName("UQ_Users_Email").HasFilter("[DeletedAtUtc] IS NULL");
 
         builder.HasIndex(x => x.IsActive).HasDatabaseName("IX_Users_IsActive").HasFilter("[DeletedAtUtc] IS NULL");
 

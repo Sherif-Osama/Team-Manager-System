@@ -135,10 +135,11 @@ namespace TeamManager.Domain.Entities
 
         public void RemoveMember(long memberId, Guid removedBy)
         {
-            var member = _members.FirstOrDefault(m => m.Id == memberId && m.Status == TeamMemberStatus.Active);
+            var member = _members.FirstOrDefault(m => m.Id == memberId &&
+                (m.Status == TeamMemberStatus.Active || m.Status == TeamMemberStatus.Suspended));
 
             if (member is null)
-                throw new DomainException("This user does not have an active membership in the team.");
+                throw new DomainException("This user does not have a removable membership in the team.");
 
             if (member.TeamRole == TeamRole.Owner)
                 throw new DomainException("The team owner cannot be removed from the team.");
@@ -148,10 +149,11 @@ namespace TeamManager.Domain.Entities
 
         public void ChangeMemberRole(long memberId, TeamRole role)
         {
-            var member = _members.FirstOrDefault(m => m.Id == memberId && m.Status == TeamMemberStatus.Active);
+            var member = _members.FirstOrDefault(m => m.Id == memberId &&
+                (m.Status == TeamMemberStatus.Active || m.Status == TeamMemberStatus.Suspended));
 
             if (member is null)
-                throw new DomainException("This member does not have an active membership in the team.");
+                throw new DomainException("This member does not have a manageable membership in the team.");
 
             if (member.TeamRole == TeamRole.Owner)
                 throw new DomainException("Ownership cannot be changed");
@@ -168,7 +170,8 @@ namespace TeamManager.Domain.Entities
             if (role == TeamRole.Owner)
                 throw new DomainException("Ownership cannot be assigned via invitation. Use TransferOwnership instead.");
 
-            if (invitedUserId.HasValue && _members.Any(m => m.UserId == invitedUserId.Value && m.Status == TeamMemberStatus.Active))
+            if (invitedUserId.HasValue && _members.Any(m => m.UserId == invitedUserId.Value &&
+                (m.Status == TeamMemberStatus.Active || m.Status == TeamMemberStatus.Suspended)))
                 throw new DomainException("This user is already a member of the team.");
 
 
@@ -209,6 +212,16 @@ namespace TeamManager.Domain.Entities
 
             if (invitation.InvitedUserId.HasValue && invitation.InvitedUserId != userId)
                 throw new DomainException("This invitation belongs to another user.");
+
+            var existingMember = _members.FirstOrDefault(m => m.UserId == userId &&
+                (m.Status == TeamMemberStatus.Active || m.Status == TeamMemberStatus.Suspended));
+
+            if (existingMember is not null)
+            {
+                existingMember.changeStatus(TeamMemberStatus.Active);
+                invitation.Accept(userId);
+                return existingMember;
+            }
 
             var newMember = AddMember(userId, invitation.TeamRole, invitation.InvitedBy);
 

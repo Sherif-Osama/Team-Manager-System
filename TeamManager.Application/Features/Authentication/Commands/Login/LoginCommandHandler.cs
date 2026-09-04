@@ -9,10 +9,8 @@ namespace TeamManager.Application.Features.Authentication.Commands.Login;
 
 public sealed class LoginCommandHandler(IUserRepository userRepository, IPasswordHasher passwordHasher,
         IAccessTokenService accessTokenService, IRefreshTokenService refreshTokenService, IUnitOfWork unitOfWork,
-        ICurrentUser currentUser, IOutbox outbox) : IRequestHandler<LoginCommand, LoginResponse>
+        ICurrentUser currentUser, IOutbox outbox, ITeamRepository teamRepository) : IRequestHandler<LoginCommand, LoginResponse>
 {
-
-
     public async Task<LoginResponse> Handle(LoginCommand request, CancellationToken cancellationToken)
     {
         var user = await userRepository.GetByEmailAsync(request.Email, cancellationToken);
@@ -46,21 +44,24 @@ public sealed class LoginCommandHandler(IUserRepository userRepository, IPasswor
         var refreshTokenEntity = new Domain.Entities.RefreshToken(Guid.NewGuid(), user.Id,
             refreshTokenHash, refreshTokenService.GetExpiration(), currentUser.DeviceInfo, currentUser.IpAddress);
 
-        await userRepository.AddRefreshTokenAsync(refreshTokenEntity, cancellationToken);
-
-        if (wasInactive)
+        await unitOfWork.ExecuteInTransactionAsync(async ct =>
         {
-            var payload = JsonSerializer.Serialize(new
+            await userRepository.AddRefreshTokenAsync(refreshTokenEntity, ct);
+            if (wasInactive)
             {
-                To = user.Email,
-                ActivatedAtUtc = DateTime.UtcNow,
-                DeviceInfo = currentUser.DeviceInfo
-            });
+                await teamRepository.ReactivateSuspendedMembershipsAsync(user.Id, ct);
 
-            outbox.Add(OutboxMessageType.AccountActivationEmail, payload);
-        }
+                var payload = JsonSerializer.Serialize(new
+                {
+                    To = user.Email,
+                    ActivatedAtUtc = DateTime.UtcNow,
+                    DeviceInfo = currentUser.DeviceInfo
+                });
 
-        await unitOfWork.SaveChangesAsync(cancellationToken);
+                outbox.Add(OutboxMessageType.AccountActivationEmail, payload);
+            }
+
+        }, cancellationToken);
 
         return new LoginResponse(accessToken, refreshToken);
     }

@@ -12,9 +12,13 @@ namespace TeamManager.Application.Abstractions.Persistence
         Task<bool> HasActiveRoleAsync(Guid teamId, Guid userId, IReadOnlyCollection<TeamRole> roles, CancellationToken cancellationToken);
         Task<Team?> GetByIdWithMembersAndInvitationsAsync(Guid teamId, CancellationToken cancellationToken);
         Task<Team?> GetByInvitationTokenHashAsync(string tokenHash, CancellationToken cancellationToken);
+        Task<Team?> GetByInvitationTokenHashWithMemberAsync(string tokenHash, Guid memberUserId, CancellationToken cancellationToken);
         Task<Team?> GetByIdWithInvitationsAsync(Guid teamId, CancellationToken cancellationToken);
         Task LinkPendingInvitationsToUserAsync(string email, Guid userId, CancellationToken cancellationToken);
         Task<bool> HasActiveOwnedTeamsAsync(Guid userId, CancellationToken cancellationToken);
         Task DeactivateOwnedTeamsAsync(Guid userId, CancellationToken cancellationToken);
+        Task DeactivateActiveMembershipsAsync(Guid userId, CancellationToken cancellationToken);
+        Task SuspendActiveMembershipsAsync(Guid userId, CancellationToken cancellationToken);
+        Task ReactivateSuspendedMembershipsAsync(Guid userId, CancellationToken cancellationToken);
     }
 }

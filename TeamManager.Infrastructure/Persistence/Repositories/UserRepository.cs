@@ -1,7 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using TeamManager.Application.Abstractions.Persistence;
 using TeamManager.Domain.Entities;
-using TeamManager.Domain.Enums;
 
 namespace TeamManager.Infrastructure.Persistence.Repositories
 {
@@ -34,9 +33,11 @@ namespace TeamManager.Infrastructure.Persistence.Repositories
             return context.RefreshTokens.FirstOrDefaultAsync(x => x.TokenHash == tokenHash, cancellationToken);
         }
 
-        public Task<User?> GetByIdAsync(Guid userId, CancellationToken cancellationToken)
+        public async Task<User?> GetByIdAsync(Guid userId, CancellationToken cancellationToken)
         {
-            return context.Users.FirstOrDefaultAsync(x => x.Id == userId && x.DeletedAtUtc == null, cancellationToken);
+            var user = await context.Users.FindAsync([userId], cancellationToken);
+
+            return user is not null && user.DeletedAtUtc == null ? user : null;
         }
 
         public Task RevokeAllRefreshTokensAsync(Guid userId, CancellationToken cancellationToken)
@@ -45,11 +46,24 @@ namespace TeamManager.Infrastructure.Persistence.Repositories
                 .ExecuteUpdateAsync(s => s.SetProperty(x => x.RevokedAtUtc, DateTime.UtcNow), cancellationToken);
         }
 
-        public Task DeactivateActiveMembershipsAsync(Guid userId, CancellationToken cancellationToken)
+        public Task<bool> HasPermissionAsync(Guid userId, string permissionCode, CancellationToken cancellationToken)
         {
-            return context.TeamMembers.Where(x => x.UserId == userId && x.Status == TeamMemberStatus.Active &&
-            x.TeamRole != TeamRole.Owner).ExecuteUpdateAsync(s => s.SetProperty(x => x.Status, TeamMemberStatus.Removed)
-                .SetProperty(x => x.RemovedAtUtc, DateTime.UtcNow), cancellationToken);
+            return context.UserRoles.AnyAsync(ur => ur.UserId == userId && ur.User.IsActive && ur.User.DeletedAtUtc == null
+            && ur.Role.RolePermissions.Any(rp => rp.Permission.Code == permissionCode), cancellationToken);
+        }
+
+        public async Task<bool> IsLastSystemAdminAsync(Guid userId, CancellationToken cancellationToken)
+        {
+            return await context.UserRoles.AnyAsync(ur => ur.UserId == userId && ur.User.IsActive
+            && ur.User.DeletedAtUtc == null && ur.Role.Name == "SystemAdmin" &&
+            !context.UserRoles.Any(other => other.RoleId == ur.RoleId && other.UserId != userId && other.User.IsActive &&
+            other.User.DeletedAtUtc == null), cancellationToken);
+        }
+
+        public Task<User?> GetByIdWithRolesAsync(Guid userId, CancellationToken cancellationToken)
+        {
+            return context.Users.Include(x => x.UserRoles)
+                .FirstOrDefaultAsync(x => x.Id == userId && x.DeletedAtUtc == null, cancellationToken);
         }
     }
 }

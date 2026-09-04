@@ -33,7 +33,7 @@ namespace TeamManager.Infrastructure.BackgroundJobs.DeleteInactiveUsers
             // Remove team members and revoke refresh tokens for the users being deleted
             // cant not delete team owners, so we only remove team members that are not owners
             await context.TeamMembers.Where(x => userIds.Contains(x.UserId) &&
-                    x.Status == TeamMemberStatus.Active &&
+                    (x.Status == TeamMemberStatus.Active || x.Status == TeamMemberStatus.Suspended) &&
                     x.TeamRole != TeamRole.Owner).ExecuteUpdateAsync(s => s.SetProperty(x => x.Status, TeamMemberStatus.Removed)
                     .SetProperty(x => x.RemovedAtUtc, DateTime.UtcNow), cancellationToken);
 

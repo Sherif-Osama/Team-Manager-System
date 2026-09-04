@@ -11,7 +11,7 @@ public class TeamMemberConfiguration : IEntityTypeConfiguration<TeamMember>
     {
         builder.ToTable("TeamMembers", tableBuilder =>
         {
-            tableBuilder.HasCheckConstraint("CK_TeamMembers_Status", "[Status] IN (1, 2)");
+            tableBuilder.HasCheckConstraint("CK_TeamMembers_Status", "[Status] IN (1, 2, 3)");
         });
 
         builder.HasKey(x => x.Id).HasName("PK_TeamMembers").IsClustered();
