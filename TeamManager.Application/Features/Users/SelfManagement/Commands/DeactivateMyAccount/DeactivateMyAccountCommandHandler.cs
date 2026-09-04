@@ -1,0 +1,52 @@
+﻿using MediatR;
+using System.Text.Json;
+using TeamManager.Application.Abstractions.Authentication;
+using TeamManager.Application.Abstractions.Persistence;
+using TeamManager.Application.Common.Exceptions;
+using TeamManager.Application.Common.Outbox;
+
+namespace TeamManager.Application.Features.Users.SelfManagement.Commands.DeactivateMyAccount
+{
+    public sealed class DeactivateMyAccountCommandHandler(ICurrentUser currentUser, IUserRepository
+        userRepository, IUnitOfWork unitOfWork, ITeamRepository teamRepository, IPasswordHasher passwordHasher, IOutbox outbox)
+        : IRequestHandler<DeactivateMyAccountCommand>
+    {
+        public async Task Handle(DeactivateMyAccountCommand request, CancellationToken cancellationToken)
+        {
+            if (!currentUser.UserId.HasValue)
+                throw new UnauthorizedAccessException("User is not authenticated.");
+
+            var user = await userRepository.GetByIdAsync(currentUser.UserId.Value, cancellationToken);
+
+            if (user is null)
+                throw new UserNotFoundException(currentUser.UserId.Value);
+
+            if (!passwordHasher.Verify(request.CurrentPassword, user.PasswordHash))
+                throw new ForbiddenException("Invalid password.");
+
+            await unitOfWork.ExecuteInSerializableTransactionAsync(async ct =>
+            {
+                var isLastSystemAdmin = await userRepository.IsLastSystemAdminAsync(user.Id, ct);
+
+                if (isLastSystemAdmin)
+                    throw new ForbiddenException("The last system administrator cannot deactivate their account.");
+
+                user.Deactivate();
+
+                await teamRepository.DeactivateOwnedTeamsAsync(user.Id, ct);
+                await teamRepository.SuspendActiveMembershipsAsync(user.Id, ct);
+                await userRepository.RevokeAllRefreshTokensAsync(user.Id, ct);
+
+                var payload = JsonSerializer.Serialize(new
+                {
+                    To = user.Email,
+                    DeactivatedAtUtc = DateTime.UtcNow,
+                    DeviceInfo = currentUser.DeviceInfo
+                });
+
+                outbox.Add(OutboxMessageType.AccountDeactivatedEmail, payload);
+
+            }, cancellationToken);
+        }
+    }
+}

@@ -1,17 +1,14 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using TeamManager.Application.Features.Users.Commands.ChangeEmail;
-using TeamManager.Application.Features.Users.Commands.ChangePassword;
-using TeamManager.Application.Features.Users.Commands.ConfirmEmail;
-using TeamManager.Application.Features.Users.Commands.DeactivateMyAccount;
-using TeamManager.Application.Features.Users.Commands.DeleteMyAccount;
-using TeamManager.Application.Features.Users.Commands.ResendEmailConfirmation;
-using TeamManager.Application.Features.Users.Commands.UpdateMyProfile;
-using TeamManager.Application.Features.Users.Queries.GetMyProfile;
-using TeamManager.Application.Features.Users.Queries.GetUserByEmail;
-using TeamManager.Application.Features.Users.Queries.GetUserById;
-using TeamManager.Application.Features.Users.Queries.GetUsers;
+using TeamManager.Application.Features.Users.SelfManagement.Commands.ChangeEmail;
+using TeamManager.Application.Features.Users.SelfManagement.Commands.ChangePassword;
+using TeamManager.Application.Features.Users.SelfManagement.Commands.ConfirmEmail;
+using TeamManager.Application.Features.Users.SelfManagement.Commands.DeactivateMyAccount;
+using TeamManager.Application.Features.Users.SelfManagement.Commands.DeleteMyAccount;
+using TeamManager.Application.Features.Users.SelfManagement.Commands.ResendEmailConfirmation;
+using TeamManager.Application.Features.Users.SelfManagement.Commands.UpdateMyProfile;
+using TeamManager.Application.Features.Users.SelfManagement.Queries.GetMyProfile;
 
 namespace TeamManager.Api.Controllers.Users
 {
@@ -63,32 +60,11 @@ namespace TeamManager.Api.Controllers.Users
             return NoContent();
         }
 
-        [HttpGet]
-        public async Task<IActionResult> GetUsers([FromQuery] GetUsersQuery query, CancellationToken cancellationToken)
-        {
-            var result = await sender.Send(query, cancellationToken);
-            return Ok(result);
-        }
-
         [HttpDelete("me")]
         public async Task<IActionResult> DeleteMyAccount(DeleteMyAccountCommand command, CancellationToken cancellationToken)
         {
             await sender.Send(command, cancellationToken);
             return NoContent();
-        }
-
-        [HttpGet("{userId:guid}")]
-        public async Task<IActionResult> GetUserById(Guid userId, CancellationToken cancellationToken)
-        {
-            var result = await sender.Send(new GetUserByIdQuery(userId), cancellationToken);
-            return Ok(result);
-        }
-
-        [HttpGet("by-email/{email}")]
-        public async Task<IActionResult> GetUserByEmail(string email, CancellationToken cancellationToken)
-        {
-            var result = await sender.Send(new GetUserByEmailQuery(email), cancellationToken);
-            return Ok(result);
         }
 
         [HttpPost("me/deactivate")]

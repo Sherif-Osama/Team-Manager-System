@@ -1,0 +1,5 @@
+﻿namespace TeamManager.Application.Features.Users.SelfManagement.Queries.GetMyProfile
+{
+    public sealed record GetMyProfileResponse(Guid Id, string Email, string DisplayName, bool IsEmailConfirmed, bool IsActive,
+        DateTime? LastLoginUtc, DateTime CreatedAtUtc, int ActiveTeamMembersCount, int OwnedTeamsCount, IReadOnlyCollection<string> SystemRolesNames);
+}

@@ -16,7 +16,6 @@ namespace TeamManager.Api
             builder.Services.AddInfrastructure(builder.Configuration);
             builder.Services.AddJwtAuthentication(builder.Configuration);
             // Add services to the container.
-
             builder.Services.AddHttpContextAccessor();
 
             builder.Services.AddScoped<ICurrentUser, CurrentUser>();
@@ -25,9 +24,7 @@ namespace TeamManager.Api
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerDocumentation();
-
             var app = builder.Build();
-
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
             {

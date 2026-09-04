@@ -2,9 +2,9 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using TeamManager.Application.Abstractions.Authentication;
+using TeamManager.Application.Abstractions.Configuration;
 using TeamManager.Application.Abstractions.Persistence;
 using TeamManager.Application.Abstractions.Security;
-using TeamManager.Infrastructure.Authentication;
 using TeamManager.Infrastructure.BackgroundJobs.DeleteInactiveUsers;
 using TeamManager.Infrastructure.BackgroundJobs.InvitationExpiration;
 using TeamManager.Infrastructure.BackgroundJobs.ProcessOutboxMessages.MessageHandlers;
@@ -13,7 +13,8 @@ using TeamManager.Infrastructure.Communication;
 using TeamManager.Infrastructure.Persistence;
 using TeamManager.Infrastructure.Persistence.Outbox;
 using TeamManager.Infrastructure.Persistence.Repositories;
-using TeamManager.Infrastructure.Security;
+using TeamManager.Infrastructure.Services.AuthenticationServices;
+using TeamManager.Infrastructure.Services.SecurityService;
 
 namespace TeamManager.Infrastructure
 {
@@ -48,6 +49,9 @@ namespace TeamManager.Infrastructure
             services.AddScoped<IOutboxMessageHandler, AccountActivatedEmailHandler>();
             services.AddScoped<InactiveUserDeletionService>();
             services.AddHostedService<DeleteInactiveUsersJob>();
+            services.Configure<BootstrapOptions>(configuration.GetSection(BootstrapOptions.SectionName));
+            services.AddScoped<IBootstrapSecretProvider, BootstrapSecretProvider>();
+            services.AddScoped<IRoleRepository, RoleRepository>();
             return services;
         }
     }
