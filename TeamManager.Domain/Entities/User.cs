@@ -81,7 +81,7 @@ public class User : Entity<Guid>
         if (confirmationTokenExpiresAtUtc <= DateTime.UtcNow)
             throw new DomainException("A confirmation token cannot be created already expired.");
         if (string.Equals(Email, newEmail, StringComparison.OrdinalIgnoreCase))
-            return;
+            throw new DomainException("Invalid email address."); //Generic message to avoid revealing if the email is already in use.
 
         PendingEmail = newEmail;
         EmailConfirmationTokenHash = confirmationTokenHash;

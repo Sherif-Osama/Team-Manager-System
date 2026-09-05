@@ -3,4 +3,5 @@
   <Project Path="TeamManager.Application/TeamManager.Application.csproj" />
   <Project Path="TeamManager.Domain/TeamManager.Domain.csproj" />
   <Project Path="TeamManager.Infrastructure/TeamManager.Infrastructure.csproj" />
+  <Project Path="TeamManager.Tests/TeamManager.Tests.csproj" Id="433a8e72-c8d9-42f5-82bd-ec63415caaa5" />
 </Solution>
