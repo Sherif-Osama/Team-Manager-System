@@ -63,16 +63,4 @@ public class TeamMember : Entity<long>
         RemovedAtUtc = DateTime.UtcNow;
         RemovedBy = removedBy;
     }
-
-    //you cannot change the status of a removed member or an owner from here.
-    internal void changeStatus(TeamMemberStatus status)
-    {
-        if (Status == TeamMemberStatus.Removed)
-            throw new DomainException("Cannot change the status of a removed member.");
-
-        if (TeamRole == TeamRole.Owner)
-            throw new DomainException("Cannot change the status of the team owner.");
-
-        Status = status;
-    }
 }

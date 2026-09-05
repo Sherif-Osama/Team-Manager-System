@@ -10,20 +10,24 @@ namespace TeamManager.Application.Features.Teams.Team.Commands.TransferOwnership
 
         public async Task Handle(TransferOwnershipCommand request, CancellationToken cancellationToken)
         {
+            // Run ownership transfer in a serializable transaction so the validation
+            // of the new owner's account state and team membership is consistent with
+            // concurrent account deactivation/deletion and other ownership changes.
+            await unitOfWork.ExecuteInSerializableTransactionAsync(async ct =>
+            {
+                var newOwner = await userRepository.GetByIdAsync(request.NewOwnerUserId, ct);
 
-            var team = await teamRepository.GetByIdWithMembersAsync(request.TeamId, cancellationToken);
+                if (newOwner is null || !newOwner.IsActive)
+                    throw new UserNotFoundException(request.NewOwnerUserId);
 
-            if (team is null)
-                throw new TeamNotFoundException(request.TeamId);
+                var team = await teamRepository.GetByIdWithMembersAsync(request.TeamId, ct);
 
-            var newOwner = await userRepository.GetByIdAsync(request.NewOwnerUserId, cancellationToken);
+                if (team is null)
+                    throw new TeamNotFoundException(request.TeamId);
 
-            if (newOwner is null || !newOwner.IsActive)
-                throw new UserNotFoundException(request.NewOwnerUserId);
+                team.TransferOwnership(request.NewOwnerUserId);
 
-            team.TransferOwnership(request.NewOwnerUserId);
-
-            await unitOfWork.SaveChangesAsync(cancellationToken);
+            }, cancellationToken);
         }
     }
 }

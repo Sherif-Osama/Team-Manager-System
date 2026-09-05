@@ -9,8 +9,7 @@ using TeamManager.Application.Common.Outbox;
 namespace TeamManager.Application.Features.Teams.Invitations.Commands.InviteMember
 {
     public sealed class InviteMemberCommandHandler(ITeamRepository teamRepository, IUserRepository userRepository,
-        IUnitOfWork unitOfWork, ICurrentUser currentUser,
-        IInvitationTokenService invitationTokenService, IOutbox outbox)
+        IUnitOfWork unitOfWork, ICurrentUser currentUser, IInvitationTokenService invitationTokenService, IOutbox outbox)
         : IRequestHandler<InviteMemberCommand, Guid>
     {
         public async Task<Guid> Handle(InviteMemberCommand request, CancellationToken cancellationToken)

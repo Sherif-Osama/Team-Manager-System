@@ -161,8 +161,8 @@ namespace TeamManager.Domain.Entities
             member.ChangeRole(role);
         }
 
-        public TeamInvitation Invite(string invitedEmail, Guid? invitedUserId, Guid invitedBy,
-            TeamRole role, string tokenHash, DateTime expiresAtUtc)
+        public TeamInvitation Invite(string invitedEmail, Guid? invitedUserId, Guid invitedBy, TeamRole role,
+            string tokenHash, DateTime expiresAtUtc)
         {
             if (!IsActive)
                 throw new DomainException("Cannot invite members to an inactive team.");
@@ -218,7 +218,6 @@ namespace TeamManager.Domain.Entities
 
             if (existingMember is not null)
             {
-                existingMember.changeStatus(TeamMemberStatus.Active);
                 invitation.Accept(userId);
                 return existingMember;
             }
