@@ -34,7 +34,7 @@ public class User : Entity<Guid>
 
     private User() { }
 
-    public User(Guid id, string email, string displayName, string passwordHash)
+    public User(Guid id, string email, string displayName, string passwordHash, int roleId)
     {
         if (string.IsNullOrWhiteSpace(email))
             throw new DomainException("A user must have an email address.");
@@ -51,6 +51,7 @@ public class User : Entity<Guid>
         IsActive = true;
         FailedLoginAttempts = 0;
         CreatedAtUtc = DateTime.UtcNow;
+        AssignRole(roleId);
     }
 
     public void ChangeDisplayName(string displayName)

@@ -6,7 +6,6 @@ using TeamManager.Application.Abstractions.Security;
 using TeamManager.Application.Common.Exceptions;
 using TeamManager.Application.Common.Outbox;
 using TeamManager.Domain.Entities;
-using TeamManager.Domain.Exceptions;
 
 namespace TeamManager.Application.Features.Authentication.Commands.Register
 {
@@ -38,17 +37,15 @@ namespace TeamManager.Application.Features.Authentication.Commands.Register
             var role = await roleRepository.GetByNameAsync(DefaultRoleName, cancellationToken);
 
             if (role is null)
-                throw new DomainException("The default User role is not seeded.");
+                throw new DefaultRoleNotFoundException("The default User role is not seeded.");
 
-            var user = new User(Guid.NewGuid(), request.Email, request.DisplayName, passwordHash);
-
-            user.AssignRole(role.Id);
+            var user = new User(Guid.NewGuid(), request.Email, request.DisplayName, passwordHash, role.Id);
 
             var token = tokenService.GenerateToken();
 
             var tokenHash = tokenService.HashToken(token);
 
-            user.RequestEmailConfirmation(tokenHash, DateTime.UtcNow.AddHours(24));
+            user.RequestEmailConfirmation(tokenHash, DateTime.UtcNow.AddHours(1));
 
             await unitOfWork.ExecuteInTransactionAsync(async ct =>
             {

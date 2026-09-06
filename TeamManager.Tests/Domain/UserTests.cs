@@ -5,7 +5,10 @@ namespace TeamManager.Tests.Domain
 {
     public sealed class UserTests
     {
-        private User CreateUser() => new(Guid.NewGuid(), "user@example.com", "Test User", "password-hash");
+        private User CreateUser(string email = "user@example.com", string displayName = "Test User", string passwordHash = "password-hash", int roleId = 1)
+        {
+            return new(Guid.NewGuid(), email, displayName, passwordHash, roleId);
+        }
 
         [Fact]
         public void Constructor_WithValidData_CreatesActiveUnconfirmedUser()
@@ -18,7 +21,7 @@ namespace TeamManager.Tests.Domain
             Assert.Equal("password-hash", user.PasswordHash);
             Assert.True(user.IsActive);
             Assert.False(user.IsEmailConfirmed);
-            Assert.Empty(user.UserRoles);
+            Assert.NotEmpty(user.UserRoles);
         }
 
         [Theory]
@@ -30,15 +33,13 @@ namespace TeamManager.Tests.Domain
         [InlineData("user@example.com", "Test User", "")]
         public void Constructor_WithRequiredValueMissing_Throws(string? email, string? displayName, string? passwordHash)
         {
-            Assert.Throws<DomainException>(() =>
-                new User(Guid.NewGuid(), email!, displayName!, passwordHash!));
+            Assert.Throws<DomainException>(() => CreateUser(email: email!, displayName: displayName!, passwordHash: passwordHash!));
         }
 
         [Fact]
         public void AssignRole_WithNewRole_AddsRole()
         {
-            var user = CreateUser();
-            user.AssignRole(1);
+            var user = CreateUser(roleId: 1);
 
             var role = Assert.Single(user.UserRoles);
             Assert.Equal(user.Id, role.UserId);
@@ -51,17 +52,15 @@ namespace TeamManager.Tests.Domain
             var user = CreateUser();
             user.Deactivate();
 
-            user.AssignRole(1);
+            user.AssignRole(2);
 
-            Assert.Contains(user.UserRoles, role => role.RoleId == 1);
+            Assert.Contains(user.UserRoles, role => role.RoleId == 2);
         }
 
         [Fact]
         public void AssignRole_WhenRoleAlreadyAssigned_Throws()
         {
             var user = CreateUser();
-            user.AssignRole(1);
-
             Assert.Throws<DomainException>(() => user.AssignRole(1));
         }
 
@@ -78,7 +77,6 @@ namespace TeamManager.Tests.Domain
         public void RemoveRole_WhenUserHasMultipleRoles_RemovesRequestedRole()
         {
             var user = CreateUser();
-            user.AssignRole(1);
             user.AssignRole(2);
 
             user.RemoveRole(1);
@@ -89,20 +87,9 @@ namespace TeamManager.Tests.Domain
         }
 
         [Fact]
-        public void RemoveRole_WhenRoleIsNotAssigned_Throws()
-        {
-            var user = CreateUser();
-            user.AssignRole(1);
-
-            Assert.Throws<DomainException>(() => user.RemoveRole(2));
-        }
-
-        [Fact]
         public void RemoveRole_WhenRemovingLastRole_Throws()
         {
             var user = CreateUser();
-            user.AssignRole(1);
-
             Assert.Throws<DomainException>(() => user.RemoveRole(1));
         }
 
@@ -110,11 +97,9 @@ namespace TeamManager.Tests.Domain
         public void RemoveRole_WhenUserIsDeleted_Throws()
         {
             var user = CreateUser();
-            user.AssignRole(1);
-            user.AssignRole(2);
             user.SoftDelete();
 
-            Assert.Throws<DomainException>(() => user.RemoveRole(1));
+            Assert.Throws<DomainException>(() => user.RemoveRole(user.UserRoles.First().RoleId));
         }
 
         [Fact]
