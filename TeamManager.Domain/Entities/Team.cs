@@ -123,8 +123,8 @@ namespace TeamManager.Domain.Entities
             if (role == TeamRole.Owner)
                 throw new DomainException("Ownership cannot be assigned via AddMember. Use TransferOwnership instead.");
 
-            if (_members.Any(m => m.UserId == userId && m.Status == TeamMemberStatus.Active))
-                throw new DomainException("This user already has an active membership in the team.");
+            if (_members.Any(m => m.UserId == userId && (m.Status == TeamMemberStatus.Active || m.Status == TeamMemberStatus.Suspended)))
+                throw new DomainException("This user already has an active or suspended membership in the team.");
 
             var member = new TeamMember(Id, userId, role, invitedBy);
 
@@ -212,9 +212,10 @@ namespace TeamManager.Domain.Entities
 
             if (invitation.InvitedUserId.HasValue && invitation.InvitedUserId != userId)
                 throw new DomainException("This invitation belongs to another user.");
-
+            //if user is already a member, accept the invitation and return the existing member
+            //this case can happen if the user was invited to the team, and he added through addMember method before accepting the invitation
             var existingMember = _members.FirstOrDefault(m => m.UserId == userId &&
-                (m.Status == TeamMemberStatus.Active || m.Status == TeamMemberStatus.Suspended));
+            (m.Status == TeamMemberStatus.Active || m.Status == TeamMemberStatus.Suspended));
 
             if (existingMember is not null)
             {

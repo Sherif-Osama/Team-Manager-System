@@ -8,6 +8,31 @@ namespace TeamManager.Tests.Domain
 {
     public sealed class TeamMemberTests
     {
+        //Helpers
+        private (Team Team, TeamMember Member) CreateTeamWithMember()
+        {
+            var ownerId = Guid.NewGuid();
+            var team = new Team(Guid.NewGuid(), "Team", ownerId, ownerId);
+            var member = team.AddMember(Guid.NewGuid(), TeamRole.Member);
+
+            SetId(member, 1);
+            return (team, member);
+        }
+
+        private void SetStatus(TeamMember member, TeamMemberStatus status)
+        {
+            var property = typeof(TeamMember).GetProperty(nameof(TeamMember.Status),
+                BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)!;
+            property.SetValue(member, status);
+        }
+
+        private void SetId(TeamMember member, long id)
+        {
+            var property = typeof(Entity<long>).GetProperty(nameof(Entity<long>.Id),
+                BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)!;
+            property.SetValue(member, id);
+        }
+
         [Fact]
         public void ChangeMemberRole_WhenActive_ChangesRoleAndKeepsStatus()
         {
@@ -168,30 +193,6 @@ namespace TeamManager.Tests.Domain
             var team = new Team(Guid.NewGuid(), "Team", ownerId, ownerId);
 
             Assert.Throws<DomainException>(() => team.TransferOwnership(ownerId));
-        }
-
-        private static (Team Team, TeamMember Member) CreateTeamWithMember()
-        {
-            var ownerId = Guid.NewGuid();
-            var team = new Team(Guid.NewGuid(), "Team", ownerId, ownerId);
-            var member = team.AddMember(Guid.NewGuid(), TeamRole.Member);
-
-            SetId(member, 1);
-            return (team, member);
-        }
-
-        private static void SetStatus(TeamMember member, TeamMemberStatus status)
-        {
-            var property = typeof(TeamMember).GetProperty(nameof(TeamMember.Status),
-                BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)!;
-            property.SetValue(member, status);
-        }
-
-        private static void SetId(TeamMember member, long id)
-        {
-            var property = typeof(Entity<long>).GetProperty(nameof(Entity<long>.Id),
-                BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)!;
-            property.SetValue(member, id);
         }
     }
 }

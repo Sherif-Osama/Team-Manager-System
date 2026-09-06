@@ -67,6 +67,9 @@ public class TeamInvitation : Entity<Guid>
 
     internal void Cancel()
     {
+        if (ExpiresAtUtc <= DateTime.UtcNow)
+            throw new DomainException("cannot cancel an invitation that has already expired");
+
         EnsurePending();
         Status = TeamInvitationStatus.Cancelled;
         CancelledAtUtc = DateTime.UtcNow;
