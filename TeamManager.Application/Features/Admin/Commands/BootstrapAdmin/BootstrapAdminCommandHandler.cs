@@ -33,13 +33,13 @@ namespace TeamManager.Application.Features.Admin.Commands.BootstrapAdmin
             if (string.IsNullOrWhiteSpace(expectedSecret) || request.Secret != expectedSecret)
                 throw new UnauthorizedAccessException("Invalid bootstrap secret.");
 
+            var role = await context.Roles.FirstOrDefaultAsync(r => r.Name == SystemAdminRoleName, cancellationToken);
+
+            if (role is null)
+                throw new DomainException("The SystemAdmin role is not seeded.");
+
             await unitOfWork.ExecuteInSerializableTransactionAsync(async ct =>
             {
-                var role = await context.Roles.FirstOrDefaultAsync(r => r.Name == SystemAdminRoleName, ct);
-
-                if (role is null)
-                    throw new DomainException("The SystemAdmin role is not seeded.");
-
                 var alreadyBootstrapped = await context.UserRoles.AnyAsync(ur => ur.RoleId == role.Id, ct);
 
                 if (alreadyBootstrapped)

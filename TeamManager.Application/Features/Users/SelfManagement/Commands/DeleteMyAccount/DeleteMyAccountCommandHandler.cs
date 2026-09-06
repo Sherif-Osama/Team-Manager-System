@@ -17,17 +17,16 @@ namespace TeamManager.Application.Features.Users.SelfManagement.Commands.DeleteM
 
             var userId = currentUser.UserId.Value;
 
+            var user = await userRepository.GetByIdAsync(userId, cancellationToken);
+
+            if (user is null)
+                throw new UserNotFoundException(userId);
+
+            if (!passwordHasher.Verify(request.CurrentPassword, user.PasswordHash))
+                throw new ForbiddenException("Invalid password.");
+
             await unitOfWork.ExecuteInSerializableTransactionAsync(async ct =>
             {
-
-                var user = await userRepository.GetByIdAsync(userId, ct);
-
-                if (user is null)
-                    throw new UserNotFoundException(userId);
-
-                if (!passwordHasher.Verify(request.CurrentPassword, user.PasswordHash))
-                    throw new ForbiddenException("Invalid password.");
-
                 var hasActiveOwnedTeams = await teamRepository.HasActiveOwnedTeamsAsync(userId, ct);
 
                 if (hasActiveOwnedTeams)

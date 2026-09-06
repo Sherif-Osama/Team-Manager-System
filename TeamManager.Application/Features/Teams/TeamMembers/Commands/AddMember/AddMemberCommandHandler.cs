@@ -7,7 +7,6 @@ namespace TeamManager.Application.Features.Teams.TeamMembers.Commands.AddMember
     public sealed class AddMemberCommandHandler(ITeamRepository teamRepository, IUserRepository userRepository, IUnitOfWork unitOfWork)
         : IRequestHandler<AddMemberCommand, long>
     {
-
         public async Task<long> Handle(AddMemberCommand request, CancellationToken cancellationToken)
         {
             var team = await teamRepository.GetByIdWithMembersAsync(request.TeamId, cancellationToken);
