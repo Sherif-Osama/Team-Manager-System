@@ -35,6 +35,7 @@ namespace TeamManager.Application.Features.Users.AdminUserManagement.Commands.Re
                         throw new ForbiddenException("The last system administrator role cannot be revoked.");
 
                     user.RemoveRole(role.Id);
+                    await unitOfWork.SaveChangesAsync(ct);
                 }, cancellationToken);
 
                 return;
