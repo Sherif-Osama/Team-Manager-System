@@ -148,22 +148,7 @@ namespace TeamManager.Tests.CommandHandler
                 .ThrowsAsync(new InvalidOperationException());
 
             bool rolledBack = false;
-
-            _unitOfWork.Setup(u => u.ExecuteInTransactionAsync(It.IsAny<Func<CancellationToken, Task>>(),
-                It.IsAny<CancellationToken>())).Returns<
-                    Func<CancellationToken, Task>, CancellationToken>(async (action, ct) =>
-                    {
-                        try
-                        {
-
-                            await action(ct);
-                        }
-                        catch (InvalidOperationException)
-                        {
-                            rolledBack = true;
-                            throw;
-                        }
-                    });
+            SetupRollbackTracking(() => rolledBack = true);
 
             await Assert.ThrowsAsync<InvalidOperationException>(() => _sut.Handle(Request, CancellationToken.None));
             Assert.True(rolledBack);
@@ -180,22 +165,7 @@ namespace TeamManager.Tests.CommandHandler
                 .ThrowsAsync(new InvalidOperationException());
 
             bool rolledBack = false;
-
-            _unitOfWork.Setup(u => u.ExecuteInTransactionAsync(It.IsAny<Func<CancellationToken, Task>>(),
-                It.IsAny<CancellationToken>())).Returns<
-                    Func<CancellationToken, Task>, CancellationToken>(async (action, ct) =>
-                    {
-                        try
-                        {
-
-                            await action(ct);
-                        }
-                        catch (InvalidOperationException)
-                        {
-                            rolledBack = true;
-                            throw;
-                        }
-                    });
+            SetupRollbackTracking(() => rolledBack = true);
 
             await Assert.ThrowsAsync<InvalidOperationException>(() => _sut.Handle(Request, CancellationToken.None));
             _userRepository.Verify(u => u.AddAsync(It.IsAny<User>(), It.IsAny<CancellationToken>()), Times.Once);
@@ -213,22 +183,7 @@ namespace TeamManager.Tests.CommandHandler
                 It.IsAny<CancellationToken>())).ThrowsAsync(new InvalidOperationException());
 
             bool rolledBack = false;
-
-            _unitOfWork.Setup(u => u.ExecuteInTransactionAsync(It.IsAny<Func<CancellationToken, Task>>(),
-                It.IsAny<CancellationToken>())).Returns<
-                    Func<CancellationToken, Task>, CancellationToken>(async (action, ct) =>
-                    {
-                        try
-                        {
-
-                            await action(ct);
-                        }
-                        catch (InvalidOperationException)
-                        {
-                            rolledBack = true;
-                            throw;
-                        }
-                    });
+            SetupRollbackTracking(() => rolledBack = true);
 
             await Assert.ThrowsAsync<InvalidOperationException>(() => _sut.Handle(Request, CancellationToken.None));
             _userRepository.Verify(u => u.AddAsync(It.IsAny<User>(), It.IsAny<CancellationToken>()), Times.Once);
@@ -242,12 +197,25 @@ namespace TeamManager.Tests.CommandHandler
         [Fact]
         public async Task Handle_WhenOutboxFails_RollsBackAfterPreviousWork()
         {
-            bool rolledBack = false;
+
 
             _outbox.Setup(o => o.Add(It.IsAny<OutboxMessageType>(), It.IsAny<string>()))
                 .Throws(new InvalidOperationException());
 
-            _unitOfWork.Setup(u => u.ExecuteInTransactionAsync(It.IsAny<Func<CancellationToken, Task>>(),
+            bool rolledBack = false;
+            SetupRollbackTracking(() => rolledBack = true);
+
+            await Assert.ThrowsAsync<InvalidOperationException>(() => _sut.Handle(Request, CancellationToken.None));
+            _userRepository.Verify(u => u.AddAsync(It.IsAny<User>(), It.IsAny<CancellationToken>()), Times.Once);
+            _unitOfWork.Verify(u => u.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
+            _teamRepository.Verify(t =>
+            t.LinkPendingInvitationsToUserAsync(It.IsAny<string>(), It.IsAny<Guid>(), It.IsAny<CancellationToken>()), Times.Once);
+            _outbox.Verify(o => o.Add(It.IsAny<OutboxMessageType>(), It.IsAny<string>()), Times.Once);
+            Assert.True(rolledBack);
+        }
+
+        private void SetupRollbackTracking(Action onRollback) =>
+                        _unitOfWork.Setup(u => u.ExecuteInTransactionAsync(It.IsAny<Func<CancellationToken, Task>>(),
                 It.IsAny<CancellationToken>())).Returns<
                     Func<CancellationToken, Task>, CancellationToken>(async (action, ct) =>
                     {
@@ -258,18 +226,9 @@ namespace TeamManager.Tests.CommandHandler
                         }
                         catch (InvalidOperationException)
                         {
-                            rolledBack = true;
+                            onRollback();
                             throw;
                         }
                     });
-
-            await Assert.ThrowsAsync<InvalidOperationException>(() => _sut.Handle(Request, CancellationToken.None));
-            _userRepository.Verify(u => u.AddAsync(It.IsAny<User>(), It.IsAny<CancellationToken>()), Times.Once);
-            _unitOfWork.Verify(u => u.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
-            _teamRepository.Verify(t =>
-            t.LinkPendingInvitationsToUserAsync(It.IsAny<string>(), It.IsAny<Guid>(), It.IsAny<CancellationToken>()), Times.Once);
-            _outbox.Verify(o => o.Add(It.IsAny<OutboxMessageType>(), It.IsAny<string>()), Times.Once);
-            Assert.True(rolledBack);
-        }
     }
 }
