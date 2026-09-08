@@ -9,7 +9,7 @@ using TeamManager.Application.Features.Users.AdminUserManagement.Commands.Revoke
 using TeamManager.Domain.Entities;
 using TeamManager.Domain.Exceptions;
 
-namespace TeamManager.Tests.CommandHandler;
+namespace TeamManager.Tests.Users.AdminUserManagement.RevokeRoleTests;
 
 public sealed class RevokeRoleCommandHandlerTests
 {

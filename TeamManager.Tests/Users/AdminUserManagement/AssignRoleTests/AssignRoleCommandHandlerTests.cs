@@ -8,7 +8,7 @@ using TeamManager.Application.Features.Users.AdminUserManagement.Commands.Assign
 using TeamManager.Domain.Entities;
 using TeamManager.Domain.Exceptions;
 
-namespace TeamManager.Tests.CommandHandler;
+namespace TeamManager.Tests.Users.AdminUserManagement.AssignRoleTests;
 
 public sealed class AssignRoleCommandHandlerTests
 {

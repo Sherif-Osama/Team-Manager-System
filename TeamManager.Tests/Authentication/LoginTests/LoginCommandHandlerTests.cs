@@ -7,7 +7,7 @@ using TeamManager.Application.Common.Outbox;
 using TeamManager.Application.Features.Authentication.Commands.Login;
 using TeamManager.Domain.Entities;
 
-namespace TeamManager.Tests.CommandHandler
+namespace TeamManager.Tests.Authentication.LoginTests
 {
     public sealed class LoginCommandHandlerTests
     {

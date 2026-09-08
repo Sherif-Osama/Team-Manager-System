@@ -6,7 +6,7 @@ using TeamManager.Application.Common.Exceptions;
 using TeamManager.Application.Features.Admin.Commands.BootstrapAdmin;
 using TeamManager.Domain.Entities;
 
-namespace TeamManager.Tests.CommandHandler
+namespace TeamManager.Tests.Admin.BootstrapAdminTests
 {
     public sealed class BootstrapAdminCommandHandlerTests
     {

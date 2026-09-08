@@ -7,7 +7,7 @@ using TeamManager.Application.Common.Outbox;
 using TeamManager.Application.Features.Users.SelfManagement.Commands.DeactivateMyAccount;
 using TeamManager.Domain.Entities;
 
-namespace TeamManager.Tests.CommandHandler;
+namespace TeamManager.Tests.Users.SelfManagement.DeactivateMyAccountTests;
 
 public sealed class DeactivateMyAccountCommandHandlerTests
 {
