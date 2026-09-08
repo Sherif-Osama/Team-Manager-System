@@ -1,5 +1,9 @@
+using MediatR;
 using Moq;
+using TeamManager.Application.Abstractions.Authentication;
 using TeamManager.Application.Abstractions.Persistence;
+using TeamManager.Application.Common.Authorization;
+using TeamManager.Application.Common.Behaviors;
 using TeamManager.Application.Common.Exceptions;
 using TeamManager.Application.Features.Users.AdminUserManagement.Commands.RevokeRole;
 using TeamManager.Domain.Entities;
@@ -21,6 +25,21 @@ public sealed class RevokeRoleCommandHandlerTests
         _unitOfWork.Setup(x => x.SaveChangesAsync(It.IsAny<CancellationToken>())).ReturnsAsync(1);
         _unitOfWork.Setup(x => x.ExecuteInSerializableTransactionAsync(It.IsAny<Func<CancellationToken, Task>>(), It.IsAny<CancellationToken>()))
             .Returns<Func<CancellationToken, Task>, CancellationToken>((action, ct) => action(ct));
+    }
+
+    private User CreateUser() => new(_userId, "user@example.com", "Test User", "password-hash", roleId: 1);
+
+    private User CreateUserWithRole(Role role)
+    {
+        var user = CreateUser();
+        user.AssignRole(role.Id);
+        return user;
+    }
+
+    private void Setup(User user, Role role)
+    {
+        _userRepository.Setup(x => x.GetByIdWithRolesAsync(_userId, It.IsAny<CancellationToken>())).ReturnsAsync(user);
+        _roleRepository.Setup(x => x.GetByIdAsync(role.Id, It.IsAny<CancellationToken>())).ReturnsAsync(role);
     }
 
     [Fact]
@@ -147,18 +166,43 @@ public sealed class RevokeRoleCommandHandlerTests
         _unitOfWork.Verify(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
     }
 
-    private User CreateUser() => new(_userId, "user@example.com", "Test User", "password-hash", roleId: 1);
 
-    private User CreateUserWithRole(Role role)
+    [Fact]
+    public async Task PermissionBehavior_WhenPermissionMissing_RejectsWithoutCallingHandler()
     {
-        var user = CreateUser();
-        user.AssignRole(role.Id);
-        return user;
+        var currentUser = new Mock<ICurrentUser>();
+
+        currentUser.SetupGet(x => x.UserId).Returns(Guid.NewGuid());
+
+        _userRepository.Setup(x => x.HasPermissionAsync(It.IsAny<Guid>(), It.IsAny<string>(),
+            It.IsAny<CancellationToken>())).ReturnsAsync(false);
+
+        var behavior = new PermissionAuthorizationBehavior<RevokeRoleCommand, Unit>(currentUser.Object, _userRepository.Object);
+
+        var nextCalled = false;
+
+        await Assert.ThrowsAsync<ForbiddenException>(() => behavior.Handle(new RevokeRoleCommand(_userId, 2),
+            _ =>
+            {
+                nextCalled = true;
+                return Task.FromResult(Unit.Value);
+            }, CancellationToken.None));
+
+        Assert.False(nextCalled);
+
+        _userRepository.Verify(x => x.HasPermissionAsync(It.IsAny<Guid>(), It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Once);
+
+        //First Method called in RevokeRoleCommand
+        _userRepository.Verify(x => x.GetByIdWithRolesAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
-    private void Setup(User user, Role role)
+
+    [Fact]
+    public void Command_RequiresRoleManagementPermission()
     {
-        _userRepository.Setup(x => x.GetByIdWithRolesAsync(_userId, It.IsAny<CancellationToken>())).ReturnsAsync(user);
-        _roleRepository.Setup(x => x.GetByIdAsync(role.Id, It.IsAny<CancellationToken>())).ReturnsAsync(role);
+        var command = new RevokeRoleCommand(_userId, 2);
+        var permission = Assert.IsAssignableFrom<IRequiresPermission>(command);
+
+        Assert.Equal("system.manage_roles", permission.PermissionCode);
     }
 }

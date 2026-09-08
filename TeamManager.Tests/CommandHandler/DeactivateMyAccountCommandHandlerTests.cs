@@ -33,6 +33,19 @@ public sealed class DeactivateMyAccountCommandHandlerTests
             .Returns<Func<CancellationToken, Task>, CancellationToken>((action, ct) => action(ct));
     }
 
+    private User CreateUser() => new(_userId, "user@example.com", "Test User", "password-hash", roleId: 1);
+
+    private void SetupUser(User user) =>
+        _userRepository.Setup(x => x.GetByIdAsync(_userId, It.IsAny<CancellationToken>())).ReturnsAsync(user);
+
+    private void SetupRollbackTracking(Action onRollback) =>
+        _unitOfWork.Setup(x => x.ExecuteInSerializableTransactionAsync(It.IsAny<Func<CancellationToken, Task>>(),
+            It.IsAny<CancellationToken>())).Returns<Func<CancellationToken, Task>, CancellationToken>(async (action, ct) =>
+            {
+                try { await action(ct); }
+                catch (InvalidOperationException) { onRollback(); throw; }
+            });
+
     [Fact]
     public async Task Handle_WhenUserIsNotAuthenticated_Throws401()
     {
@@ -160,17 +173,4 @@ public sealed class DeactivateMyAccountCommandHandlerTests
         _teamRepository.Verify(x => x.SuspendActiveMembershipsAsync(_userId, It.IsAny<CancellationToken>()), Times.Once);
         _userRepository.Verify(x => x.RevokeAllRefreshTokensAsync(_userId, It.IsAny<CancellationToken>()), Times.Once);
     }
-
-    private User CreateUser() => new(_userId, "user@example.com", "Test User", "password-hash", roleId: 1);
-
-    private void SetupUser(User user) =>
-        _userRepository.Setup(x => x.GetByIdAsync(_userId, It.IsAny<CancellationToken>())).ReturnsAsync(user);
-
-    private void SetupRollbackTracking(Action onRollback) =>
-        _unitOfWork.Setup(x => x.ExecuteInSerializableTransactionAsync(It.IsAny<Func<CancellationToken, Task>>(), It.IsAny<CancellationToken>()))
-            .Returns<Func<CancellationToken, Task>, CancellationToken>(async (action, ct) =>
-            {
-                try { await action(ct); }
-                catch (InvalidOperationException) { onRollback(); throw; }
-            });
 }

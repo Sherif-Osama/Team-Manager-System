@@ -19,9 +19,11 @@ namespace TeamManager.Infrastructure.Persistence.Repositories
                 .FirstOrDefaultAsync(t => t.Id == teamId && t.DeletedAtUtc == null, cancellationToken);
         }
 
-        public Task<Team?> GetByIdForUpdateAsync(Guid teamId, CancellationToken cancellationToken)
+        public async Task<Team?> GetByIdForUpdateAsync(Guid teamId, CancellationToken cancellationToken)
         {
-            return context.Teams.FirstOrDefaultAsync(T => T.Id == teamId && T.DeletedAtUtc == null, cancellationToken);
+            var team = await context.Teams.FindAsync([teamId], cancellationToken);
+
+            return team is not null && team.DeletedAtUtc == null ? team : null;
         }
 
         public Task<Team?> GetByNameAsync(string name, CancellationToken cancellationToken)
@@ -34,7 +36,6 @@ namespace TeamManager.Infrastructure.Persistence.Repositories
             return context.Teams.Include(x => x.Members).FirstOrDefaultAsync(x => x.Id == teamId &&
             x.DeletedAtUtc == null, cancellationToken);
         }
-
 
         public Task<Team?> GetByIdWithMembersAndInvitationsAsync(Guid teamId, CancellationToken cancellationToken)
         {
@@ -101,7 +102,8 @@ namespace TeamManager.Infrastructure.Persistence.Repositories
         }
 
         #region Ensure methods
-        public Task<bool> HasActiveRoleAsync(Guid teamId, Guid userId, IReadOnlyCollection<TeamRole> roles, CancellationToken cancellationToken)
+        public Task<bool> HasActiveRoleAsync(Guid teamId, Guid userId, IReadOnlyCollection<TeamRole> roles,
+            CancellationToken cancellationToken)
         {
             return context.TeamMembers
             .AnyAsync(m => m.TeamId == teamId && m.UserId == userId && m.Team.DeletedAtUtc == null

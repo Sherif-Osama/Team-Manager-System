@@ -24,6 +24,23 @@ public sealed class AssignRoleCommandHandlerTests
         _unitOfWork.Setup(x => x.SaveChangesAsync(It.IsAny<CancellationToken>())).ReturnsAsync(1);
     }
 
+    private User CreateUser(int? additionalRoleId = null)
+    {
+        var user = new User(_userId, "user@example.com", "Test User", "password-hash", roleId: 1);
+        if (additionalRoleId.HasValue && additionalRoleId.Value != 1)
+            user.AssignRole(additionalRoleId.Value);
+        return user;
+    }
+
+    private void SetupUser(User user) =>
+        _userRepository.Setup(x => x.GetByIdWithRolesAsync(_userId, It.IsAny<CancellationToken>())).ReturnsAsync(user);
+
+    private void Setup(User user, Role role)
+    {
+        SetupUser(user);
+        _roleRepository.Setup(x => x.GetByIdAsync(role.Id, It.IsAny<CancellationToken>())).ReturnsAsync(role);
+    }
+
     [Fact]
     public async Task Handle_WhenActiveUser_AssignsRoleAndSavesOnce()
     {
@@ -108,22 +125,5 @@ public sealed class AssignRoleCommandHandlerTests
             CancellationToken.None));
 
         Assert.False(nextCalled);
-    }
-
-    private User CreateUser(int? additionalRoleId = null)
-    {
-        var user = new User(_userId, "user@example.com", "Test User", "password-hash", roleId: 1);
-        if (additionalRoleId.HasValue && additionalRoleId.Value != 1)
-            user.AssignRole(additionalRoleId.Value);
-        return user;
-    }
-
-    private void SetupUser(User user) =>
-        _userRepository.Setup(x => x.GetByIdWithRolesAsync(_userId, It.IsAny<CancellationToken>())).ReturnsAsync(user);
-
-    private void Setup(User user, Role role)
-    {
-        SetupUser(user);
-        _roleRepository.Setup(x => x.GetByIdAsync(role.Id, It.IsAny<CancellationToken>())).ReturnsAsync(role);
     }
 }

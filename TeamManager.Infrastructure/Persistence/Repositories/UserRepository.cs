@@ -65,5 +65,10 @@ namespace TeamManager.Infrastructure.Persistence.Repositories
             return context.Users.Include(x => x.UserRoles)
                 .FirstOrDefaultAsync(x => x.Id == userId && x.DeletedAtUtc == null, cancellationToken);
         }
+
+        public async Task<User?> GetByEmailWithRolesAsync(string email, CancellationToken cancellationToken)
+        {
+            return await context.Users.Include(x => x.UserRoles).FirstOrDefaultAsync(x => x.Email == email && x.DeletedAtUtc == null, cancellationToken);
+        }
     }
 }

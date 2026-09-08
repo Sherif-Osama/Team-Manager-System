@@ -38,6 +38,18 @@ namespace TeamManager.Tests.CommandHandler
                 .Returns<Func<CancellationToken, Task>, CancellationToken>((action, ct) => action(ct));
         }
 
+        private User CreateUser() => new(Guid.NewGuid(), Request.Email, "Test User", "password-hash", roleId: 1);
+
+        private void SetupTransactionTracking(Action onRollback)
+        {
+            _unitOfWork.Setup(x => x.ExecuteInTransactionAsync(It.IsAny<Func<CancellationToken, Task>>(), It.IsAny<CancellationToken>()))
+                .Returns<Func<CancellationToken, Task>, CancellationToken>(async (action, ct) =>
+                {
+                    try { await action(ct); }
+                    catch (InvalidOperationException) { onRollback(); throw; }
+                });
+        }
+
         [Fact]
         public async Task Handle_WhenUserDoesNotExist_ThrowsUnauthorized()
         {
@@ -161,18 +173,6 @@ namespace TeamManager.Tests.CommandHandler
             Assert.True(rolledBack);
             _userRepository.Verify(x => x.AddRefreshTokenAsync(It.IsAny<RefreshToken>(), It.IsAny<CancellationToken>()), Times.Once);
             _outbox.Verify(x => x.Add(It.IsAny<OutboxMessageType>(), It.IsAny<string>()), Times.Never);
-        }
-
-        private User CreateUser() => new(Guid.NewGuid(), Request.Email, "Test User", "password-hash", roleId: 1);
-
-        private void SetupTransactionTracking(Action onRollback)
-        {
-            _unitOfWork.Setup(x => x.ExecuteInTransactionAsync(It.IsAny<Func<CancellationToken, Task>>(), It.IsAny<CancellationToken>()))
-                .Returns<Func<CancellationToken, Task>, CancellationToken>(async (action, ct) =>
-                {
-                    try { await action(ct); }
-                    catch (InvalidOperationException) { onRollback(); throw; }
-                });
         }
     }
 }

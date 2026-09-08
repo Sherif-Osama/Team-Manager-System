@@ -1,14 +1,12 @@
 ﻿using MediatR;
-using Microsoft.EntityFrameworkCore;
 using TeamManager.Application.Abstractions.Configuration;
 using TeamManager.Application.Abstractions.Persistence;
 using TeamManager.Application.Common.Exceptions;
-using TeamManager.Domain.Exceptions;
 
 namespace TeamManager.Application.Features.Admin.Commands.BootstrapAdmin
 {
-    public sealed class BootstrapAdminCommandHandler(IApplicationDbContext context, IBootstrapSecretProvider secretProvider,
-        IUnitOfWork unitOfWork) : IRequestHandler<BootstrapAdminCommand>
+    public sealed class BootstrapAdminCommandHandler(IBootstrapSecretProvider secretProvider,
+        IUnitOfWork unitOfWork, IRoleRepository roleRepository, IUserRepository userRepository) : IRequestHandler<BootstrapAdminCommand>
     {
         // The name of the system role assigned by the one-time bootstrap process.
         //
@@ -31,25 +29,27 @@ namespace TeamManager.Application.Features.Admin.Commands.BootstrapAdmin
             var expectedSecret = secretProvider.AdminSecret;
 
             if (string.IsNullOrWhiteSpace(expectedSecret) || request.Secret != expectedSecret)
-                throw new UnauthorizedAccessException("Invalid bootstrap secret.");
+                throw new UnauthorizedAccessException("Invalid email or bootstrap secret.");
 
-            var role = await context.Roles.FirstOrDefaultAsync(r => r.Name == SystemAdminRoleName, cancellationToken);
+            var role = await roleRepository.GetByNameAsync(SystemAdminRoleName, cancellationToken);
 
             if (role is null)
-                throw new DomainException("The SystemAdmin role is not seeded.");
+                throw new DefaultRoleNotFoundException("role is not seeded.");
 
             await unitOfWork.ExecuteInSerializableTransactionAsync(async ct =>
             {
-                var alreadyBootstrapped = await context.UserRoles.AnyAsync(ur => ur.RoleId == role.Id, ct);
+                var alreadyBootstrapped = await roleRepository.ExistsAdminAsync(ct);
 
                 if (alreadyBootstrapped)
                     throw new ForbiddenException("An administrator already exists. Bootstrap is disabled.");
 
-                var user = await context.Users.Include(u => u.UserRoles)
-                    .FirstOrDefaultAsync(u => u.Email == request.Email && u.DeletedAtUtc == null, ct);
+                var user = await userRepository.GetByEmailWithRolesAsync(request.Email, ct);
 
                 if (user is null)
                     throw new UserNotFoundException(request.Email);
+
+                if (!user.IsActive)
+                    throw new ForbiddenException("User with email is inactive");
 
                 user.AssignRole(role.Id);
             }, cancellationToken);

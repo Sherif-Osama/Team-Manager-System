@@ -37,6 +37,23 @@ namespace TeamManager.Tests.CommandHandler
 
         private readonly RegisterCommand Request = new("user@example.com", "Test User", "Password123!");
 
+        private void SetupRollbackTracking(Action onRollback) =>
+                _unitOfWork.Setup(u => u.ExecuteInTransactionAsync(It.IsAny<Func<CancellationToken, Task>>(),
+        It.IsAny<CancellationToken>())).Returns<
+            Func<CancellationToken, Task>, CancellationToken>(async (action, ct) =>
+            {
+                try
+                {
+
+                    await action(ct);
+                }
+                catch (InvalidOperationException)
+                {
+                    onRollback();
+                    throw;
+                }
+            });
+
         [Fact]
         public async Task Handle_WhenEmailAlreadyExists_ThrowsWithoutStartingTransaction()
         {
@@ -213,22 +230,5 @@ namespace TeamManager.Tests.CommandHandler
             _outbox.Verify(o => o.Add(It.IsAny<OutboxMessageType>(), It.IsAny<string>()), Times.Once);
             Assert.True(rolledBack);
         }
-
-        private void SetupRollbackTracking(Action onRollback) =>
-                        _unitOfWork.Setup(u => u.ExecuteInTransactionAsync(It.IsAny<Func<CancellationToken, Task>>(),
-                It.IsAny<CancellationToken>())).Returns<
-                    Func<CancellationToken, Task>, CancellationToken>(async (action, ct) =>
-                    {
-                        try
-                        {
-
-                            await action(ct);
-                        }
-                        catch (InvalidOperationException)
-                        {
-                            onRollback();
-                            throw;
-                        }
-                    });
     }
 }

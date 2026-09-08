@@ -14,5 +14,6 @@ namespace TeamManager.Application.Abstractions.Persistence
         Task<bool> HasPermissionAsync(Guid userId, string permissionCode, CancellationToken cancellationToken);
         Task<bool> IsLastSystemAdminAsync(Guid userId, CancellationToken cancellationToken);
         Task<User?> GetByIdWithRolesAsync(Guid userId, CancellationToken cancellationToken);
+        Task<User?> GetByEmailWithRolesAsync(string email, CancellationToken cancellationToken);
     }
 }
