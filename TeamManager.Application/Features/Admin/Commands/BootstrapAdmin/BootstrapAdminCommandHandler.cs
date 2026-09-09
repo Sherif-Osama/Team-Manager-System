@@ -38,7 +38,7 @@ namespace TeamManager.Application.Features.Admin.Commands.BootstrapAdmin
 
             await unitOfWork.ExecuteInSerializableTransactionAsync(async ct =>
             {
-                var alreadyBootstrapped = await roleRepository.ExistsAdminAsync(ct);
+                var alreadyBootstrapped = await roleRepository.ExistsAdminAsync(role.Id, ct);
 
                 if (alreadyBootstrapped)
                     throw new ForbiddenException("An administrator already exists. Bootstrap is disabled.");

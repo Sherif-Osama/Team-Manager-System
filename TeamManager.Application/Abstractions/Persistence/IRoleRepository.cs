@@ -6,6 +6,6 @@ namespace TeamManager.Application.Abstractions.Persistence
     {
         Task<Role?> GetByNameAsync(string name, CancellationToken cancellationToken);
         Task<Role?> GetByIdAsync(int roleId, CancellationToken cancellationToken);
-        Task<bool> ExistsAdminAsync(CancellationToken cancellationToken);
+        Task<bool> ExistsAdminAsync(int roleId, CancellationToken cancellationToken);
     }
 }

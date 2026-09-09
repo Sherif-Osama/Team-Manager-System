@@ -15,11 +15,9 @@ namespace TeamManager.Infrastructure.Persistence.Repositories
             return context.Roles.FirstOrDefaultAsync(x => x.Id == roleId, cancellationToken);
         }
 
-        public async Task<bool> ExistsAdminAsync(CancellationToken cancellationToken)
+        public Task<bool> ExistsAdminAsync(int roleId, CancellationToken cancellationToken)
         {
-            var roleIdquery = context.Roles.Where(r => r.Name == "SystemAdmin").Select(r => r.Id);
-
-            return await context.UserRoles.AnyAsync(ur => ur.RoleId == roleIdquery.FirstOrDefault(), cancellationToken);
+            return context.UserRoles.AnyAsync(ur => ur.RoleId == roleId, cancellationToken);
         }
     }
 }

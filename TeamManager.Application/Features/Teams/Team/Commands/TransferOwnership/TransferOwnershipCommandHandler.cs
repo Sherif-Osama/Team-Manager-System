@@ -7,7 +7,6 @@ namespace TeamManager.Application.Features.Teams.Team.Commands.TransferOwnership
     public sealed class TransferOwnershipCommandHandler(ITeamRepository teamRepository, IUserRepository userRepository,
             IUnitOfWork unitOfWork) : IRequestHandler<TransferOwnershipCommand>
     {
-
         public async Task Handle(TransferOwnershipCommand request, CancellationToken cancellationToken)
         {
             // Run ownership transfer in a serializable transaction so the validation

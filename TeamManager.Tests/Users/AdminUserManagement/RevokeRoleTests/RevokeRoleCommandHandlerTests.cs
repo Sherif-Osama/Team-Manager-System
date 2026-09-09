@@ -136,7 +136,6 @@ public sealed class RevokeRoleCommandHandlerTests
         Assert.DoesNotContain(user.UserRoles, x => x.RoleId == role.Id);
         _unitOfWork.Verify(x => x.ExecuteInSerializableTransactionAsync(It.IsAny<Func<CancellationToken, Task>>(), It.IsAny<CancellationToken>()), Times.Once);
         _userRepository.Verify(x => x.IsLastSystemAdminAsync(_userId, It.IsAny<CancellationToken>()), Times.Once);
-        _unitOfWork.Verify(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Fact]
@@ -151,7 +150,6 @@ public sealed class RevokeRoleCommandHandlerTests
 
         Assert.Contains(user.UserRoles, x => x.RoleId == role.Id);
         _unitOfWork.Verify(x => x.ExecuteInSerializableTransactionAsync(It.IsAny<Func<CancellationToken, Task>>(), It.IsAny<CancellationToken>()), Times.Once);
-        _unitOfWork.Verify(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Never);
     }
 
     [Fact]

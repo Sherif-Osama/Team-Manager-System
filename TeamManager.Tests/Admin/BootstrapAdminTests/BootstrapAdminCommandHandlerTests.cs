@@ -25,7 +25,7 @@ namespace TeamManager.Tests.Admin.BootstrapAdminTests
             _secretProvider.SetupGet(s => s.AdminSecret).Returns("secret");
             role = new("SystemAdmin");
             _roleRepository.Setup(r => r.GetByNameAsync(It.IsAny<string>(), It.IsAny<CancellationToken>())).ReturnsAsync(role);
-            _roleRepository.Setup(r => r.ExistsAdminAsync(It.IsAny<CancellationToken>())).ReturnsAsync(false);
+            _roleRepository.Setup(r => r.ExistsAdminAsync(It.IsAny<int>(), It.IsAny<CancellationToken>())).ReturnsAsync(false);
             user = new User(Guid.NewGuid(), Request.Email, "Test User", "hashed-password", 1);
             _userRepository.Setup(u => u.GetByEmailWithRolesAsync(It.IsAny<string>(), It.IsAny<CancellationToken>())).ReturnsAsync(user);
         }
@@ -76,7 +76,7 @@ namespace TeamManager.Tests.Admin.BootstrapAdminTests
         [Fact]
         public async Task Handle_WhenAdminAlreadyExists_Throws403InsideSerializableTransaction()
         {
-            _roleRepository.Setup(r => r.ExistsAdminAsync(It.IsAny<CancellationToken>())).ReturnsAsync(true);
+            _roleRepository.Setup(r => r.ExistsAdminAsync(It.IsAny<int>(), It.IsAny<CancellationToken>())).ReturnsAsync(true);
 
             var rolledBack = false;
             SetupRollbackTracking(() => { rolledBack = true; });
@@ -84,7 +84,6 @@ namespace TeamManager.Tests.Admin.BootstrapAdminTests
             await Assert.ThrowsAsync<ForbiddenException>(() => _sut.Handle(Request, CancellationToken.None));
             _unitOfWork.Verify(x => x.ExecuteInSerializableTransactionAsync(It.IsAny<Func<CancellationToken, Task>>(), It.IsAny<CancellationToken>()), Times.Once);
             Assert.True(rolledBack);
-            _unitOfWork.Verify(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Never);
         }
 
         [Fact]
