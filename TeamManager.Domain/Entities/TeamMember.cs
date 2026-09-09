@@ -48,8 +48,7 @@ public class TeamMember : Entity<long>
     internal void PromoteToOwner()
     {
         if (Status != TeamMemberStatus.Active)
-            throw new DomainException(
-                "Only an active member can become the team owner.");
+            throw new DomainException("Only an active member can become the team owner.");
 
         TeamRole = TeamRole.Owner;
     }

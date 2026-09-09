@@ -16,7 +16,6 @@ namespace TeamManager.Api.Controllers.Admin
     public sealed class AdminController(ISender sender) : ControllerBase
     {
         [HttpPost("bootstrap")]
-        [Authorize]
         public async Task<IActionResult> Bootstrap(BootstrapAdminCommand command, CancellationToken cancellationToken)
         {
             await sender.Send(command, cancellationToken);
