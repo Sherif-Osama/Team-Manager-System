@@ -210,6 +210,9 @@ public class User : Entity<Guid>
         if (_userRoles.Any(x => x.RoleId == roleId))
             throw new DomainException("User already has this role.");
 
+        if (!IsActive)
+            throw new DomainException("Cannot assign role to inactive user");
+
         _userRoles.Add(new UserRole(Id, roleId));
     }
 

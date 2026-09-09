@@ -55,20 +55,6 @@ public sealed class AssignRoleCommandHandlerTests
     }
 
     [Fact]
-    public async Task Handle_WhenInactiveUser_AssignsRoleAndSavesOnce()
-    {
-        var user = CreateUser();
-        user.Deactivate();
-        var role = new Role("Admin");
-        Setup(user, role);
-
-        await _sut.Handle(new AssignRoleCommand(_userId, role.Id), CancellationToken.None);
-
-        Assert.Contains(user.UserRoles, x => x.RoleId == role.Id);
-        _unitOfWork.Verify(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
-    }
-
-    [Fact]
     public async Task Handle_WhenUserIsDeleted_Throws404()
     {
         _userRepository.Setup(x => x.GetByIdWithRolesAsync(_userId, It.IsAny<CancellationToken>())).ReturnsAsync((User?)null);

@@ -5,11 +5,14 @@ namespace TeamManager.Tests.UnitTest.Domain
 {
     public sealed class UserTests
     {
+        #region Helper methods
         private User CreateUser(string email = "user@example.com", string displayName = "Test User", string passwordHash = "password-hash", int roleId = 1)
         {
             return new(Guid.NewGuid(), email, displayName, passwordHash, roleId);
         }
+        #endregion
 
+        #region Constructor
         [Fact]
         public void Constructor_WithValidData_CreatesActiveUnconfirmedUser()
         {
@@ -35,7 +38,9 @@ namespace TeamManager.Tests.UnitTest.Domain
         {
             Assert.Throws<DomainException>(() => CreateUser(email: email!, displayName: displayName!, passwordHash: passwordHash!));
         }
+        #endregion
 
+        #region Assign Role
         [Fact]
         public void AssignRole_WithNewRole_AddsRole()
         {
@@ -47,14 +52,12 @@ namespace TeamManager.Tests.UnitTest.Domain
         }
 
         [Fact]
-        public void AssignRole_WhenUserIsInactive_AddsRole()
+        public void AssignRole_WhenUserIsInactive_Throws()
         {
             var user = CreateUser();
             user.Deactivate();
 
-            user.AssignRole(2);
-
-            Assert.Contains(user.UserRoles, role => role.RoleId == 2);
+            Assert.Throws<DomainException>(() => user.AssignRole(2));
         }
 
         [Fact]
@@ -72,7 +75,9 @@ namespace TeamManager.Tests.UnitTest.Domain
 
             Assert.Throws<DomainException>(() => user.AssignRole(1));
         }
+        #endregion
 
+        #region Remove role
         [Fact]
         public void RemoveRole_WhenUserHasMultipleRoles_RemovesRequestedRole()
         {
@@ -103,6 +108,16 @@ namespace TeamManager.Tests.UnitTest.Domain
         }
 
         [Fact]
+        public void RemoveRole_WhenUserDoesNotHaveRole_Throws()
+        {
+            var user = CreateUser();
+
+            Assert.Throws<DomainException>(() => user.RemoveRole(999));
+        }
+        #endregion
+
+        #region Deactivate
+        [Fact]
         public void Deactivate_WhenActive_SetsInactive()
         {
             var user = CreateUser();
@@ -119,7 +134,9 @@ namespace TeamManager.Tests.UnitTest.Domain
 
             Assert.Throws<DomainException>(() => user.Deactivate());
         }
+        #endregion
 
+        #region Activate
         [Fact]
         public void Activate_WhenInactive_SetsActive()
         {
@@ -147,7 +164,9 @@ namespace TeamManager.Tests.UnitTest.Domain
 
             Assert.Throws<DomainException>(() => user.Activate());
         }
+        #endregion
 
+        #region SoftDelete
         [Fact]
         public void SoftDelete_WhenNotDeleted_SetsDeletedAndInactive()
         {
@@ -166,7 +185,9 @@ namespace TeamManager.Tests.UnitTest.Domain
 
             Assert.Throws<DomainException>(() => user.SoftDelete());
         }
+        #endregion
 
+        #region Display name
         [Fact]
         public void ChangeDisplayName_WhenActive_ChangesNameAndTimestamp()
         {
@@ -205,7 +226,9 @@ namespace TeamManager.Tests.UnitTest.Domain
 
             Assert.Throws<DomainException>(() => user.ChangeDisplayName("Updated User"));
         }
+        #endregion
 
+        #region Password
         [Fact]
         public void ChangePasswordHash_WhenActive_ChangesHashAndTimestamp()
         {
@@ -244,7 +267,9 @@ namespace TeamManager.Tests.UnitTest.Domain
 
             Assert.Throws<DomainException>(() => user.ChangePasswordHash("new-hash"));
         }
+        #endregion
 
+        #region Request Email Confirmation
         [Fact]
         public void RequestEmailConfirmation_WithValidToken_StoresTokenAndExpiry()
         {
@@ -289,6 +314,17 @@ namespace TeamManager.Tests.UnitTest.Domain
                 user.RequestEmailConfirmation("new-token-hash", DateTime.UtcNow.AddHours(1)));
         }
 
+        [Fact]
+        public void RequestEmailConfirmation_WhenInactive_Throws()
+        {
+            var user = CreateUser();
+            user.Deactivate();
+
+            Assert.Throws<DomainException>(() => user.RequestEmailConfirmation("token-hash", DateTime.UtcNow.AddHours(1)));
+        }
+        #endregion
+
+        #region Confirm Email
         [Fact]
         public void ConfirmEmail_WithValidToken_ConfirmsAndClearsTokenData()
         {
@@ -383,7 +419,9 @@ namespace TeamManager.Tests.UnitTest.Domain
             Assert.Throws<DomainException>(() =>
                 user.ChangeEmail("new@example.com", "token-hash", DateTime.UtcNow.AddHours(1)));
         }
+        #endregion
 
+        #region  Record Success
         [Fact]
         public void RecordSuccessfulLogin_ResetsFailuresLockoutAndRecordsTime()
         {
@@ -454,5 +492,6 @@ namespace TeamManager.Tests.UnitTest.Domain
         {
             Assert.False(CreateUser().IsLockedOut);
         }
+        #endregion
     }
 }
