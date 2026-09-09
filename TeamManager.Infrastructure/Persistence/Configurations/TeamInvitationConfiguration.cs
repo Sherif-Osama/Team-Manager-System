@@ -51,5 +51,7 @@ public class TeamInvitationConfiguration : IEntityTypeConfiguration<TeamInvitati
             .HasFilter("[Status] = 1");
 
         builder.HasIndex(x => new { x.TeamId, x.Status }).HasDatabaseName("IX_TeamInvitations_TeamId_Status");
+
+        builder.Property<byte[]>("RowVersion").IsRowVersion();
     }
 }
