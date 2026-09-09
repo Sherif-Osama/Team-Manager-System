@@ -55,7 +55,7 @@ public sealed class AssignRoleCommandHandlerTests
     }
 
     [Fact]
-    public async Task Handle_WhenUserIsDeleted_Throws404()
+    public async Task Handle_WhenUserDoesNotExist_Throws404()
     {
         _userRepository.Setup(x => x.GetByIdWithRolesAsync(_userId, It.IsAny<CancellationToken>())).ReturnsAsync((User?)null);
 

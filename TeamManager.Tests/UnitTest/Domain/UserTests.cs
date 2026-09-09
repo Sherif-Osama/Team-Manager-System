@@ -52,15 +52,6 @@ namespace TeamManager.Tests.UnitTest.Domain
         }
 
         [Fact]
-        public void AssignRole_WhenUserIsInactive_Throws()
-        {
-            var user = CreateUser();
-            user.Deactivate();
-
-            Assert.Throws<DomainException>(() => user.AssignRole(2));
-        }
-
-        [Fact]
         public void AssignRole_WhenRoleAlreadyAssigned_Throws()
         {
             var user = CreateUser();

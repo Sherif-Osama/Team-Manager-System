@@ -14,6 +14,7 @@ namespace TeamManager.Application.Features.Users.AdminUserManagement.Commands.As
             if (user is null)
                 throw new UserNotFoundException(request.UserId);
 
+
             var role = await roleRepository.GetByIdAsync(request.RoleId, cancellationToken);
 
             if (role is null)
