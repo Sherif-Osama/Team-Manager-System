@@ -1,5 +1,6 @@
 using TeamManager.Domain.Common;
 using TeamManager.Domain.Enums;
+using TeamManager.Domain.Exceptions;
 
 namespace TeamManager.Domain.Entities;
 
@@ -16,9 +17,7 @@ public class ProjectMember : Entity<long>
     public User? AddedByUser { get; private set; }
     public DateTime? RemovedAtUtc { get; private set; }
 
-    private ProjectMember()
-    {
-    }
+    private ProjectMember() { }
 
     internal ProjectMember(Guid projectId, Guid userId, TeamRole teamRole, Guid? addedBy = null)
     {
@@ -30,13 +29,38 @@ public class ProjectMember : Entity<long>
         AddedAtUtc = DateTime.UtcNow;
     }
 
-    public void ChangeRole(TeamRole role) => TeamRole = role;
-
-    public void Remove()
+    internal void ChangeRole(TeamRole role)
     {
-        if (Status == ProjectMemberStatus.Removed) return;
+        if (role == TeamRole)
+            throw new DomainException($"Member already has {role} role");
+
+        if (role == TeamRole.Owner)
+            throw new DomainException("Ownership cannot be changed, Use TransferOwnership instead.");
+
+        TeamRole = role;
+    }
+
+
+    internal void Remove()
+    {
+        if (Status == ProjectMemberStatus.Removed)
+            throw new DomainException("Member is already deleted");
+
+        if (TeamRole == TeamRole.Owner)
+            throw new DomainException("The project owner cannot be removed from the project.");
 
         Status = ProjectMemberStatus.Removed;
         RemovedAtUtc = DateTime.UtcNow;
+    }
+
+    internal void PromoteToOwner()
+    {
+        if (Status != ProjectMemberStatus.Active)
+            throw new DomainException("Cannot set inactive as project owner");
+
+        if (TeamRole == TeamRole.Owner)
+            throw new DomainException("Member is already project owner");
+
+        TeamRole = TeamRole.Owner;
     }
 }

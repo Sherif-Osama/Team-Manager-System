@@ -37,8 +37,11 @@ public class ProjectConfiguration : IEntityTypeConfiguration<Project>
 
         builder.Property<byte[]>("RowVersion").IsRowVersion();
 
+        builder.HasIndex(x => new { x.TeamId, x.Name }).IsUnique().HasDatabaseName("UX_Projects_TeamId_Name")
+            .HasFilter("[DeletedAtUtc] IS NULL");
+
         builder.HasOne(x => x.Team).WithMany(x => x.Projects).HasForeignKey(x => x.TeamId)
-            .HasConstraintName("FK_Projects_Teams").OnDelete(DeleteBehavior.NoAction);
+        .HasConstraintName("FK_Projects_Teams").OnDelete(DeleteBehavior.NoAction);
 
         builder.HasOne(x => x.Owner).WithMany().HasForeignKey(x => x.OwnerUserId)
             .HasConstraintName("FK_Projects_Owner").OnDelete(DeleteBehavior.NoAction);

@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using TeamManager.Application.Abstractions;
 using TeamManager.Application.Abstractions.Authentication;
 using TeamManager.Application.Abstractions.Configuration;
 using TeamManager.Application.Abstractions.Persistence;
@@ -52,6 +53,7 @@ namespace TeamManager.Infrastructure
             services.Configure<BootstrapOptions>(configuration.GetSection(BootstrapOptions.SectionName));
             services.AddScoped<IBootstrapSecretProvider, BootstrapSecretProvider>();
             services.AddScoped<IRoleRepository, RoleRepository>();
+            services.AddScoped<IProjectRepository, ProjectRepository>();
             return services;
         }
     }
