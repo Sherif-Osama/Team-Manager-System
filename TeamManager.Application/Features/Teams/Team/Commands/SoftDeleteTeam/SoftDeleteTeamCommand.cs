@@ -6,6 +6,6 @@ namespace TeamManager.Application.Features.Teams.Team.Commands.SoftDeleteTeam
 {
     public sealed record SoftDeleteTeamCommand(Guid TeamId) : IRequest, ITeamScopedRequest
     {
-        public TeamRole[] RequiredRoles => new[] { TeamRole.Owner };
+        public TeamRole[] RequiredRoles => [TeamRole.Owner];
     };
 }

@@ -6,6 +6,6 @@ namespace TeamManager.Application.Features.Teams.TeamMembers.Commands.AddMember
 {
     public sealed record AddMemberCommand(Guid TeamId, Guid UserId, TeamRole TeamRole) : IRequest<long>, ITeamScopedRequest
     {
-        public TeamRole[] RequiredRoles => new[] { TeamRole.Owner, TeamRole.Admin };
+        public TeamRole[] RequiredRoles => [TeamRole.Owner, TeamRole.Admin];
     };
 }

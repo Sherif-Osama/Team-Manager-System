@@ -5,6 +5,6 @@ namespace TeamManager.Application.Features.Teams.TeamMembers.Commands.ChangeMemb
 {
     public sealed record ChangeMemberRoleCommand(Guid TeamId, long MemberId, TeamRole Role) : IRequest, ITeamScopedRequest
     {
-        public TeamRole[] RequiredRoles => new[] { TeamRole.Owner, TeamRole.Admin };
+        public TeamRole[] RequiredRoles => [TeamRole.Owner, TeamRole.Admin];
     }
 }

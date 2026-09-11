@@ -6,6 +6,6 @@ namespace TeamManager.Application.Features.Teams.Team.Commands.ActivateTeam
 {
     public sealed record ActivateTeamCommand(Guid TeamId) : IRequest, ITeamScopedRequest
     {
-        public TeamRole[] RequiredRoles => new[] { TeamRole.Owner };
+        public TeamRole[] RequiredRoles => [TeamRole.Owner];
     };
 }

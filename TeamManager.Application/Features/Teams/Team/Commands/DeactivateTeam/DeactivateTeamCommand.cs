@@ -6,6 +6,6 @@ namespace TeamManager.Application.Features.Teams.Team.Commands.DeactivateTeam
 {
     public sealed record DeactivateTeamCommand(Guid TeamId) : IRequest, ITeamScopedRequest
     {
-        public TeamRole[] RequiredRoles => new[] { TeamRole.Owner };
+        public TeamRole[] RequiredRoles => [TeamRole.Owner];
     };
 }

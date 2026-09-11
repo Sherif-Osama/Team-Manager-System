@@ -6,6 +6,6 @@ namespace TeamManager.Application.Features.Teams.Team.Commands.TransferOwnership
 {
     public sealed record TransferOwnershipCommand(Guid TeamId, Guid NewOwnerUserId) : IRequest, ITeamScopedRequest
     {
-        public TeamRole[] RequiredRoles => new[] { TeamRole.Owner };
+        public TeamRole[] RequiredRoles => [TeamRole.Owner];
     };
 }

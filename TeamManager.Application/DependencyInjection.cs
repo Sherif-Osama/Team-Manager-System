@@ -19,6 +19,7 @@ namespace TeamManager.Application
                 configuration.AddOpenBehavior(typeof(ConfirmedEmailBehavior<,>));
 
                 configuration.AddOpenBehavior(typeof(TeamAuthorizationBehavior<,>));
+                configuration.AddOpenBehavior(typeof(ProjectAuthorizationBehavior<,>));
             });
 
             services.AddValidatorsFromAssembly(typeof(DependencyInjection).Assembly);

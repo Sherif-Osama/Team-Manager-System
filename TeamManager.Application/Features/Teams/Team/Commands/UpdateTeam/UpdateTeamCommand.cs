@@ -6,6 +6,6 @@ namespace TeamManager.Application.Features.Teams.Team.Commands.UpdateTeam
 {
     public sealed record UpdateTeamCommand(Guid TeamId, string Name, string? Description) : IRequest, ITeamScopedRequest
     {
-        public TeamRole[] RequiredRoles => new[] { TeamRole.Owner };
+        public TeamRole[] RequiredRoles => [TeamRole.Owner];
     };
 }

@@ -30,7 +30,8 @@ namespace TeamManager.Domain.Entities
 
         private Project() { }
 
-        public Project(Guid id, Guid teamId, string name, Guid ownerUserId, string? description = null)
+        public Project(Guid id, Guid teamId, string name, Guid ownerUserId, string? description = null,
+            DateOnly? startDate = null, DateOnly? dueDate = null)
         {
             if (string.IsNullOrWhiteSpace(name))
                 throw new DomainException("A project must have a name.");
@@ -44,8 +45,10 @@ namespace TeamManager.Domain.Entities
             Status = ProjectStatus.Active;
             CreatedAtUtc = DateTime.UtcNow;
 
-            var ownership = new ProjectMember(id, ownerUserId, TeamRole.Owner);
+            if (startDate.HasValue || dueDate.HasValue)
+                Schedule(startDate, dueDate);
 
+            var ownership = new ProjectMember(id, ownerUserId, TeamRole.Owner);
             _members.Add(ownership);
         }
 
@@ -64,11 +67,19 @@ namespace TeamManager.Domain.Entities
         {
             EnsureNotDeleted("Cannot modify a deleted project.");
 
+            var today = DateOnly.FromDateTime(DateTime.UtcNow);
+
             if (startDate.HasValue && dueDate.HasValue && dueDate.Value < startDate.Value)
                 throw new DomainException("A project's due date cannot be before its start date.");
 
-            StartDate = startDate;
-            DueDate = dueDate;
+            if (startDate.HasValue && startDate.Value < today)
+                throw new DomainException("Project start date cannot be in the past.");
+
+            if (dueDate.HasValue && dueDate.Value < today)
+                throw new DomainException("Project due date cannot be in the past.");
+
+            StartDate = startDate ?? StartDate;
+            DueDate = dueDate ?? DueDate;
             Touch();
         }
 

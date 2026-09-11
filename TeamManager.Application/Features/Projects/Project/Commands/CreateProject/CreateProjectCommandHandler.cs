@@ -22,7 +22,7 @@ namespace TeamManager.Application.Features.Projects.Project.Commands.CreateProje
                 throw new ProjectNameAlreadyExistsException(request.Name);
 
             var project = new Domain.Entities.Project(Guid.NewGuid(), request.TeamId, request.Name,
-                currentUser.UserId.Value, request.Description);
+                currentUser.UserId.Value, request.Description, request.StartDate, request.DueDate);
 
             await projectRepository.AddAsync(project, cancellationToken);
 

@@ -6,6 +6,6 @@ namespace TeamManager.Application.Features.Teams.TeamMembers.Commands.RemoveMemb
 {
     public sealed record RemoveMemberCommand(Guid TeamId, long MemberId) : IRequest, ITeamScopedRequest
     {
-        public TeamRole[] RequiredRoles => new[] { TeamRole.Owner, TeamRole.Admin };
+        public TeamRole[] RequiredRoles => [TeamRole.Owner, TeamRole.Admin];
     }
 }

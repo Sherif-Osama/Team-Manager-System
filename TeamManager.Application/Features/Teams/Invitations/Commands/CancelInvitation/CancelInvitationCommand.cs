@@ -6,6 +6,6 @@ namespace TeamManager.Application.Features.Teams.Invitations.Commands.CancelInvi
 {
     public sealed record CancelInvitationCommand(Guid TeamId, Guid InvitationId) : IRequest, ITeamScopedRequest
     {
-        public TeamRole[] RequiredRoles => new[] { TeamRole.Owner, TeamRole.Admin };
+        public TeamRole[] RequiredRoles => [TeamRole.Owner, TeamRole.Admin];
     }
 }

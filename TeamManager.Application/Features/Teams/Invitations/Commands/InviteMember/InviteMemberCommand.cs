@@ -7,6 +7,6 @@ namespace TeamManager.Application.Features.Teams.Invitations.Commands.InviteMemb
     public sealed record InviteMemberCommand(Guid TeamId, string Email, TeamRole TeamRole) : IRequest<Guid>,
         ITeamScopedRequest, IRequiresConfirmedEmail
     {
-        public TeamRole[] RequiredRoles => new[] { TeamRole.Owner, TeamRole.Admin };
+        public TeamRole[] RequiredRoles => [TeamRole.Owner, TeamRole.Admin];
     }
 }
