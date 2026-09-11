@@ -25,7 +25,9 @@ public class PermissionConfiguration : IEntityTypeConfiguration<Permission>
         builder.HasData(
             new { Id = 1, Code = "system.manage_users", Description = "Disable/enable or delete any user account" },
             new { Id = 2, Code = "system.view_audit_log", Description = "View platform-wide audit log" },
-            new { Id = 3, Code = "system.manage_roles", Description = "Assign or revoke system roles" }
+            new { Id = 3, Code = "system.manage_roles", Description = "Assign or revoke system roles" },
+           new { Id = 4, Code = "system.manage_teams", Description = "View Teams" },
+           new { Id = 5, Code = "system.manage_projects", Description = "Manage projects" }
         );
     }
 }

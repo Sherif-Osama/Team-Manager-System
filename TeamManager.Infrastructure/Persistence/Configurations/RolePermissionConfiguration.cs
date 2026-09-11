@@ -27,7 +27,9 @@ public class RolePermissionConfiguration : IEntityTypeConfiguration<RolePermissi
         builder.HasData(
             new { RoleId = 1, PermissionId = 1 },
             new { RoleId = 1, PermissionId = 2 },
-            new { RoleId = 1, PermissionId = 3 }
+            new { RoleId = 1, PermissionId = 3 },
+            new { RoleId = 1, PermissionId = 4 },
+            new { RoleId = 1, PermissionId = 5 }
         );
     }
 }

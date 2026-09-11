@@ -6,6 +6,6 @@ namespace TeamManager.Application.Features.Teams.Team.Queries.GetTeam
 {
     public sealed record GetTeamQuery(Guid TeamId) : IRequest<GetTeamResponse>, ITeamScopedRequest
     {
-        public TeamRole[] RequiredRoles => new[] { TeamRole.Member, TeamRole.Admin, TeamRole.Owner, TeamRole.Viewer };
+        public TeamRole[] RequiredRoles => [TeamRole.Member, TeamRole.Admin, TeamRole.Owner, TeamRole.Viewer];
     }
 }
