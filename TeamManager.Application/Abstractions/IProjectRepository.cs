@@ -9,5 +9,6 @@ namespace TeamManager.Application.Abstractions
         Task<Project?> GetByIdAsync(Guid projectID, CancellationToken cancellationToken);
         Task<Project?> GetByNameAsync(Guid teamID, string name, CancellationToken cancellationToken);
         Task<bool> HasActiveRoleAsync(Guid projectId, Guid userId, ProjectRole[] requiredRoles, CancellationToken cancellationToken);
+        Task<Project?> GetByIdWithMembersAsync(Guid projectId, CancellationToken cancellationToken);
     }
 }

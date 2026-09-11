@@ -35,7 +35,7 @@ public class ProjectMember : Entity<long>
             throw new DomainException($"Member already has {role} role");
 
         if (role == ProjectRole.Owner)
-            throw new DomainException("Ownership cannot be changed, Use TransferOwnership instead.");
+            throw new DomainException("Ownership cannot be changed");
 
         ProjectRole = role;
     }
@@ -51,16 +51,5 @@ public class ProjectMember : Entity<long>
 
         Status = ProjectMemberStatus.Removed;
         RemovedAtUtc = DateTime.UtcNow;
-    }
-
-    internal void PromoteToOwner()
-    {
-        if (Status != ProjectMemberStatus.Active)
-            throw new DomainException("Cannot set inactive as project owner");
-
-        if (ProjectRole == ProjectRole.Owner)
-            throw new DomainException("Member is already project owner");
-
-        ProjectRole = ProjectRole.Owner;
     }
 }

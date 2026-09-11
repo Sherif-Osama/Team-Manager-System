@@ -1,9 +1,11 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using TeamManager.Application.Features.Projects.Project.Commands.ChangeProjectStatus;
 using TeamManager.Application.Features.Projects.Project.Commands.CreateProject;
 using TeamManager.Application.Features.Projects.Project.Commands.ScheduleProject;
 using TeamManager.Application.Features.Projects.Project.Commands.UpdateProject;
+using TeamManager.Application.Features.Projects.ProjectMembers.Commands.AddProjectMember;
 
 namespace TeamManager.Api.Controllers.Projects
 {
@@ -39,6 +41,23 @@ namespace TeamManager.Api.Controllers.Projects
             CancellationToken cancellationToken)
         {
             await sender.Send(new UpdateProjectCommand(projectId, request.Name, request.Description), cancellationToken);
+
+            return NoContent();
+        }
+
+        [HttpPut("projects/{projectId:guid}/status")]
+        public async Task<IActionResult> ChangeProjectStatus(Guid projectId, [FromBody] ChangeProjectStatusRequest request,
+        CancellationToken cancellationToken)
+        {
+            await sender.Send(new ChangeProjectStatusCommand(projectId, request.Status), cancellationToken);
+
+            return NoContent();
+        }
+
+        [HttpPost("projects/{projectId:guid}/members")]
+        public async Task<IActionResult> AddProjectMember(Guid projectId, [FromBody] AddProjectMemberRequest request, CancellationToken cancellationToken)
+        {
+            await sender.Send(new AddProjectMemberCommand(projectId, request.UserId, request.ProjectRole), cancellationToken);
 
             return NoContent();
         }

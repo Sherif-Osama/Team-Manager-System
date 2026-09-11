@@ -19,6 +19,12 @@ namespace TeamManager.Infrastructure.Persistence.Repositories
             return project is null || project.DeletedAtUtc.HasValue ? null : project;
         }
 
+        public async Task<Project?> GetByIdWithMembersAsync(Guid projectId, CancellationToken cancellationToken)
+        {
+            return await context.Projects.Include(p => p.Members.Where(m => m.Status == ProjectMemberStatus.Active))
+                .FirstOrDefaultAsync(p => p.Id == projectId && p.DeletedAtUtc == null, cancellationToken);
+        }
+
         public Task<Project?> GetByNameAsync(Guid teamId, string name, CancellationToken cancellationToken)
         {
             return context.Projects.Where(p => p.Name == name && p.TeamId == teamId && p.DeletedAtUtc == null)

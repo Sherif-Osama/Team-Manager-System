@@ -97,8 +97,27 @@ namespace TeamManager.Domain.Entities
             if (Status == status)
                 throw new DomainException($"project already has status {status}");
 
+            if (!CanTransitionTo(status))
+                throw new DomainException($"Project cannot transition from {Status} to {status}.");
+
             Status = status;
             Touch();
+        }
+
+        private bool CanTransitionTo(ProjectStatus newStatus)
+        {
+            return Status switch
+            {
+                ProjectStatus.Active => newStatus is ProjectStatus.OnHold or ProjectStatus.Completed or ProjectStatus.Archived,
+
+                ProjectStatus.OnHold => newStatus is ProjectStatus.Active or ProjectStatus.Completed or ProjectStatus.Archived,
+
+                ProjectStatus.Completed => newStatus is ProjectStatus.Archived or ProjectStatus.Active,
+
+                ProjectStatus.Archived => newStatus is ProjectStatus.Active,
+
+                _ => false
+            };
         }
 
         public void SoftDelete()
@@ -115,7 +134,7 @@ namespace TeamManager.Domain.Entities
                 throw new DomainException("This user already has an active membership in the project.");
 
             if (role == ProjectRole.Owner)
-                throw new DomainException("Ownership cannot be assigned via AddMember. Use TransferOwnership instead.");
+                throw new DomainException("Ownership cannot be assigned");
 
             var member = new ProjectMember(Id, userId, role, addedBy);
             _members.Add(member);
@@ -132,29 +151,6 @@ namespace TeamManager.Domain.Entities
                 throw new DomainException("cannot remove project owner from project");
 
             member.Remove();
-        }
-
-        public void TransferOwnership(Guid newOwnerUserId)
-        {
-            EnsureNotDeleted("Cannot modify a deleted project.");
-
-            if (OwnerUserId == newOwnerUserId)
-                throw new DomainException("The specified user is already the project owner.");
-
-            var currentOwner = _members.FirstOrDefault(m => m.UserId == OwnerUserId && m.Status == ProjectMemberStatus.Active);
-
-            if (currentOwner is null)
-                throw new DomainException("The current project owner must have an active membership.");
-
-            var newOwner = _members.FirstOrDefault(m => m.UserId == newOwnerUserId && m.Status == ProjectMemberStatus.Active);
-
-            if (newOwner is null)
-                throw new DomainException("The new owner must be an active project member.");
-
-            currentOwner.ChangeRole(ProjectRole.Admin);
-            newOwner.PromoteToOwner();
-            OwnerUserId = newOwnerUserId;
-            Touch();
         }
 
         private void Touch() => UpdatedAtUtc = DateTime.UtcNow;
