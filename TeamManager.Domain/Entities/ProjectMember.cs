@@ -10,7 +10,7 @@ public class ProjectMember : Entity<long>
     public Project Project { get; private set; } = null!;
     public Guid UserId { get; private set; }
     public User User { get; private set; } = null!;
-    public TeamRole TeamRole { get; private set; }
+    public ProjectRole ProjectRole { get; private set; }
     public ProjectMemberStatus Status { get; private set; }
     public DateTime AddedAtUtc { get; private set; }
     public Guid? AddedBy { get; private set; }
@@ -19,25 +19,25 @@ public class ProjectMember : Entity<long>
 
     private ProjectMember() { }
 
-    internal ProjectMember(Guid projectId, Guid userId, TeamRole teamRole, Guid? addedBy = null)
+    internal ProjectMember(Guid projectId, Guid userId, ProjectRole projectRole, Guid? addedBy = null)
     {
         ProjectId = projectId;
         UserId = userId;
-        TeamRole = teamRole;
+        ProjectRole = projectRole;
         Status = ProjectMemberStatus.Active;
         AddedBy = addedBy;
         AddedAtUtc = DateTime.UtcNow;
     }
 
-    internal void ChangeRole(TeamRole role)
+    internal void ChangeRole(ProjectRole role)
     {
-        if (role == TeamRole)
+        if (role == ProjectRole)
             throw new DomainException($"Member already has {role} role");
 
-        if (role == TeamRole.Owner)
+        if (role == ProjectRole.Owner)
             throw new DomainException("Ownership cannot be changed, Use TransferOwnership instead.");
 
-        TeamRole = role;
+        ProjectRole = role;
     }
 
 
@@ -46,7 +46,7 @@ public class ProjectMember : Entity<long>
         if (Status == ProjectMemberStatus.Removed)
             throw new DomainException("Member is already deleted");
 
-        if (TeamRole == TeamRole.Owner)
+        if (ProjectRole == ProjectRole.Owner)
             throw new DomainException("The project owner cannot be removed from the project.");
 
         Status = ProjectMemberStatus.Removed;
@@ -58,9 +58,9 @@ public class ProjectMember : Entity<long>
         if (Status != ProjectMemberStatus.Active)
             throw new DomainException("Cannot set inactive as project owner");
 
-        if (TeamRole == TeamRole.Owner)
+        if (ProjectRole == ProjectRole.Owner)
             throw new DomainException("Member is already project owner");
 
-        TeamRole = TeamRole.Owner;
+        ProjectRole = ProjectRole.Owner;
     }
 }

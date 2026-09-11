@@ -18,7 +18,7 @@ public class ProjectMemberConfiguration : IEntityTypeConfiguration<ProjectMember
 
         builder.Property(x => x.Id).HasColumnName("ProjectMemberId").ValueGeneratedOnAdd().UseIdentityColumn();
 
-        builder.Property(x => x.TeamRole).HasColumnName("TeamRoleId").IsRequired().HasConversion<byte>();
+        builder.Property(x => x.ProjectRole).HasColumnName("ProjectRoleId").IsRequired().HasConversion<byte>();
 
         builder.Property(x => x.Status).IsRequired().HasConversion<byte>().HasDefaultValue(ProjectMemberStatus.Active);
 

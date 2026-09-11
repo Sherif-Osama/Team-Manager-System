@@ -48,7 +48,7 @@ namespace TeamManager.Domain.Entities
             if (startDate.HasValue || dueDate.HasValue)
                 Schedule(startDate, dueDate);
 
-            var ownership = new ProjectMember(id, ownerUserId, TeamRole.Owner);
+            var ownership = new ProjectMember(id, ownerUserId, ProjectRole.Owner);
             _members.Add(ownership);
         }
 
@@ -60,6 +60,13 @@ namespace TeamManager.Domain.Entities
                 throw new DomainException("A project must have a name.");
 
             Name = name;
+            Touch();
+        }
+
+        public void UpdateDescription(string? description)
+        {
+            EnsureNotDeleted("Cannot modify a deleted project.");
+            Description = description;
             Touch();
         }
 
@@ -100,14 +107,14 @@ namespace TeamManager.Domain.Entities
             DeletedAtUtc = DateTime.UtcNow;
         }
 
-        public ProjectMember AddMember(Guid userId, TeamRole role, Guid? addedBy = null)
+        public ProjectMember AddMember(Guid userId, ProjectRole role, Guid? addedBy = null)
         {
             EnsureNotDeleted("cannot add member to deleted project");
 
             if (_members.Any(m => m.UserId == userId && m.Status == ProjectMemberStatus.Active))
                 throw new DomainException("This user already has an active membership in the project.");
 
-            if (role == TeamRole.Owner)
+            if (role == ProjectRole.Owner)
                 throw new DomainException("Ownership cannot be assigned via AddMember. Use TransferOwnership instead.");
 
             var member = new ProjectMember(Id, userId, role, addedBy);
@@ -121,7 +128,7 @@ namespace TeamManager.Domain.Entities
 
             if (member is null)
                 throw new DomainException("This user does not have an active membership in the project.");
-            if (member.TeamRole == TeamRole.Owner)
+            if (member.ProjectRole == ProjectRole.Owner)
                 throw new DomainException("cannot remove project owner from project");
 
             member.Remove();
@@ -144,7 +151,7 @@ namespace TeamManager.Domain.Entities
             if (newOwner is null)
                 throw new DomainException("The new owner must be an active project member.");
 
-            currentOwner.ChangeRole(TeamRole.Admin);
+            currentOwner.ChangeRole(ProjectRole.Admin);
             newOwner.PromoteToOwner();
             OwnerUserId = newOwnerUserId;
             Touch();

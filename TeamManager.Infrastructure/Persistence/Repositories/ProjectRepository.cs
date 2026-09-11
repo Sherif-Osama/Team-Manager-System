@@ -25,14 +25,14 @@ namespace TeamManager.Infrastructure.Persistence.Repositories
                 .FirstOrDefaultAsync(cancellationToken);
         }
 
-        public async Task<bool> HasActiveRoleAsync(Guid projectId, Guid userId, TeamRole[] requiredRoles,
+        public async Task<bool> HasActiveRoleAsync(Guid projectId, Guid userId, ProjectRole[] requiredRoles,
             CancellationToken cancellationToken)
         {
             return await context.ProjectMembers.AsNoTracking().AnyAsync(pm => pm.ProjectId == projectId
             &&
             pm.UserId == userId && pm.User.IsActive
             &&
-            pm.Status == ProjectMemberStatus.Active && requiredRoles.Contains(pm.TeamRole), cancellationToken);
+            pm.Status == ProjectMemberStatus.Active && requiredRoles.Contains(pm.ProjectRole), cancellationToken);
         }
     }
 }

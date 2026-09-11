@@ -19,7 +19,7 @@ namespace TeamManager.Infrastructure.Persistence.Repositories
                 .FirstOrDefaultAsync(t => t.Id == teamId && t.DeletedAtUtc == null, cancellationToken);
         }
 
-        public async Task<Team?> GetByIdForUpdateAsync(Guid teamId, CancellationToken cancellationToken)
+        public async Task<Team?> GetByIdAsync(Guid teamId, CancellationToken cancellationToken)
         {
             var team = await context.Teams.FindAsync([teamId], cancellationToken);
 

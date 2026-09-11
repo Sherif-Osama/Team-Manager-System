@@ -10,7 +10,7 @@ namespace TeamManager.Application.Features.Teams.Team.Commands.DeactivateTeam
 
         public async Task Handle(DeactivateTeamCommand request, CancellationToken cancellationToken)
         {
-            var team = await teamRepository.GetByIdForUpdateAsync(request.TeamId, cancellationToken);
+            var team = await teamRepository.GetByIdAsync(request.TeamId, cancellationToken);
 
             if (team is null)
                 throw new TeamNotFoundException(request.TeamId);

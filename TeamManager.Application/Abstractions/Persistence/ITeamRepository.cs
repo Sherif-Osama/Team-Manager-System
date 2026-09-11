@@ -6,7 +6,7 @@ namespace TeamManager.Application.Abstractions.Persistence
     public interface ITeamRepository
     {
         Task AddAsync(Team team, CancellationToken cancellationToken);
-        Task<Team?> GetByIdForUpdateAsync(Guid teamId, CancellationToken cancellationToken);
+        Task<Team?> GetByIdAsync(Guid teamId, CancellationToken cancellationToken);
         Task<Team?> GetByNameAsync(string name, CancellationToken cancellationToken);
         Task<Team?> GetByIdWithMembersAsync(Guid teamId, CancellationToken cancellationToken);
         Task<bool> HasActiveRoleAsync(Guid teamId, Guid userId, IReadOnlyCollection<TeamRole> roles, CancellationToken cancellationToken);

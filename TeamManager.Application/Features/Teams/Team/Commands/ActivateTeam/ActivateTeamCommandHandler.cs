@@ -9,7 +9,7 @@ namespace TeamManager.Application.Features.Teams.Team.Commands.ActivateTeam
     {
         public async Task Handle(ActivateTeamCommand request, CancellationToken cancellationToken)
         {
-            var team = await teamRepository.GetByIdForUpdateAsync(request.TeamId, cancellationToken);
+            var team = await teamRepository.GetByIdAsync(request.TeamId, cancellationToken);
 
             if (team is null)
                 throw new TeamNotFoundException(request.TeamId);

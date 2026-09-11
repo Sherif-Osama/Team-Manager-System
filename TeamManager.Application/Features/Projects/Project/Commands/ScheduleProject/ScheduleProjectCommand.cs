@@ -7,6 +7,6 @@ namespace TeamManager.Application.Features.Projects.Project.Commands.SchedulePro
     public sealed record ScheduleProjectCommand(Guid ProjectId, DateOnly? StartDate, DateOnly? DueDate)
         : IRequest, IProjectScopedRequest
     {
-        public TeamRole[] RequiredRoles => [TeamRole.Owner];
+        public ProjectRole[] RequiredRoles => [ProjectRole.Owner];
     }
 }
