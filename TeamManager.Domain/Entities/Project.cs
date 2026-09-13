@@ -162,9 +162,10 @@ namespace TeamManager.Domain.Entities
             return member;
         }
 
-        public void RemoveMember(Guid userId)
+        public void RemoveMember(long memberId, Guid removedBy)
         {
-            var member = _members.FirstOrDefault(m => m.UserId == userId && m.Status == ProjectMemberStatus.Active);
+            var member = _members.FirstOrDefault(m => m.Id == memberId && m.Status == ProjectMemberStatus.Active ||
+           m.Status == ProjectMemberStatus.Suspended);
 
             if (member is null)
                 throw new DomainException("This user does not have an active membership in the project.");
@@ -172,7 +173,7 @@ namespace TeamManager.Domain.Entities
             if (member.ProjectRole == ProjectRole.Owner)
                 throw new DomainException("cannot remove project owner from project");
 
-            member.Remove();
+            member.Remove(removedBy);
         }
 
         private void Touch() => UpdatedAtUtc = DateTime.UtcNow;

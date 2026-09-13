@@ -16,6 +16,8 @@ public class ProjectMember : Entity<long>
     public Guid? AddedBy { get; private set; }
     public User? AddedByUser { get; private set; }
     public DateTime? RemovedAtUtc { get; private set; }
+    public Guid? RemovedBy { get; private set; }
+    public User? RemovedByUser { get; private set; }
 
     private ProjectMember() { }
 
@@ -51,7 +53,7 @@ public class ProjectMember : Entity<long>
         ProjectRole = ProjectRole.Owner;
     }
 
-    internal void Remove()
+    internal void Remove(Guid removedBy)
     {
         if (Status == ProjectMemberStatus.Removed)
             throw new DomainException("Member is already deleted");
@@ -60,6 +62,7 @@ public class ProjectMember : Entity<long>
             throw new DomainException("The project owner cannot be removed from the project.");
 
         Status = ProjectMemberStatus.Removed;
+        RemovedBy = removedBy;
         RemovedAtUtc = DateTime.UtcNow;
     }
 }

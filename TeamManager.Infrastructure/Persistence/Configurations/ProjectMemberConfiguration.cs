@@ -26,6 +26,11 @@ public class ProjectMemberConfiguration : IEntityTypeConfiguration<ProjectMember
 
         builder.Property(x => x.RemovedAtUtc).HasColumnType("datetime2(3)");
 
+        builder.Property<byte[]>("RowVersion").IsRowVersion();
+
+        builder.HasOne(x => x.RemovedByUser).WithMany().HasForeignKey(x => x.RemovedBy)
+            .HasConstraintName("FK_ProjectMembers_RemovedBy").OnDelete(DeleteBehavior.NoAction);
+
         builder.HasOne(x => x.Project).WithMany(x => x.Members).HasForeignKey(x => x.ProjectId)
             .HasConstraintName("FK_ProjectMembers_Projects").OnDelete(DeleteBehavior.NoAction);
 

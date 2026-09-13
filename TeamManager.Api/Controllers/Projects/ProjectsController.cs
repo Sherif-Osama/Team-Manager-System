@@ -6,7 +6,6 @@ using TeamManager.Application.Features.Projects.Project.Commands.CreateProject;
 using TeamManager.Application.Features.Projects.Project.Commands.ScheduleProject;
 using TeamManager.Application.Features.Projects.Project.Commands.TransferProjectOwnership;
 using TeamManager.Application.Features.Projects.Project.Commands.UpdateProject;
-using TeamManager.Application.Features.Projects.ProjectMembers.Commands.AddProjectMember;
 
 namespace TeamManager.Api.Controllers.Projects
 {
@@ -53,15 +52,6 @@ namespace TeamManager.Api.Controllers.Projects
         CancellationToken cancellationToken)
         {
             await sender.Send(new ChangeProjectStatusCommand(projectId, request.Status), cancellationToken);
-
-            return NoContent();
-        }
-
-        [HttpPost("projects/{projectId:guid}/members")]
-        [Authorize]
-        public async Task<IActionResult> AddProjectMember(Guid projectId, [FromBody] AddProjectMemberRequest request, CancellationToken cancellationToken)
-        {
-            await sender.Send(new AddProjectMemberCommand(projectId, request.UserId, request.ProjectRole), cancellationToken);
 
             return NoContent();
         }
