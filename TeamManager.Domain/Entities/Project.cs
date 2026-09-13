@@ -149,8 +149,7 @@ namespace TeamManager.Domain.Entities
         {
             EnsureNotDeleted("cannot add member to deleted project");
 
-            if (_members.Any(m => m.UserId == userId && m.Status == ProjectMemberStatus.Active ||
-            m.Status == ProjectMemberStatus.Suspended))
+            if (_members.Any(m => m.UserId == userId && ProjectMemberStatuses.Occupied.Contains(m.Status)))
                 throw new DomainException("This user already has an active membership in the project.");
 
             if (role == ProjectRole.Owner)
@@ -164,8 +163,7 @@ namespace TeamManager.Domain.Entities
 
         public void RemoveMember(long memberId, Guid removedBy)
         {
-            var member = _members.FirstOrDefault(m => m.Id == memberId && m.Status == ProjectMemberStatus.Active ||
-           m.Status == ProjectMemberStatus.Suspended);
+            var member = _members.FirstOrDefault(m => m.Id == memberId && ProjectMemberStatuses.Occupied.Contains(m.Status));
 
             if (member is null)
                 throw new DomainException("This user does not have an active membership in the project.");

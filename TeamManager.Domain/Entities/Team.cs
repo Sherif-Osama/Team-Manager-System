@@ -123,7 +123,7 @@ namespace TeamManager.Domain.Entities
             if (role == TeamRole.Owner)
                 throw new DomainException("Ownership cannot be assigned via AddMember. Use TransferOwnership instead.");
 
-            if (_members.Any(m => m.UserId == userId && (m.Status == TeamMemberStatus.Active || m.Status == TeamMemberStatus.Suspended)))
+            if (_members.Any(m => m.UserId == userId && TeamMemberStatuses.Occupied.Contains(m.Status)))
                 throw new DomainException("This user already has an active or suspended membership in the team.");
 
             var member = new TeamMember(Id, userId, role, invitedBy);
@@ -135,8 +135,7 @@ namespace TeamManager.Domain.Entities
 
         public void RemoveMember(long memberId, Guid removedBy)
         {
-            var member = _members.FirstOrDefault(m => m.Id == memberId &&
-                (m.Status == TeamMemberStatus.Active || m.Status == TeamMemberStatus.Suspended));
+            var member = _members.FirstOrDefault(m => m.Id == memberId && TeamMemberStatuses.Occupied.Contains(m.Status));
 
             if (member is null)
                 throw new DomainException("This user does not have a removable membership in the team.");
