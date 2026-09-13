@@ -12,6 +12,21 @@ namespace TeamManager.Infrastructure.Persistence.Repositories
             await context.AddAsync(newProject, cancellationToken);
         }
 
+        public Task RemoveActiveMembershipsAsync(Guid userId, CancellationToken cancellationToken)
+        {
+            return context.ProjectMembers.Where(x => x.UserId == userId &&
+                    (x.Status == ProjectMemberStatus.Active || x.Status == ProjectMemberStatus.Suspended)
+                    && x.ProjectRole != ProjectRole.Owner).ExecuteUpdateAsync(s => s.SetProperty(x => x.Status, ProjectMemberStatus.Removed)
+                    .SetProperty(x => x.RemovedAtUtc, DateTime.UtcNow), cancellationToken);
+        }
+
+        public Task DeactivateOwnedProjectsAsync(Guid userId, CancellationToken cancellationToken)
+        {
+            return context.Projects.Where(x => x.OwnerUserId == userId && x.Status == ProjectStatus.Active
+            && x.DeletedAtUtc == null).ExecuteUpdateAsync(s => s.SetProperty(x => x.Status, ProjectStatus.OnHold)
+            .SetProperty(x => x.UpdatedAtUtc, DateTime.UtcNow), cancellationToken);
+        }
+
         public async Task<Project?> GetByIdAsync(Guid projectID, CancellationToken cancellationToken)
         {
             var project = await context.Projects.FindAsync([projectID], cancellationToken);
@@ -21,7 +36,8 @@ namespace TeamManager.Infrastructure.Persistence.Repositories
 
         public async Task<Project?> GetByIdWithMembersAsync(Guid projectId, CancellationToken cancellationToken)
         {
-            return await context.Projects.Include(p => p.Members.Where(m => m.Status == ProjectMemberStatus.Active))
+            return await context.Projects.Include(p => p.Members.Where(m => m.Status == ProjectMemberStatus.Active ||
+            m.Status == ProjectMemberStatus.Suspended))
                 .FirstOrDefaultAsync(p => p.Id == projectId && p.DeletedAtUtc == null, cancellationToken);
         }
 
@@ -29,6 +45,12 @@ namespace TeamManager.Infrastructure.Persistence.Repositories
         {
             return context.Projects.Where(p => p.Name == name && p.TeamId == teamId && p.DeletedAtUtc == null)
                 .FirstOrDefaultAsync(cancellationToken);
+        }
+
+        public Task<bool> HasActiveOwnedProjectAsync(Guid userId, CancellationToken cancellationToken)
+        {
+            return context.Projects.AnyAsync(p => p.OwnerUserId == userId && p.Status != ProjectStatus.Completed
+            && p.DeletedAtUtc == null, cancellationToken);
         }
 
         public async Task<bool> HasActiveRoleAsync(Guid projectId, Guid userId, ProjectRole[] requiredRoles,
@@ -39,6 +61,13 @@ namespace TeamManager.Infrastructure.Persistence.Repositories
             pm.UserId == userId && pm.User.IsActive
             &&
             pm.Status == ProjectMemberStatus.Active && requiredRoles.Contains(pm.ProjectRole), cancellationToken);
+        }
+
+        public Task SuspendActiveMembershipsAsync(Guid userId, CancellationToken cancellationToken)
+        {
+            return context.ProjectMembers.Where(x => x.UserId == userId && x.Status == ProjectMemberStatus.Active
+                && x.ProjectRole != ProjectRole.Owner)
+                .ExecuteUpdateAsync(s => s.SetProperty(x => x.Status, ProjectMemberStatus.Suspended), cancellationToken);
         }
     }
 }

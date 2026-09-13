@@ -120,6 +120,25 @@ namespace TeamManager.Domain.Entities
             };
         }
 
+        public void TransferOwnership(Guid newOwnerUserId)
+        {
+            var currentOwner = _members.FirstOrDefault(m => m.UserId == OwnerUserId && m.Status == ProjectMemberStatus.Active);
+
+            if (currentOwner is null)
+                throw new DomainException("The current project owner must have an active membership.");
+
+            var newOwner = _members.FirstOrDefault(m => m.UserId == newOwnerUserId && m.Status == ProjectMemberStatus.Active);
+
+            if (newOwner is null)
+                throw new DomainException("The new owner must already be an active project member.");
+
+            currentOwner.ChangeRole(ProjectRole.Admin);
+
+            newOwner.PromoteToOwner();
+
+            OwnerUserId = newOwnerUserId;
+        }
+
         public void SoftDelete()
         {
             EnsureNotDeleted("Project is already deleted");
@@ -130,13 +149,15 @@ namespace TeamManager.Domain.Entities
         {
             EnsureNotDeleted("cannot add member to deleted project");
 
-            if (_members.Any(m => m.UserId == userId && m.Status == ProjectMemberStatus.Active))
+            if (_members.Any(m => m.UserId == userId && m.Status == ProjectMemberStatus.Active ||
+            m.Status == ProjectMemberStatus.Suspended))
                 throw new DomainException("This user already has an active membership in the project.");
 
             if (role == ProjectRole.Owner)
                 throw new DomainException("Ownership cannot be assigned");
 
             var member = new ProjectMember(Id, userId, role, addedBy);
+
             _members.Add(member);
             return member;
         }
@@ -147,6 +168,7 @@ namespace TeamManager.Domain.Entities
 
             if (member is null)
                 throw new DomainException("This user does not have an active membership in the project.");
+
             if (member.ProjectRole == ProjectRole.Owner)
                 throw new DomainException("cannot remove project owner from project");
 

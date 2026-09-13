@@ -31,6 +31,9 @@ public class ProjectMember : Entity<long>
 
     internal void ChangeRole(ProjectRole role)
     {
+        if (Status == ProjectMemberStatus.Removed)
+            throw new DomainException("Cannot change the role of a removed member.");
+
         if (role == ProjectRole)
             throw new DomainException($"Member already has {role} role");
 
@@ -40,6 +43,13 @@ public class ProjectMember : Entity<long>
         ProjectRole = role;
     }
 
+    internal void PromoteToOwner()
+    {
+        if (Status != ProjectMemberStatus.Active)
+            throw new DomainException("Only an active member can become the project owner.");
+
+        ProjectRole = ProjectRole.Owner;
+    }
 
     internal void Remove()
     {

@@ -79,7 +79,7 @@ namespace TeamManager.Infrastructure.Persistence.Repositories
                 .SetProperty(x => x.UpdatedAtUtc, DateTime.UtcNow), cancellationToken);
         }
 
-        public Task DeactivateActiveMembershipsAsync(Guid userId, CancellationToken cancellationToken)
+        public Task RemoveActiveMembershipsAsync(Guid userId, CancellationToken cancellationToken)
         {
             return context.TeamMembers.Where(x => x.UserId == userId &&
             (x.Status == TeamMemberStatus.Active || x.Status == TeamMemberStatus.Suspended) &&

@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using TeamManager.Application.Features.Projects.Project.Commands.ChangeProjectStatus;
 using TeamManager.Application.Features.Projects.Project.Commands.CreateProject;
 using TeamManager.Application.Features.Projects.Project.Commands.ScheduleProject;
+using TeamManager.Application.Features.Projects.Project.Commands.TransferProjectOwnership;
 using TeamManager.Application.Features.Projects.Project.Commands.UpdateProject;
 using TeamManager.Application.Features.Projects.ProjectMembers.Commands.AddProjectMember;
 
@@ -37,6 +38,7 @@ namespace TeamManager.Api.Controllers.Projects
         }
 
         [HttpPut("projects/{projectId:guid}")]
+        [Authorize]
         public async Task<IActionResult> UpdateProject(Guid projectId, [FromBody] UpdateProjectRequest request,
             CancellationToken cancellationToken)
         {
@@ -46,6 +48,7 @@ namespace TeamManager.Api.Controllers.Projects
         }
 
         [HttpPut("projects/{projectId:guid}/status")]
+        [Authorize]
         public async Task<IActionResult> ChangeProjectStatus(Guid projectId, [FromBody] ChangeProjectStatusRequest request,
         CancellationToken cancellationToken)
         {
@@ -55,9 +58,19 @@ namespace TeamManager.Api.Controllers.Projects
         }
 
         [HttpPost("projects/{projectId:guid}/members")]
+        [Authorize]
         public async Task<IActionResult> AddProjectMember(Guid projectId, [FromBody] AddProjectMemberRequest request, CancellationToken cancellationToken)
         {
             await sender.Send(new AddProjectMemberCommand(projectId, request.UserId, request.ProjectRole), cancellationToken);
+
+            return NoContent();
+        }
+
+        [HttpPut("{projectId:guid}/owner")]
+        [Authorize]
+        public async Task<IActionResult> TransferOwnership(Guid projectId, TransferProjectOwnershipRequest request, CancellationToken cancellationToken)
+        {
+            await sender.Send(new TransferProjectOwnershipCommand(projectId, request.NewOwnerUserId), cancellationToken);
 
             return NoContent();
         }

@@ -6,11 +6,8 @@ using TeamManager.Application.Common.Exceptions;
 
 namespace TeamManager.Application.Common.Behaviors
 {
-    public sealed class TeamAuthorizationBehavior<TRequest, TResponse>(ITeamRepository teamRepository, ICurrentUser currentUser)
-        : IPipelineBehavior<TRequest, TResponse>
-        where TRequest : ITeamScopedRequest
+    public sealed class TeamAuthorizationBehavior<TRequest, TResponse>(ITeamRepository teamRepository, ICurrentUser currentUser) : IPipelineBehavior<TRequest, TResponse> where TRequest : ITeamScopedRequest
     {
-
         public async Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next,
             CancellationToken cancellationToken)
         {

@@ -9,20 +9,20 @@ namespace TeamManager.Application.Features.Teams.Team.Commands.TransferOwnership
     {
         public async Task Handle(TransferOwnershipCommand request, CancellationToken cancellationToken)
         {
+            {
+                await unitOfWork.ExecuteInSerializableTransactionAsync(async ct =>
+                {
+                    var newOwner = await userRepository.GetByIdAsync(request.NewOwnerUserId, ct);
+                    if (newOwner is null || !newOwner.IsActive)
+                        throw new UserNotFoundException(request.NewOwnerUserId);
 
-            var newOwner = await userRepository.GetByIdAsync(request.NewOwnerUserId, cancellationToken);
+                    var team = await teamRepository.GetByIdWithMembersAsync(request.TeamId, ct);
+                    if (team is null)
+                        throw new TeamNotFoundException(request.TeamId);
 
-            if (newOwner is null || !newOwner.IsActive)
-                throw new UserNotFoundException(request.NewOwnerUserId);
-
-            var team = await teamRepository.GetByIdWithMembersAsync(request.TeamId, cancellationToken);
-
-            if (team is null)
-                throw new TeamNotFoundException(request.TeamId);
-
-            team.TransferOwnership(request.NewOwnerUserId);
-
-            await unitOfWork.SaveChangesAsync(cancellationToken);
+                    team.TransferOwnership(request.NewOwnerUserId);
+                }, cancellationToken);
+            }
         }
     }
 }

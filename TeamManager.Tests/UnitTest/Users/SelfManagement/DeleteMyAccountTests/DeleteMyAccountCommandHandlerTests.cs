@@ -1,5 +1,6 @@
 using Moq;
 using System.Text.Json;
+using TeamManager.Application.Abstractions;
 using TeamManager.Application.Abstractions.Authentication;
 using TeamManager.Application.Abstractions.Persistence;
 using TeamManager.Application.Common.Exceptions;
@@ -18,13 +19,14 @@ public sealed class DeleteMyAccountCommandHandlerTest
     private readonly Mock<ITeamRepository> _teamRepository = new();
     private readonly Mock<IPasswordHasher> _passwordHasher = new();
     private readonly Mock<IUnitOfWork> _unitOfWork = new();
+    private readonly Mock<IProjectRepository> _projectRepositiry = new();
     private readonly Mock<IOutbox> _outbox = new();
     private readonly DeleteMyAccountCommandHandler _sut;
 
     public DeleteMyAccountCommandHandlerTest()
     {
         _sut = new(_currentUser.Object, _userRepository.Object, _teamRepository.Object,
-            _passwordHasher.Object, _unitOfWork.Object, _outbox.Object);
+            _passwordHasher.Object, _unitOfWork.Object, _projectRepositiry.Object, _outbox.Object);
         //happy path
         _currentUser.SetupGet(x => x.UserId).Returns(_userId);
         _currentUser.SetupGet(x => x.DeviceInfo).Returns("test-device");
@@ -88,7 +90,7 @@ public sealed class DeleteMyAccountCommandHandlerTest
 
         await Assert.ThrowsAsync<ForbiddenException>(() => _sut.Handle(Request, CancellationToken.None));
         Assert.Null(user.DeletedAtUtc);
-        _teamRepository.Verify(x => x.DeactivateActiveMembershipsAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()), Times.Never);
+        _teamRepository.Verify(x => x.RemoveActiveMembershipsAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()), Times.Never);
         _userRepository.Verify(x => x.RevokeAllRefreshTokensAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()), Times.Never);
         _outbox.Verify(x => x.Add(It.IsAny<OutboxMessageType>(), It.IsAny<string>()), Times.Never);
     }
@@ -119,7 +121,7 @@ public sealed class DeleteMyAccountCommandHandlerTest
 
         Assert.NotNull(user.DeletedAtUtc);
         Assert.False(user.IsActive);
-        _teamRepository.Verify(x => x.DeactivateActiveMembershipsAsync(_userId, It.IsAny<CancellationToken>()), Times.Once);
+        _teamRepository.Verify(x => x.RemoveActiveMembershipsAsync(_userId, It.IsAny<CancellationToken>()), Times.Once);
         _userRepository.Verify(x => x.RevokeAllRefreshTokensAsync(_userId, It.IsAny<CancellationToken>()), Times.Once);
         _unitOfWork.Verify(x => x.ExecuteInSerializableTransactionAsync(It.IsAny<Func<CancellationToken, Task>>(), It.IsAny<CancellationToken>()), Times.Once);
         _outbox.Verify(x => x.Add(OutboxMessageType.AccountDeletedEmail, It.IsAny<string>()), Times.Once);
@@ -140,7 +142,7 @@ public sealed class DeleteMyAccountCommandHandlerTest
         await Assert.ThrowsAsync<InvalidOperationException>(() => _sut.Handle(Request, CancellationToken.None));
 
         Assert.True(rolledBack);
-        _teamRepository.Verify(x => x.DeactivateActiveMembershipsAsync(_userId, It.IsAny<CancellationToken>()), Times.Once);
+        _teamRepository.Verify(x => x.RemoveActiveMembershipsAsync(_userId, It.IsAny<CancellationToken>()), Times.Once);
         _outbox.Verify(x => x.Add(It.IsAny<OutboxMessageType>(), It.IsAny<string>()), Times.Never);
     }
 
@@ -149,7 +151,7 @@ public sealed class DeleteMyAccountCommandHandlerTest
     {
         var user = CreateUser();
         SetupUser(user);
-        _teamRepository.Setup(x => x.DeactivateActiveMembershipsAsync(_userId, It.IsAny<CancellationToken>())).ThrowsAsync(new InvalidOperationException());
+        _teamRepository.Setup(x => x.RemoveActiveMembershipsAsync(_userId, It.IsAny<CancellationToken>())).ThrowsAsync(new InvalidOperationException());
         var rolledBack = false;
         SetupRollbackTracking(() => rolledBack = true);
 
@@ -172,7 +174,7 @@ public sealed class DeleteMyAccountCommandHandlerTest
         await Assert.ThrowsAsync<InvalidOperationException>(() => _sut.Handle(Request, CancellationToken.None));
 
         Assert.True(rolledBack);
-        _teamRepository.Verify(x => x.DeactivateActiveMembershipsAsync(_userId, It.IsAny<CancellationToken>()), Times.Once);
+        _teamRepository.Verify(x => x.RemoveActiveMembershipsAsync(_userId, It.IsAny<CancellationToken>()), Times.Once);
         _userRepository.Verify(x => x.RevokeAllRefreshTokensAsync(_userId, It.IsAny<CancellationToken>()), Times.Once);
     }
 }

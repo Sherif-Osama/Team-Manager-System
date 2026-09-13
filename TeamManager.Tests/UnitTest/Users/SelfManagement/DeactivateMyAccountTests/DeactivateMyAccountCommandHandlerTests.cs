@@ -1,5 +1,6 @@
 using Moq;
 using System.Text.Json;
+using TeamManager.Application.Abstractions;
 using TeamManager.Application.Abstractions.Authentication;
 using TeamManager.Application.Abstractions.Persistence;
 using TeamManager.Application.Common.Exceptions;
@@ -18,13 +19,14 @@ public sealed class DeactivateMyAccountCommandHandlerTests
     private readonly Mock<IUnitOfWork> _unitOfWork = new();
     private readonly Mock<ITeamRepository> _teamRepository = new();
     private readonly Mock<IPasswordHasher> _passwordHasher = new();
+    private readonly Mock<IProjectRepository> _projectRepositiry = new();
     private readonly Mock<IOutbox> _outbox = new();
     private readonly DeactivateMyAccountCommandHandler _sut;
 
     public DeactivateMyAccountCommandHandlerTests()
     {
         _sut = new(_currentUser.Object, _userRepository.Object, _unitOfWork.Object,
-            _teamRepository.Object, _passwordHasher.Object, _outbox.Object);
+            _teamRepository.Object, _passwordHasher.Object, _projectRepositiry.Object, _outbox.Object);
         _currentUser.SetupGet(x => x.UserId).Returns(_userId);
         _currentUser.SetupGet(x => x.DeviceInfo).Returns("test-device");
         _passwordHasher.Setup(x => x.Verify(Request.CurrentPassword, It.IsAny<string>())).Returns(true);

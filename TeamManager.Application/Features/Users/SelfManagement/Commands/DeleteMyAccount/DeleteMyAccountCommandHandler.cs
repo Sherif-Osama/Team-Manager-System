@@ -1,5 +1,6 @@
 ﻿using MediatR;
 using System.Text.Json;
+using TeamManager.Application.Abstractions;
 using TeamManager.Application.Abstractions.Authentication;
 using TeamManager.Application.Abstractions.Persistence;
 using TeamManager.Application.Common.Exceptions;
@@ -8,7 +9,8 @@ using TeamManager.Application.Common.Outbox;
 namespace TeamManager.Application.Features.Users.SelfManagement.Commands.DeleteMyAccount
 {
     public sealed class DeleteMyAccountCommandHandler(ICurrentUser currentUser, IUserRepository userRepository,
-        ITeamRepository teamRepository, IPasswordHasher passwordHasher, IUnitOfWork unitOfWork, IOutbox outbox) : IRequestHandler<DeleteMyAccountCommand>
+        ITeamRepository teamRepository, IPasswordHasher passwordHasher, IUnitOfWork unitOfWork,
+        IProjectRepository projectRepository, IOutbox outbox) : IRequestHandler<DeleteMyAccountCommand>
     {
         public async Task Handle(DeleteMyAccountCommand request, CancellationToken cancellationToken)
         {
@@ -32,6 +34,11 @@ namespace TeamManager.Application.Features.Users.SelfManagement.Commands.DeleteM
                 if (hasActiveOwnedTeams)
                     throw new UserOwnsActiveTeamException(userId);
 
+                var hasActiveOwnedProject = await projectRepository.HasActiveOwnedProjectAsync(userId, ct);
+
+                if (hasActiveOwnedProject)
+                    throw new UserOwnsActiveProjectException(userId);
+
                 var isLastSystemAdmin = await userRepository.IsLastSystemAdminAsync(user.Id, ct);
 
                 if (isLastSystemAdmin)
@@ -39,7 +46,9 @@ namespace TeamManager.Application.Features.Users.SelfManagement.Commands.DeleteM
 
                 user.SoftDelete();
 
-                await teamRepository.DeactivateActiveMembershipsAsync(userId, ct);
+                await teamRepository.RemoveActiveMembershipsAsync(userId, ct);
+
+                await projectRepository.RemoveActiveMembershipsAsync(userId, ct);
 
                 await userRepository.RevokeAllRefreshTokensAsync(userId, ct);
 

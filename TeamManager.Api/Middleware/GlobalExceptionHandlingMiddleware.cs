@@ -57,6 +57,7 @@ namespace TeamManager.Api.Middleware
                 TeamMemberNotFoundException => StatusCodes.Status404NotFound,
                 DbUpdateConcurrencyException => StatusCodes.Status409Conflict,
                 UserOwnsActiveTeamException => StatusCodes.Status409Conflict,
+                UserOwnsActiveProjectException => StatusCodes.Status409Conflict,
                 RoleNotFoundException => StatusCodes.Status404NotFound,
                 ProjectNameAlreadyExistsException => StatusCodes.Status409Conflict,
                 _ => StatusCodes.Status500InternalServerError

@@ -17,7 +17,7 @@ namespace TeamManager.Application.Abstractions.Persistence
         Task LinkPendingInvitationsToUserAsync(string email, Guid userId, CancellationToken cancellationToken);
         Task<bool> HasActiveOwnedTeamsAsync(Guid userId, CancellationToken cancellationToken);
         Task DeactivateOwnedTeamsAsync(Guid userId, CancellationToken cancellationToken);
-        Task DeactivateActiveMembershipsAsync(Guid userId, CancellationToken cancellationToken);
+        Task RemoveActiveMembershipsAsync(Guid userId, CancellationToken cancellationToken);
         Task SuspendActiveMembershipsAsync(Guid userId, CancellationToken cancellationToken);
         Task ReactivateSuspendedMembershipsAsync(Guid userId, CancellationToken cancellationToken);
     }

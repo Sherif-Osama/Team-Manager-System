@@ -176,7 +176,7 @@ namespace TeamManager.Domain.Entities
 
 
             if (_invitations.Any(i => i.InvitedEmail.Equals(invitedEmail, StringComparison.OrdinalIgnoreCase)
-                                       && i.Status == TeamInvitationStatus.Pending))
+            && i.Status == TeamInvitationStatus.Pending))
                 throw new DomainException("There is already a pending invitation for this email in the team.");
 
             var invitation = new TeamInvitation(Id, invitedEmail, invitedUserId, invitedBy, role, tokenHash, expiresAtUtc);
