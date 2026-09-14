@@ -8,6 +8,7 @@ using TeamManager.Application.Features.Projects.Project.Commands.TransferProject
 using TeamManager.Application.Features.Projects.Project.Commands.UpdateProject;
 using TeamManager.Application.Features.Projects.Project.Queries.GetProject;
 using TeamManager.Application.Features.Projects.Project.Queries.GetProjectByName;
+using TeamManager.Application.Features.Projects.Project.Queries.GetProjects;
 
 namespace TeamManager.Api.Controllers.Projects
 {
@@ -80,6 +81,15 @@ namespace TeamManager.Api.Controllers.Projects
         public async Task<IActionResult> GetByName([FromQuery] string name, CancellationToken cancellationToken)
         {
             var result = await sender.Send(new GetProjectByNameQuery(name), cancellationToken);
+
+            return Ok(result);
+        }
+
+        [HttpGet]
+        [Authorize]
+        public async Task<IActionResult> GetProjects([FromQuery] GetProjectsQuery query, CancellationToken cancellationToken)
+        {
+            var result = await sender.Send(query, cancellationToken);
 
             return Ok(result);
         }

@@ -12,7 +12,11 @@ namespace TeamManager.Application.Features.Teams.Team.Queries.GetTeams
             var query = context.Teams.AsNoTracking().Where(x => x.DeletedAtUtc == null);
 
             if (!string.IsNullOrWhiteSpace(request.Search))
-                query = query.Where(x => x.Name.Contains(request.Search.Trim()));
+            {
+                var search = request.Search.Trim();
+
+                query = query.Where(x => x.Name.Contains(search) || (x.Description != null && x.Description.Contains(search)));
+            }
 
 
             if (request.IsActive.HasValue)
