@@ -7,6 +7,7 @@ using TeamManager.Application.Features.Projects.Project.Commands.ScheduleProject
 using TeamManager.Application.Features.Projects.Project.Commands.TransferProjectOwnership;
 using TeamManager.Application.Features.Projects.Project.Commands.UpdateProject;
 using TeamManager.Application.Features.Projects.Project.Queries.GetProject;
+using TeamManager.Application.Features.Projects.Project.Queries.GetProjectByName;
 
 namespace TeamManager.Api.Controllers.Projects
 {
@@ -21,8 +22,7 @@ namespace TeamManager.Api.Controllers.Projects
             var projectId = await sender.Send(new CreateProjectCommand(teamId, request.Name, request.Description, request.startDate, request.dueDate),
                 cancellationToken);
 
-            //return CreatedAtAction(nameof(GetById), new { id = projectId }, projectId);
-            return Ok();
+            return CreatedAtAction(nameof(GetById), new { id = projectId }, projectId);
         }
 
         [HttpPut("projects/{projectId:guid}/schedule")]
@@ -66,11 +66,20 @@ namespace TeamManager.Api.Controllers.Projects
             return NoContent();
         }
 
-        [Authorize]
         [HttpGet("{projectId:guid}")]
+        [Authorize]
         public async Task<IActionResult> GetById(Guid projectId, CancellationToken cancellationToken)
         {
             var result = await sender.Send(new GetProjectQuery(projectId), cancellationToken);
+
+            return Ok(result);
+        }
+
+        [HttpGet("by-name")]
+        [Authorize]
+        public async Task<IActionResult> GetByName([FromQuery] string name, CancellationToken cancellationToken)
+        {
+            var result = await sender.Send(new GetProjectByNameQuery(name), cancellationToken);
 
             return Ok(result);
         }
