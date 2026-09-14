@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using TeamManager.Application.Abstractions.Persistence;
 using TeamManager.Application.Common.Exceptions;
+using TeamManager.Domain.Enums;
 
 namespace TeamManager.Application.Features.Teams.Team.Queries.GetTeam
 {
@@ -12,8 +13,9 @@ namespace TeamManager.Application.Features.Teams.Team.Queries.GetTeam
         {
             var team = await context.Teams.AsNoTracking().Where(x => x.Id == request.TeamId && x.DeletedAtUtc == null)
               .Select(x => new GetTeamResponse(x.Id, x.Name, x.Description, x.IsActive, x.OwnerUserId,
-              x.Owner.DisplayName, x.CreatedBy, x.Creator.DisplayName, x.Members.Count, x.Projects.Count,
-              x.CreatedAtUtc, x.UpdatedAtUtc)).FirstOrDefaultAsync(cancellationToken);
+              x.Owner.DisplayName, x.CreatedBy, x.Creator.DisplayName,
+              x.Members.Count(m => TeamMemberStatuses.Occupied.Contains(m.Status)),
+              x.Projects.Count(p => p.DeletedAtUtc == null), x.CreatedAtUtc, x.UpdatedAtUtc)).FirstOrDefaultAsync(cancellationToken);
 
             if (team is null)
                 throw new TeamNotFoundException(request.TeamId);
