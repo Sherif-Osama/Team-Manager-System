@@ -2,7 +2,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using TeamManager.Domain.Entities;
 using TeamManager.Domain.Enums;
-using TaskStatus = TeamManager.Domain.Enums.TaskStatus;
 
 namespace TeamManager.Infrastructure.Persistence.Configurations;
 
@@ -25,7 +24,7 @@ public class TaskItemConfiguration : IEntityTypeConfiguration<TaskItem>
 
         builder.Property(x => x.Description).HasColumnType("nvarchar(max)");
 
-        builder.Property(x => x.Status).IsRequired().HasConversion<byte>().HasDefaultValue(TaskStatus.Todo);
+        builder.Property(x => x.Status).IsRequired().HasConversion<byte>().HasDefaultValue(TaskItemStatus.Todo);
 
         builder.Property(x => x.Priority).IsRequired().HasConversion<byte>().HasDefaultValue(TaskPriority.Medium);
 

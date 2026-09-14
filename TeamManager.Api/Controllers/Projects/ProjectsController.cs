@@ -6,6 +6,7 @@ using TeamManager.Application.Features.Projects.Project.Commands.CreateProject;
 using TeamManager.Application.Features.Projects.Project.Commands.ScheduleProject;
 using TeamManager.Application.Features.Projects.Project.Commands.TransferProjectOwnership;
 using TeamManager.Application.Features.Projects.Project.Commands.UpdateProject;
+using TeamManager.Application.Features.Projects.Project.Queries.GetProject;
 
 namespace TeamManager.Api.Controllers.Projects
 {
@@ -63,6 +64,15 @@ namespace TeamManager.Api.Controllers.Projects
             await sender.Send(new TransferProjectOwnershipCommand(projectId, request.NewOwnerUserId), cancellationToken);
 
             return NoContent();
+        }
+
+        [Authorize]
+        [HttpGet("{projectId:guid}")]
+        public async Task<IActionResult> GetById(Guid projectId, CancellationToken cancellationToken)
+        {
+            var result = await sender.Send(new GetProjectQuery(projectId), cancellationToken);
+
+            return Ok(result);
         }
     }
 }

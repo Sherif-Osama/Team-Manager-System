@@ -1,7 +1,7 @@
 using TeamManager.Domain.Common;
 using TeamManager.Domain.Enums;
 using TeamManager.Domain.Exceptions;
-using TaskStatus = TeamManager.Domain.Enums.TaskStatus;
+using TaskStatus = TeamManager.Domain.Enums.TaskItemStatus;
 
 namespace TeamManager.Domain.Entities;
 
@@ -17,7 +17,7 @@ public class TaskItem : Entity<long>
     public Project Project { get; private set; } = null!;
     public string Title { get; private set; } = null!;
     public string? Description { get; private set; }
-    public TaskStatus Status { get; private set; }
+    public TaskItemStatus Status { get; private set; }
     public TaskPriority Priority { get; private set; }
     public Guid CreatedBy { get; private set; }
     public User Creator { get; private set; } = null!;

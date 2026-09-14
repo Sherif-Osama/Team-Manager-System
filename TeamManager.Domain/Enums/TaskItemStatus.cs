@@ -1,6 +1,6 @@
 namespace TeamManager.Domain.Enums;
 
-public enum TaskStatus
+public enum TaskItemStatus
 {
     Todo = 1,
     InProgress = 2,

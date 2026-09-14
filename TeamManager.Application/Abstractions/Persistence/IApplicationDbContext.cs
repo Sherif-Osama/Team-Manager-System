@@ -11,5 +11,6 @@ namespace TeamManager.Application.Abstractions.Persistence
         DbSet<User> Users { get; }
         DbSet<Role> Roles { get; }
         DbSet<UserRole> UserRoles { get; }
+        DbSet<Project> Projects { get; }
     }
 }
