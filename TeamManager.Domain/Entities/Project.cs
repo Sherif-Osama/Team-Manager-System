@@ -120,6 +120,24 @@ namespace TeamManager.Domain.Entities
             };
         }
 
+        public void ChangeMemberRole(long memberId, ProjectRole role)
+        {
+            EnsureNotDeleted("Cannot modify a deleted project.");
+
+            var member = _members.FirstOrDefault(m => m.Id == memberId && ProjectMemberStatuses.Occupied.Contains(m.Status));
+
+            if (member is null)
+                throw new DomainException("This user does not have an active membership in the project.");
+
+            if (member.ProjectRole == role)
+                throw new DomainException("The member already has this role.");
+
+            if (role == ProjectRole.Owner)
+                throw new DomainException("Ownership must be transferred through the ownership transfer process.");
+
+            member.ChangeRole(role);
+        }
+
         public void TransferOwnership(Guid newOwnerUserId)
         {
             var currentOwner = _members.FirstOrDefault(m => m.UserId == OwnerUserId && m.Status == ProjectMemberStatus.Active);
