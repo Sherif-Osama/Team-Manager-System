@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using TeamManager.Infrastructure.Persistence;
 
@@ -11,9 +12,11 @@ using TeamManager.Infrastructure.Persistence;
 namespace TeamManager.Infrastructure.Migrations
 {
     [DbContext(typeof(TeamManagerDbContext))]
-    partial class TeamManagerDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260915031343_UpdateProjectMemberOccupiedIndex")]
+    partial class UpdateProjectMemberOccupiedIndex
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -496,10 +499,10 @@ namespace TeamManager.Infrastructure.Migrations
                         .HasDatabaseName("UQ_ProjectMembers_ProjectId_UserId_Occupied")
                         .HasFilter("[Status] IN (1, 2)");
 
-                    b.HasIndex("UserId", "Status", "AddedAtUtc")
+                    b.HasIndex("UserId", "Status")
                         .HasDatabaseName("IX_ProjectMembers_UserId_Status");
 
-                    SqlServerIndexBuilderExtensions.IncludeProperties(b.HasIndex("UserId", "Status", "AddedAtUtc"), new[] { "ProjectId" });
+                    SqlServerIndexBuilderExtensions.IncludeProperties(b.HasIndex("UserId", "Status"), new[] { "ProjectId" });
 
                     b.ToTable("ProjectMembers", null, t =>
                         {

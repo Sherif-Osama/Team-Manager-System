@@ -40,10 +40,10 @@ public class ProjectMemberConfiguration : IEntityTypeConfiguration<ProjectMember
         builder.HasOne(x => x.AddedByUser).WithMany().HasForeignKey(x => x.AddedBy)
             .HasConstraintName("FK_ProjectMembers_AddedBy").OnDelete(DeleteBehavior.NoAction);
 
-        builder.HasIndex(x => new { x.ProjectId, x.UserId }).IsUnique().HasDatabaseName("UQ_ProjectMembers_ProjectId_UserId_Active")
-            .HasFilter("[Status] = 1");
+        builder.HasIndex(x => new { x.ProjectId, x.UserId }).IsUnique().HasDatabaseName("UQ_ProjectMembers_ProjectId_UserId_Occupied")
+            .HasFilter("[Status] IN (1, 2)");
 
-        builder.HasIndex(x => new { x.UserId, x.Status }).HasDatabaseName("IX_ProjectMembers_UserId_Status")
+        builder.HasIndex(x => new { x.UserId, x.Status, x.AddedAtUtc }).HasDatabaseName("IX_ProjectMembers_UserId_Status")
             .IncludeProperties(x => new { x.ProjectId });
     }
 }

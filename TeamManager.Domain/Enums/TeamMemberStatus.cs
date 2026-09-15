@@ -3,6 +3,6 @@ namespace TeamManager.Domain.Enums;
 public enum TeamMemberStatus
 {
     Active = 1,
-    Removed = 2,
-    Suspended = 3
+    Suspended = 2,
+    Removed = 3
 }

@@ -41,7 +41,7 @@ public class TeamMemberConfiguration : IEntityTypeConfiguration<TeamMember>
             .HasConstraintName("FK_TeamMembers_RemovedBy").OnDelete(DeleteBehavior.NoAction);
 
         builder.HasIndex(x => new { x.TeamId, x.UserId }).IsUnique().HasDatabaseName("UQ_TeamMembers_TeamId_UserId_Active")
-            .HasFilter("[Status] = 1");
+            .HasFilter("[Status] IN (1, 2)");
 
         builder.HasIndex(x => new { x.TeamId, x.Status }).HasDatabaseName("IX_TeamMembers_TeamId_Status")
             .IncludeProperties(x => new { x.UserId, x.TeamRole });

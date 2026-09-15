@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using TeamManager.Application.Features.Projects.ProjectMembers.Commands.AddProjectMember;
 using TeamManager.Application.Features.Projects.ProjectMembers.Commands.RemoveMember;
+using TeamManager.Application.Features.Projects.ProjectMembers.Queries.GetMyProjects;
 
 namespace TeamManager.Api.Controllers.Projects
 {
@@ -27,6 +28,15 @@ namespace TeamManager.Api.Controllers.Projects
             await sender.Send(new RemoveMemberCommand(projectId, memberId), cancellationToken);
 
             return NoContent();
+        }
+
+        [HttpGet("my")]
+        [Authorize]
+        public async Task<IActionResult> GetMyProjects([FromQuery] GetMyProjectsQuery query, CancellationToken cancellationToken)
+        {
+            var result = await sender.Send(query, cancellationToken);
+
+            return Ok(result);
         }
     }
 }
