@@ -1,6 +1,5 @@
 ﻿using MediatR;
 using Microsoft.EntityFrameworkCore;
-using System.Diagnostics;
 using TeamManager.Application.Abstractions.Authentication;
 using TeamManager.Application.Abstractions.Persistence;
 using TeamManager.Domain.Enums;
@@ -32,8 +31,6 @@ namespace TeamManager.Application.Features.Projects.ProjectMembers.Queries.GetMy
                 (pm.Project.Description != null && pm.Project.Description.Contains(search)));
             }
 
-            var stopwatch = Stopwatch.StartNew();
-
             var totalCount = await query.CountAsync(cancellationToken);
 
             var projects = await query.OrderByDescending(pm => pm.AddedAtUtc).Skip((request.Page - 1) * request.PageSize)
@@ -43,12 +40,8 @@ namespace TeamManager.Application.Features.Projects.ProjectMembers.Queries.GetMy
                 pm.ProjectRole, pm.Project.Members.Count(m => ProjectMemberStatuses.Occupied.Contains(m.Status)),
                 pm.Project.Tasks.Count(t => t.DeletedAtUtc == null), pm.Project.CreatedAtUtc, pm.Project.UpdatedAtUtc))
                 .ToListAsync(cancellationToken);
-            stopwatch.Stop();
 
-            Console.WriteLine($"///////////////GetMyProjects took: {stopwatch.ElapsedMilliseconds} ms");
             return new GetMyProjectsResponse(projects, totalCount, request.Page, request.PageSize);
-            //Console.WriteLine(projects);
-            //return null;
         }
     }
 }
