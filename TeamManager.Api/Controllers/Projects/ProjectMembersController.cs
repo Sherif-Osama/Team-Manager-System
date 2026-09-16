@@ -24,7 +24,7 @@ namespace TeamManager.Api.Controllers.Projects
             return NoContent();
         }
 
-        [HttpDelete("{projectId:guid}/members{memberId:long}")]
+        [HttpDelete("{projectId:guid}/members/{memberId:long}")]
         [Authorize]
         public async Task<IActionResult> RemoveProjectMember(Guid projectId, long memberId, CancellationToken cancellationToken)
         {
