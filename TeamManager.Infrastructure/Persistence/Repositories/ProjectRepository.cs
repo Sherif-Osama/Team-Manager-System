@@ -69,5 +69,13 @@ namespace TeamManager.Infrastructure.Persistence.Repositories
                 && x.ProjectRole != ProjectRole.Owner)
                 .ExecuteUpdateAsync(s => s.SetProperty(x => x.Status, ProjectMemberStatus.Suspended), cancellationToken);
         }
+
+        public Task ReactivateSuspendedMembershipsAsync(Guid userId, CancellationToken cancellationToken)
+        {
+            return context.ProjectMembers.Where(x => x.UserId == userId &&
+            x.Status == ProjectMemberStatus.Suspended
+            && x.ProjectRole != ProjectRole.Owner)
+                .ExecuteUpdateAsync(s => s.SetProperty(x => x.Status, ProjectMemberStatus.Active), cancellationToken);
+        }
     }
 }

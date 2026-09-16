@@ -148,8 +148,7 @@ namespace TeamManager.Domain.Entities
 
         public void ChangeMemberRole(long memberId, TeamRole role)
         {
-            var member = _members.FirstOrDefault(m => m.Id == memberId &&
-                (m.Status == TeamMemberStatus.Active || m.Status == TeamMemberStatus.Suspended));
+            var member = _members.FirstOrDefault(m => m.Id == memberId && TeamMemberStatuses.Occupied.Contains(m.Status));
 
             if (member is null)
                 throw new DomainException("This member does not have a manageable membership in the team.");

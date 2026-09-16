@@ -60,6 +60,8 @@ namespace TeamManager.Api.Middleware
                 UserOwnsActiveProjectException => StatusCodes.Status409Conflict,
                 RoleNotFoundException => StatusCodes.Status404NotFound,
                 ProjectNameAlreadyExistsException => StatusCodes.Status409Conflict,
+                DefaultRoleNotFoundException => StatusCodes.Status404NotFound,
+                ProjectNotFoundException => StatusCodes.Status404NotFound,
                 _ => StatusCodes.Status500InternalServerError
             };
 

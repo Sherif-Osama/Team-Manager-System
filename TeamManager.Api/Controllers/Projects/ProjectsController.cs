@@ -26,7 +26,7 @@ namespace TeamManager.Api.Controllers.Projects
             return CreatedAtAction(nameof(GetById), new { id = projectId }, projectId);
         }
 
-        [HttpPut("projects/{projectId:guid}/schedule")]
+        [HttpPut("{projectId:guid}/schedule")]
         [Authorize]
         public async Task<IActionResult> ScheduleProject(Guid projectId, [FromBody] ScheduleProjectRequest request,
             CancellationToken cancellationToken)
@@ -38,7 +38,7 @@ namespace TeamManager.Api.Controllers.Projects
             return NoContent();
         }
 
-        [HttpPut("projects/{projectId:guid}")]
+        [HttpPut("{projectId:guid}")]
         [Authorize]
         public async Task<IActionResult> UpdateProject(Guid projectId, [FromBody] UpdateProjectRequest request,
             CancellationToken cancellationToken)
@@ -48,7 +48,7 @@ namespace TeamManager.Api.Controllers.Projects
             return NoContent();
         }
 
-        [HttpPut("projects/{projectId:guid}/status")]
+        [HttpPut("{projectId:guid}/status")]
         [Authorize]
         public async Task<IActionResult> ChangeProjectStatus(Guid projectId, [FromBody] ChangeProjectStatusRequest request,
         CancellationToken cancellationToken)

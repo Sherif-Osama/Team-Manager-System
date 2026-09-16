@@ -124,22 +124,28 @@ namespace TeamManager.Domain.Entities
         {
             EnsureNotDeleted("Cannot modify a deleted project.");
 
+            if (role == ProjectRole.Owner)
+                throw new DomainException("Ownership must be transferred through the ownership transfer process.");
+
             var member = _members.FirstOrDefault(m => m.Id == memberId && ProjectMemberStatuses.Occupied.Contains(m.Status));
 
             if (member is null)
                 throw new DomainException("This user does not have an active membership in the project.");
 
+            if (member.ProjectRole == ProjectRole.Owner)
+                throw new DomainException("Ownership cannot be changed");
+
             if (member.ProjectRole == role)
                 throw new DomainException("The member already has this role.");
 
-            if (role == ProjectRole.Owner)
-                throw new DomainException("Ownership must be transferred through the ownership transfer process.");
 
             member.ChangeRole(role);
         }
 
         public void TransferOwnership(Guid newOwnerUserId)
         {
+            EnsureNotDeleted("Cannot modify a deleted project.");
+
             var currentOwner = _members.FirstOrDefault(m => m.UserId == OwnerUserId && m.Status == ProjectMemberStatus.Active);
 
             if (currentOwner is null)
@@ -155,6 +161,8 @@ namespace TeamManager.Domain.Entities
             newOwner.PromoteToOwner();
 
             OwnerUserId = newOwnerUserId;
+
+            Touch();
         }
 
         public void SoftDelete()

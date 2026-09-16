@@ -14,7 +14,7 @@ namespace TeamManager.Api.Controllers.Projects
     [ApiController]
     public class ProjectMembersController(ISender sender) : ControllerBase
     {
-        [HttpPost("projects/{projectId:guid}/members")]
+        [HttpPost("{projectId:guid}/members")]
         [Authorize]
         public async Task<IActionResult> AddProjectMember(Guid projectId, [FromBody] AddProjectMemberRequest request,
             CancellationToken cancellationToken)

@@ -11,7 +11,7 @@ namespace TeamManager.Api.Controllers.Authentication
 {
 
     [ApiController]
-    [Route("api/auth")]
+    [Route("api/[controller]")]
     public sealed class AuthenticationController(ISender sender) : ControllerBase
     {
         [HttpPost("register")]

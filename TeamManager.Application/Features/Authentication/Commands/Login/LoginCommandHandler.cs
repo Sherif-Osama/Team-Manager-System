@@ -1,5 +1,6 @@
 ﻿using MediatR;
 using System.Text.Json;
+using TeamManager.Application.Abstractions;
 using TeamManager.Application.Abstractions.Authentication;
 using TeamManager.Application.Abstractions.Persistence;
 using TeamManager.Application.Common.Exceptions;
@@ -9,7 +10,7 @@ namespace TeamManager.Application.Features.Authentication.Commands.Login;
 
 public sealed class LoginCommandHandler(IUserRepository userRepository, IPasswordHasher passwordHasher,
         IAccessTokenService accessTokenService, IRefreshTokenService refreshTokenService, IUnitOfWork unitOfWork,
-        ICurrentUser currentUser, IOutbox outbox, ITeamRepository teamRepository) : IRequestHandler<LoginCommand, LoginResponse>
+        ICurrentUser currentUser, IOutbox outbox, ITeamRepository teamRepository, IProjectRepository projectRepository) : IRequestHandler<LoginCommand, LoginResponse>
 {
     public async Task<LoginResponse> Handle(LoginCommand request, CancellationToken cancellationToken)
     {
@@ -47,9 +48,11 @@ public sealed class LoginCommandHandler(IUserRepository userRepository, IPasswor
         await unitOfWork.ExecuteInTransactionAsync(async ct =>
         {
             await userRepository.AddRefreshTokenAsync(refreshTokenEntity, ct);
+
             if (wasInactive)
             {
                 await teamRepository.ReactivateSuspendedMembershipsAsync(user.Id, ct);
+                await projectRepository.ReactivateSuspendedMembershipsAsync(user.Id, ct);
 
                 var payload = JsonSerializer.Serialize(new
                 {
