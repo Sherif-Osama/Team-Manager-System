@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
 using System.Data;
 using TeamManager.Application.Abstractions.Persistence;
 using TeamManager.Domain.Entities;
@@ -39,9 +40,25 @@ namespace TeamManager.Infrastructure.Persistence
             return ExecuteInTransactionAsync(action, IsolationLevel.ReadCommitted, cancellationToken);
         }
 
-        public Task ExecuteInSerializableTransactionAsync(Func<CancellationToken, Task> action, CancellationToken cancellationToken)
+        private const int MaxDeadlockRetries = 3;
+
+        public async Task ExecuteInSerializableTransactionAsync(Func<CancellationToken, Task> action, CancellationToken cancellationToken)
         {
-            return ExecuteInTransactionAsync(action, IsolationLevel.Serializable, cancellationToken);
+            for (var attempt = 1; attempt <= MaxDeadlockRetries; attempt++)
+            {
+                try
+                {
+                    await ExecuteInTransactionAsync(action, IsolationLevel.Serializable, cancellationToken);
+
+                    return;
+                }
+                catch (SqlException ex) when (ex.Number == 1205 && attempt < MaxDeadlockRetries)
+                {
+                    var delay = TimeSpan.FromMilliseconds(100 * attempt);
+
+                    await Task.Delay(delay, cancellationToken);
+                }
+            }
         }
 
         private async Task ExecuteInTransactionAsync(Func<CancellationToken, Task> action,
