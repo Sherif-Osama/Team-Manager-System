@@ -50,6 +50,8 @@ namespace TeamManager.Domain.Entities
 
         public void Rename(string name)
         {
+            EnsureNotDeleted("cannot modify deleted team");
+
             if (string.IsNullOrWhiteSpace(name))
                 throw new DomainException("A team must have a name.");
 
@@ -59,12 +61,16 @@ namespace TeamManager.Domain.Entities
 
         public void UpdateDescription(string? description)
         {
+            EnsureNotDeleted("cannot modify deleted team");
+
             Description = description;
             Touch();
         }
 
         public void TransferOwnership(Guid newOwnerUserId)
         {
+            EnsureNotDeleted("cannot modify deleted team");
+
             if (OwnerUserId == newOwnerUserId)
                 throw new DomainException("The specified user is already the team owner.");
 
@@ -86,6 +92,8 @@ namespace TeamManager.Domain.Entities
 
         public void Deactivate()
         {
+            EnsureNotDeleted("cannot modify deleted team");
+
             if (!IsActive)
                 throw new DomainException("The team is already inactive.");
 
@@ -95,8 +103,7 @@ namespace TeamManager.Domain.Entities
 
         public void Activate()
         {
-            if (DeletedAtUtc.HasValue)
-                throw new DomainException("A deleted team cannot be activated.");
+            EnsureNotDeleted("A deleted team cannot be activated.");
 
             if (IsActive)
                 throw new DomainException("The team is already active.");
@@ -107,8 +114,7 @@ namespace TeamManager.Domain.Entities
 
         public void SoftDelete()
         {
-            if (DeletedAtUtc.HasValue)
-                throw new DomainException("The team is already deleted.");
+            EnsureNotDeleted("The team is already deleted.");
 
             DeletedAtUtc = DateTime.UtcNow;
             IsActive = false;
@@ -117,6 +123,8 @@ namespace TeamManager.Domain.Entities
 
         public TeamMember AddMember(Guid userId, TeamRole role, Guid? invitedBy = null)
         {
+            EnsureNotDeleted("cannot add member to deleted team");
+
             if (!IsActive)
                 throw new DomainException("Cannot add a member to an inactive team.");
 
@@ -148,6 +156,8 @@ namespace TeamManager.Domain.Entities
 
         public void ChangeMemberRole(long memberId, TeamRole role)
         {
+            EnsureNotDeleted("cannot modify member in a deleted team");
+
             var member = _members.FirstOrDefault(m => m.Id == memberId && TeamMemberStatuses.Occupied.Contains(m.Status));
 
             if (member is null)
@@ -162,6 +172,8 @@ namespace TeamManager.Domain.Entities
         public TeamInvitation Invite(string invitedEmail, Guid? invitedUserId, Guid invitedBy, TeamRole role,
             string tokenHash, DateTime expiresAtUtc)
         {
+            EnsureNotDeleted("cannot invite member to deleted team");
+
             if (!IsActive)
                 throw new DomainException("Cannot invite members to an inactive team.");
 
@@ -186,6 +198,8 @@ namespace TeamManager.Domain.Entities
 
         public TeamMember AcceptInvitation(string tokenHash, Guid userId, string userEmail)
         {
+            EnsureNotDeleted("cannot add member to deleted team");
+
             if (!IsActive)
                 throw new DomainException("Cannot accept an invitation for an inactive team.");
 
@@ -212,8 +226,7 @@ namespace TeamManager.Domain.Entities
                 throw new DomainException("This invitation belongs to another user.");
             //if user is already a member, accept the invitation and return the existing member
             //this case can happen if the user was invited to the team, and he added through addMember method before accepting the invitation
-            var existingMember = _members.FirstOrDefault(m => m.UserId == userId &&
-            (m.Status == TeamMemberStatus.Active || m.Status == TeamMemberStatus.Suspended));
+            var existingMember = _members.FirstOrDefault(m => m.UserId == userId && TeamMemberStatuses.Occupied.Contains(m.Status));
 
             if (existingMember is not null)
             {
@@ -252,6 +265,12 @@ namespace TeamManager.Domain.Entities
                 throw new DomainException("Invitation not found.");
 
             invitation.Cancel();
+        }
+
+        private void EnsureNotDeleted(string Message)
+        {
+            if (DeletedAtUtc.HasValue)
+                throw new DomainException(Message);
         }
 
         private void Touch() => UpdatedAtUtc = DateTime.UtcNow;
