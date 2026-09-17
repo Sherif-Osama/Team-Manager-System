@@ -77,5 +77,13 @@ namespace TeamManager.Infrastructure.Persistence.Repositories
             && x.ProjectRole != ProjectRole.Owner)
                 .ExecuteUpdateAsync(s => s.SetProperty(x => x.Status, ProjectMemberStatus.Active), cancellationToken);
         }
+
+        public Task RemoveMembershipsByTeamAsync(Guid teamId, Guid userId, CancellationToken cancellationToken)
+        {
+            return context.ProjectMembers.Where(pm => pm.Project.TeamId == teamId && pm.UserId == userId
+                    && (pm.Status == ProjectMemberStatus.Active || pm.Status == ProjectMemberStatus.Suspended) && pm.ProjectRole
+                    != ProjectRole.Owner).ExecuteUpdateAsync(s => s.SetProperty(x => x.Status, ProjectMemberStatus.Removed)
+                    .SetProperty(x => x.RemovedAtUtc, DateTime.UtcNow), cancellationToken);
+        }
     }
 }

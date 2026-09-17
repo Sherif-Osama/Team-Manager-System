@@ -1,12 +1,13 @@
 ﻿using MediatR;
+using TeamManager.Application.Abstractions;
 using TeamManager.Application.Abstractions.Authentication;
 using TeamManager.Application.Abstractions.Persistence;
 using TeamManager.Application.Common.Exceptions;
 
 namespace TeamManager.Application.Features.Teams.TeamMembers.Commands.RemoveMember
 {
-    public sealed class RemoveMemberCommandHandler(ITeamRepository teamRepository, ICurrentUser currentUser, IUnitOfWork unitOfWork)
-        : IRequestHandler<RemoveMemberCommand>
+    public sealed class RemoveMemberCommandHandler(ITeamRepository teamRepository, IProjectRepository projectRepository,
+        ICurrentUser currentUser, IUnitOfWork unitOfWork) : IRequestHandler<RemoveMemberCommand>
     {
         public async Task Handle(RemoveMemberCommand request, CancellationToken cancellationToken)
         {
@@ -18,9 +19,17 @@ namespace TeamManager.Application.Features.Teams.TeamMembers.Commands.RemoveMemb
             if (team is null)
                 throw new TeamNotFoundException(request.TeamId);
 
-            team.RemoveMember(request.MemberId, currentUser.UserId!.Value);
+            var memberToRemove = team.Members.FirstOrDefault(m => m.Id == request.MemberId);
 
-            await unitOfWork.SaveChangesAsync(cancellationToken);
+            if (memberToRemove is null)
+                throw new TeamMemberNotFoundException(team.Id, request.MemberId);
+
+            await unitOfWork.ExecuteInTransactionAsync(async ct =>
+            {
+                team.RemoveMember(request.MemberId, currentUser.UserId!.Value);
+                await projectRepository.RemoveMembershipsByTeamAsync(request.TeamId, memberToRemove.UserId, ct);
+                await unitOfWork.SaveChangesAsync(ct);
+            }, cancellationToken);
         }
     }
 }

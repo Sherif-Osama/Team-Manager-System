@@ -1,8 +1,6 @@
 using TeamManager.Domain.Common;
 using TeamManager.Domain.Enums;
 using TeamManager.Domain.Exceptions;
-using TaskStatus = TeamManager.Domain.Enums.TaskItemStatus;
-
 namespace TeamManager.Domain.Entities;
 
 public class TaskItem : Entity<long>
@@ -49,7 +47,7 @@ public class TaskItem : Entity<long>
         Title = title;
         Description = description;
         CreatedBy = createdBy;
-        Status = TaskStatus.Todo;
+        Status = TaskItemStatus.Todo;
         Priority = TaskPriority.Medium;
         CreatedAtUtc = DateTime.UtcNow;
     }
@@ -81,10 +79,10 @@ public class TaskItem : Entity<long>
         Touch();
     }
 
-    public void ChangeStatus(TaskStatus status)
+    public void ChangeStatus(TaskItemStatus status)
     {
         Status = status;
-        CompletedAtUtc = status == TaskStatus.Done ? DateTime.UtcNow : null;
+        CompletedAtUtc = status == TaskItemStatus.Done ? DateTime.UtcNow : null;
         Touch();
     }
 
