@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using TeamManager.Application.Abstractions.DefaultValues;
 using TeamManager.Application.Abstractions.Persistence;
 using TeamManager.Domain.Entities;
 
@@ -55,7 +56,7 @@ namespace TeamManager.Infrastructure.Persistence.Repositories
         public async Task<bool> IsLastSystemAdminAsync(Guid userId, CancellationToken cancellationToken)
         {
             return await context.UserRoles.AnyAsync(ur => ur.UserId == userId && ur.User.IsActive
-            && ur.User.DeletedAtUtc == null && ur.Role.Name == "SystemAdmin" &&
+            && ur.User.DeletedAtUtc == null && ur.Role.Name == DefaultRoles.Admin &&
             !context.UserRoles.Any(other => other.RoleId == ur.RoleId && other.UserId != userId && other.User.IsActive &&
             other.User.DeletedAtUtc == null), cancellationToken);
         }

@@ -1,6 +1,7 @@
 ﻿using MediatR;
 using System.Text.Json;
 using TeamManager.Application.Abstractions.Authentication;
+using TeamManager.Application.Abstractions.DefaultValues;
 using TeamManager.Application.Abstractions.Persistence;
 using TeamManager.Application.Abstractions.Security;
 using TeamManager.Application.Common.Exceptions;
@@ -13,19 +14,6 @@ namespace TeamManager.Application.Features.Authentication.Commands.Register
         IUnitOfWork unitOfWork, ITeamRepository teamRepository, IEmailConfirmationTokenService tokenService,
         IRoleRepository roleRepository, IOutbox outbox) : IRequestHandler<RegisterCommand, Guid>
     {
-        // The default role assigned to every newly registered user.
-        // This role is resolved from the database by name and its RoleId is assigned
-        // to the user through the UserRole relationship.
-        //
-        // The default registration role is intentionally fixed in the application
-        // and is not configurable through the admin role-management features.
-        // Administrators can create and assign additional roles to users, but they
-        // cannot change the role automatically assigned during registration.
-        //
-        // If this role is renamed or removed from the database, user registration
-        // will fail until the corresponding value and seeded role are updated.
-        private const string DefaultRoleName = "User";
-
         public async Task<Guid> Handle(RegisterCommand request, CancellationToken cancellationToken)
         {
             var exists = await userRepository.ExistsByEmailAsync(request.Email, cancellationToken);
@@ -34,7 +22,7 @@ namespace TeamManager.Application.Features.Authentication.Commands.Register
 
             var passwordHash = passwordHasher.Hash(request.Password);
 
-            var role = await roleRepository.GetByNameAsync(DefaultRoleName, cancellationToken);
+            var role = await roleRepository.GetByNameAsync(DefaultRoles.User, cancellationToken);
 
             if (role is null)
                 throw new DefaultRoleNotFoundException("The default User role is not seeded.");

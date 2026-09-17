@@ -1,4 +1,5 @@
 ﻿using MediatR;
+using TeamManager.Application.Abstractions.DefaultValues;
 using TeamManager.Application.Common.Authorization;
 
 namespace TeamManager.Application.Features.Users.AdminUserManagement.Queries.GetUsers
@@ -6,6 +7,6 @@ namespace TeamManager.Application.Features.Users.AdminUserManagement.Queries.Get
     public sealed record GetUsersQuery(string? Search, bool? IsActive, bool? IsEmailConfirmed, int Page = 1, int PageSize = 20)
         : IRequest<GetUsersResponse>, IRequiresPermission
     {
-        public string PermissionCode => "system.manage_users";
+        public string PermissionCode => PermissionCodes.ManageUsers;
     }
 }

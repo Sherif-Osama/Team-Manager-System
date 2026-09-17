@@ -1,9 +1,8 @@
 ﻿using FluentValidation;
-using TeamManager.Application.Features.Teams.Team.Queries.GetTeamByName;
 
 namespace TeamManager.Application.Features.Projects.Project.Queries.GetProjectByName
 {
-    public sealed class GetProjectByNameValidator : AbstractValidator<GetTeamByNameQuery>
+    public sealed class GetProjectByNameValidator : AbstractValidator<GetProjectByNameQuery>
     {
         public GetProjectByNameValidator()
         {
