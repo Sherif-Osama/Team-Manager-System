@@ -54,6 +54,7 @@ namespace TeamManager.Infrastructure
             services.AddScoped<IBootstrapSecretProvider, BootstrapSecretProvider>();
             services.AddScoped<IRoleRepository, RoleRepository>();
             services.AddScoped<IProjectRepository, ProjectRepository>();
+            services.AddScoped<ITaskRepository, TaskRepository>();
             return services;
         }
     }

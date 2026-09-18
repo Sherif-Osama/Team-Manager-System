@@ -16,5 +16,6 @@ namespace TeamManager.Application.Abstractions
         Task SuspendActiveMembershipsAsync(Guid userId, CancellationToken cancellationToken);
         Task ReactivateSuspendedMembershipsAsync(Guid userId, CancellationToken cancellationToken);
         Task RemoveMembershipsByTeamAsync(Guid teamId, Guid userId, CancellationToken cancellationToken);
+        Task<bool> IsActiveMemberAsync(Guid projectId, Guid userId, CancellationToken cancellationToken);
     }
 }

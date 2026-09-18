@@ -1,6 +1,6 @@
 ﻿using FluentValidation;
 
-namespace TeamManager.Application.Features.Tasks.Commands.CreateTask
+namespace TeamManager.Application.Features.Tasks.TaskItem.Commands.CreateTask
 {
     public sealed class CreateTaskCommandValidator : AbstractValidator<CreateTaskCommand>
     {

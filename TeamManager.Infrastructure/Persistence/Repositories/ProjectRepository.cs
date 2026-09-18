@@ -63,6 +63,13 @@ namespace TeamManager.Infrastructure.Persistence.Repositories
             pm.Status == ProjectMemberStatus.Active && requiredRoles.Contains(pm.ProjectRole), cancellationToken);
         }
 
+        public Task<bool> IsActiveMemberAsync(Guid projectId, Guid userId, CancellationToken cancellationToken)
+        {
+            return context.ProjectMembers.AsNoTracking()
+                .AnyAsync(pm => pm.ProjectId == projectId &&
+                pm.UserId == userId && pm.User.IsActive && pm.Status == ProjectMemberStatus.Active, cancellationToken);
+        }
+
         public Task SuspendActiveMembershipsAsync(Guid userId, CancellationToken cancellationToken)
         {
             return context.ProjectMembers.Where(x => x.UserId == userId && x.Status == ProjectMemberStatus.Active

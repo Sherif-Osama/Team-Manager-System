@@ -76,7 +76,10 @@ namespace TeamManager.Domain.Entities
 
             var today = DateOnly.FromDateTime(DateTime.UtcNow);
 
-            if (startDate.HasValue && dueDate.HasValue && dueDate.Value < startDate.Value)
+            var effectiveStart = startDate ?? StartDate;
+            var effectiveDue = dueDate ?? DueDate;
+
+            if (effectiveStart.HasValue && effectiveDue.HasValue && effectiveDue.Value < effectiveStart.Value)
                 throw new DomainException("A project's due date cannot be before its start date.");
 
             if (startDate.HasValue && startDate.Value < today)
@@ -85,8 +88,8 @@ namespace TeamManager.Domain.Entities
             if (dueDate.HasValue && dueDate.Value < today)
                 throw new DomainException("Project due date cannot be in the past.");
 
-            StartDate = startDate ?? StartDate;
-            DueDate = dueDate ?? DueDate;
+            StartDate = effectiveStart;
+            DueDate = effectiveDue;
             Touch();
         }
 

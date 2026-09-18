@@ -118,7 +118,6 @@ namespace TeamManager.Domain.Entities
 
             DeletedAtUtc = DateTime.UtcNow;
             IsActive = false;
-            Touch();
         }
 
         public TeamMember AddMember(Guid userId, TeamRole role, Guid? invitedBy = null)

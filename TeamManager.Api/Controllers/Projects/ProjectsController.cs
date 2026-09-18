@@ -23,7 +23,7 @@ namespace TeamManager.Api.Controllers.Projects
             var projectId = await sender.Send(new CreateProjectCommand(teamId, request.Name, request.Description, request.startDate, request.dueDate),
                 cancellationToken);
 
-            return CreatedAtAction(nameof(GetById), new { id = projectId }, projectId);
+            return CreatedAtAction(nameof(GetById), new { projectId }, projectId);
         }
 
         [HttpPut("{projectId:guid}/schedule")]
