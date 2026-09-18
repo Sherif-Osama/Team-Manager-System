@@ -14,8 +14,7 @@ namespace TeamManager.Infrastructure.Persistence.Repositories
 
         public Task RemoveActiveMembershipsAsync(Guid userId, CancellationToken cancellationToken)
         {
-            return context.ProjectMembers.Where(x => x.UserId == userId &&
-                    (x.Status == ProjectMemberStatus.Active || x.Status == ProjectMemberStatus.Suspended)
+            return context.ProjectMembers.Where(x => x.UserId == userId && ProjectMemberStatuses.Occupied.Contains(x.Status)
                     && x.ProjectRole != ProjectRole.Owner).ExecuteUpdateAsync(s => s.SetProperty(x => x.Status, ProjectMemberStatus.Removed)
                     .SetProperty(x => x.RemovedAtUtc, DateTime.UtcNow), cancellationToken);
         }
@@ -36,8 +35,7 @@ namespace TeamManager.Infrastructure.Persistence.Repositories
 
         public async Task<Project?> GetByIdWithMembersAsync(Guid projectId, CancellationToken cancellationToken)
         {
-            return await context.Projects.Include(p => p.Members.Where(m => m.Status == ProjectMemberStatus.Active ||
-            m.Status == ProjectMemberStatus.Suspended))
+            return await context.Projects.Include(p => p.Members.Where(m => ProjectMemberStatuses.Occupied.Contains(m.Status)))
                 .FirstOrDefaultAsync(p => p.Id == projectId && p.DeletedAtUtc == null, cancellationToken);
         }
 

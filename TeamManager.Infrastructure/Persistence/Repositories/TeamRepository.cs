@@ -41,7 +41,7 @@ namespace TeamManager.Infrastructure.Persistence.Repositories
         {
             return context.Teams
                 .Include(t => t.Members
-                    .Where(m => m.Status == TeamMemberStatus.Active || m.Status == TeamMemberStatus.Suspended))
+                    .Where(m => TeamMemberStatuses.Occupied.Contains(m.Status)))
                 .Include(t => t.Invitations.Where(i => i.Status == TeamInvitationStatus.Pending))
                 .FirstOrDefaultAsync(t => t.Id == teamId && t.DeletedAtUtc == null, cancellationToken);
         }
@@ -59,11 +59,11 @@ namespace TeamManager.Infrastructure.Persistence.Repositories
         {
             return context.Teams
                 .Include(t => t.Invitations.Where(i => i.TokenHash == tokenHash))
-                .Include(t => t.Members.Where(m => m.UserId == memberUserId &&
-                    (m.Status == TeamMemberStatus.Active || m.Status == TeamMemberStatus.Suspended)))
+                .Include(t => t.Members.Where(m => m.UserId == memberUserId && TeamMemberStatuses.Occupied.Contains(m.Status)))
                 .FirstOrDefaultAsync(t => t.Invitations.Any(i => i.TokenHash == tokenHash) &&
                     t.DeletedAtUtc == null, cancellationToken);
         }
+
         #endregion
         public Task LinkPendingInvitationsToUserAsync(string email, Guid userId, CancellationToken cancellationToken)
         {
@@ -81,8 +81,7 @@ namespace TeamManager.Infrastructure.Persistence.Repositories
 
         public Task RemoveActiveMembershipsAsync(Guid userId, CancellationToken cancellationToken)
         {
-            return context.TeamMembers.Where(x => x.UserId == userId &&
-            (x.Status == TeamMemberStatus.Active || x.Status == TeamMemberStatus.Suspended) &&
+            return context.TeamMembers.Where(x => x.UserId == userId && TeamMemberStatuses.Occupied.Contains(x.Status) &&
             x.TeamRole != TeamRole.Owner).ExecuteUpdateAsync(s => s.SetProperty(x => x.Status, TeamMemberStatus.Removed)
                 .SetProperty(x => x.RemovedAtUtc, DateTime.UtcNow), cancellationToken);
         }

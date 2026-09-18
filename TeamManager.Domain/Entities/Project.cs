@@ -205,10 +205,10 @@ namespace TeamManager.Domain.Entities
 
         private void Touch() => UpdatedAtUtc = DateTime.UtcNow;
 
-        private void EnsureNotDeleted(string Message)
+        private void EnsureNotDeleted(string message)
         {
             if (DeletedAtUtc.HasValue)
-                throw new DomainException(Message);
+                throw new DomainException(message);
         }
     }
 }

@@ -168,6 +168,7 @@ namespace TeamManager.Domain.Entities
             EnsureNotDeleted("Task is already deleted");
             Status = TaskItemStatus.Cancelled;
             DeletedAtUtc = DateTime.UtcNow;
+            CompletedAtUtc = null;
         }
 
         public TaskDependency AddDependency(long dependsOnTaskId, Guid createdBy)
@@ -250,16 +251,16 @@ namespace TeamManager.Domain.Entities
         }
 
 
-        private void EnsureNotDeleted(string Message)
+        private void EnsureNotDeleted(string message)
         {
             if (DeletedAtUtc.HasValue)
-                throw new DomainException(Message);
+                throw new DomainException(message);
         }
 
-        private void EnsureNotCancelled(string Message)
+        private void EnsureNotCancelled(string message)
         {
             if (Status == TaskItemStatus.Cancelled)
-                throw new DomainException(Message);
+                throw new DomainException(message);
         }
 
         private void Touch() => UpdatedAtUtc = DateTime.UtcNow;

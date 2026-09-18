@@ -40,7 +40,7 @@ namespace TeamManager.Infrastructure.BackgroundJobs.DeleteInactiveUsers
             await context.ExecuteInTransactionAsync(async ct =>
             {
                 await context.TeamMembers.Where(x => userIds.Contains(x.UserId) &&
-                (x.Status == TeamMemberStatus.Active || x.Status == TeamMemberStatus.Suspended) &&
+                TeamMemberStatuses.Occupied.Contains(x.Status) &&
                 x.TeamRole != TeamRole.Owner).ExecuteUpdateAsync(s => s.SetProperty(x => x.Status, TeamMemberStatus.Removed)
                 .SetProperty(x => x.RemovedAtUtc, DateTime.UtcNow), ct);
 
