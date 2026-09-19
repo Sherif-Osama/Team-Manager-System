@@ -68,6 +68,14 @@ namespace TeamManager.Domain.Entities
             Touch();
         }
 
+        public void UpdateDescription(string? description)
+        {
+            EnsureNotDeleted("cannot modify deleted task");
+
+            Description = description;
+            Touch();
+        }
+
         public void Assign(Guid userId)
         {
             EnsureNotDeleted("cannot assigned deleted task");

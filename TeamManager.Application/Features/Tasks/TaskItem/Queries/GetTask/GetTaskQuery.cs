@@ -4,8 +4,8 @@ using TeamManager.Domain.Enums;
 
 namespace TeamManager.Application.Features.Tasks.TaskItem.Queries.GetTask
 {
-    public sealed record GetTaskQuery(Guid ProjectId, long TaskId) : IRequest<GetTaskResponse>, IProjectScopedRequest
+    public sealed record GetTaskQuery(long TaskId) : IRequest<GetTaskResponse>, ITaskScopedRequest
     {
-        public ProjectRole[] RequiredRoles => [ProjectRole.Owner, ProjectRole.Admin, ProjectRole.Member, ProjectRole.Viewer];
+        public ProjectRole[] RequiredProjectRoles => [ProjectRole.Owner, ProjectRole.Admin, ProjectRole.Member, ProjectRole.Viewer];
     }
 }

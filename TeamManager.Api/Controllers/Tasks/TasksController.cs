@@ -2,7 +2,9 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using TeamManager.Application.Features.Tasks.TaskItem.Commands.CreateTask;
-using TeamManager.Application.Features.Tasks.TaskItem.Queries.GetTaskById;
+using TeamManager.Application.Features.Tasks.TaskItem.Commands.UpdateTask;
+using TeamManager.Application.Features.Tasks.TaskItem.Queries.GetMyTasks;
+using TeamManager.Application.Features.Tasks.TaskItem.Queries.GetTask;
 
 namespace TeamManager.Api.Controllers.Tasks
 {
@@ -21,11 +23,29 @@ namespace TeamManager.Api.Controllers.Tasks
             return CreatedAtAction(nameof(GetById), new { taskId }, taskId);
         }
 
+        [HttpPut("{taskId:long}")]
+        [Authorize]
+        public async Task<IActionResult> UpdateTask(long taskId, [FromBody] UpdateTaskRequest request, CancellationToken cancellationToken)
+        {
+            await sender.Send(new UpdateTaskCommand(taskId, request.Title, request.Description), cancellationToken);
+
+            return NoContent();
+        }
+
         [HttpGet("{taskId:long}")]
         [Authorize]
-        public async Task<ActionResult<GetTaskByIdResponse>> GetById(long taskId, CancellationToken cancellationToken)
+        public async Task<ActionResult<GetTaskResponse>> GetById(long taskId, CancellationToken cancellationToken)
         {
-            var response = await sender.Send(new GetTaskByIdQuery(taskId), cancellationToken);
+            var response = await sender.Send(new GetTaskQuery(taskId), cancellationToken);
+
+            return Ok(response);
+        }
+
+        [HttpGet("my")]
+        [Authorize]
+        public async Task<ActionResult<GetMyTasksResponse>> GetMyTasks([FromQuery] GetMyTasksQuery query, CancellationToken cancellationToken)
+        {
+            var response = await sender.Send(query, cancellationToken);
 
             return Ok(response);
         }

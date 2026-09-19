@@ -14,7 +14,7 @@ namespace TeamManager.Infrastructure.Persistence.Repositories
 
         public async Task<TaskItem?> GetByIdAsync(long taskId, CancellationToken cancellationToken)
         {
-            var task = await context.Tasks.FindAsync(taskId, cancellationToken);
+            var task = await context.Tasks.FindAsync([taskId], cancellationToken);
 
             return task is null || task.DeletedAtUtc is not null ? null : task;
         }
