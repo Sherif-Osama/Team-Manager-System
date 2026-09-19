@@ -22,9 +22,6 @@ namespace TeamManager.Application.Common.Behaviors
             if (task is null)
                 throw new TaskNotFoundException(request.TaskId);
 
-            if (task.CreatedBy == userId || task.AssigneeUserId == userId)
-                return await next();
-
             var hasProjectRole = await projectRepository.HasActiveRoleAsync(task.ProjectId, userId, request.RequiredProjectRoles, cancellationToken);
 
             if (!hasProjectRole)

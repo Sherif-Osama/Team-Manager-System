@@ -10,20 +10,23 @@ namespace TeamManager.Application.Features.Projects.Project.Commands.SchedulePro
     {
         public async Task Handle(ScheduleProjectCommand request, CancellationToken cancellationToken)
         {
-            var project = await projectRepository.GetByIdAsync(request.ProjectId, cancellationToken);
+            await unitOfWork.ExecuteInSerializableTransactionAsync(async ct =>
+            {
+                var project = await projectRepository.GetByIdAsync(request.ProjectId, ct);
 
-            if (project is null)
-                throw new ProjectNotFoundException(request.ProjectId);
+                if (project is null) throw new ProjectNotFoundException(request.ProjectId);
 
-            project.Schedule(request.StartDate, request.DueDate);
+                project.Schedule(request.StartDate, request.DueDate);
 
-            var conflictingTitles = await taskRepository.GetConflictingWithProjectDatesAsync(project.Id, project.StartDate,
-                project.DueDate, maxResults: 3, cancellationToken);
+                var conflictingTitles = await taskRepository.GetConflictingWithProjectDatesAsync(project.Id, project.StartDate,
+                    project.DueDate, maxResults: 3, ct);
 
-            if (conflictingTitles.Count > 0)
-                throw new TaskDateConflictException(conflictingTitles);
+                if (conflictingTitles.Count > 0)
+                    throw new TaskDateConflictException(conflictingTitles);
 
-            await unitOfWork.SaveChangesAsync(cancellationToken);
+                await unitOfWork.SaveChangesAsync(ct);
+
+            }, cancellationToken);
         }
     }
 }

@@ -15,31 +15,37 @@ namespace TeamManager.Application.Features.Tasks.TaskItem.Commands.CreateTask
             if (!currentUser.UserId.HasValue || !currentUser.IsAuthenticated)
                 throw new UnauthorizedAccessException("User is not authenticated.");
 
-            var project = await projectRepository.GetByIdAsync(request.ProjectId, cancellationToken);
+            long taskId = default;
 
-            if (project is null)
-                throw new ProjectNotFoundException(request.ProjectId);
-
-            if (project.Status != ProjectStatus.Active)
-                throw new ProjectNotActiveException(project.Id);
-
-            if (request.AssigneeUserId.HasValue)
+            await unitOfWork.ExecuteInSerializableTransactionAsync(async ct =>
             {
-                var isActiveMember = await projectRepository.IsActiveMemberAsync(project.Id, request.AssigneeUserId.Value,
-                    cancellationToken);
+                var project = await projectRepository.GetByIdAsync(request.ProjectId, ct);
 
-                if (!isActiveMember)
-                    throw new UserNotMemberOfProjectException(request.AssigneeUserId.Value, project.Id);
-            }
+                if (project is null)
+                    throw new ProjectNotFoundException(request.ProjectId);
 
-            var task = new Domain.Entities.TaskItem(project.Id, request.Title, currentUser.UserId.Value, request.Priority,
-                request.Description, request.AssigneeUserId, request.StartDate, request.DueDate, project.StartDate, project.DueDate);
+                if (project.Status != ProjectStatus.Active)
+                    throw new ProjectNotActiveException(project.Id);
 
-            await taskRepository.AddAsync(task, cancellationToken);
+                if (request.AssigneeUserId.HasValue)
+                {
+                    var isActiveMember = await projectRepository.IsActiveMemberAsync(project.Id, request.AssigneeUserId.Value, ct);
 
-            await unitOfWork.SaveChangesAsync(cancellationToken);
+                    if (!isActiveMember) throw new UserNotMemberOfProjectException(request.AssigneeUserId.Value, project.Id);
+                }
 
-            return task.Id;
+                var task = new Domain.Entities.TaskItem(project.Id, request.Title, currentUser.UserId.Value, request.Priority,
+                    request.Description, request.AssigneeUserId, request.StartDate, request.DueDate, project.StartDate, project.DueDate);
+
+                await taskRepository.AddAsync(task, ct);
+
+                await unitOfWork.SaveChangesAsync(ct);
+
+                taskId = task.Id;
+
+            }, cancellationToken);
+
+            return taskId;
         }
     }
 }

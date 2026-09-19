@@ -52,7 +52,7 @@ public class TaskItemConfiguration : IEntityTypeConfiguration<TaskItem>
             .HasConstraintName("FK_Tasks_Assignee").OnDelete(DeleteBehavior.NoAction);
 
         builder.HasIndex(x => new { x.ProjectId, x.Status }).HasDatabaseName("IX_Tasks_ProjectId_Status")
-            .IncludeProperties(x => new { x.Title, x.Priority, x.AssigneeUserId, x.DueDate })
+            .IncludeProperties(x => new { x.Title, x.Priority, x.AssigneeUserId, x.StartDate, x.DueDate })
             .HasFilter("[DeletedAtUtc] IS NULL");
 
         builder.HasIndex(x => new { x.AssigneeUserId, x.Status }).HasDatabaseName("IX_Tasks_AssigneeUserId_Status")
