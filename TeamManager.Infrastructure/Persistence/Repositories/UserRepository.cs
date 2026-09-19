@@ -1,13 +1,12 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using TeamManager.Application.Abstractions.DefaultValues;
 using TeamManager.Application.Abstractions.Persistence;
+using TeamManager.Application.Common.DefaultValues;
 using TeamManager.Domain.Entities;
 
 namespace TeamManager.Infrastructure.Persistence.Repositories
 {
     public sealed class UserRepository(TeamManagerDbContext context) : IUserRepository
     {
-
         public Task<bool> ExistsByEmailAsync(string email, CancellationToken cancellationToken)
         {
             return context.Users.AnyAsync(x => x.Email == email && x.DeletedAtUtc == null, cancellationToken);

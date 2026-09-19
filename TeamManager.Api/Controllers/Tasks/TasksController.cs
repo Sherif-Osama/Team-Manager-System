@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using TeamManager.Application.Features.Tasks.TaskItem.Commands.CreateTask;
-using TeamManager.Application.Features.Tasks.TaskItem.Queries.GetTask;
+using TeamManager.Application.Features.Tasks.TaskItem.Queries.GetTaskById;
 
 namespace TeamManager.Api.Controllers.Tasks
 {
@@ -23,9 +23,9 @@ namespace TeamManager.Api.Controllers.Tasks
 
         [HttpGet("{taskId:long}")]
         [Authorize]
-        public async Task<ActionResult<GetTaskResponse>> GetById(long taskId, CancellationToken cancellationToken)
+        public async Task<ActionResult<GetTaskByIdResponse>> GetById(long taskId, CancellationToken cancellationToken)
         {
-            var response = await sender.Send(new GetTaskQuery(taskId), cancellationToken);
+            var response = await sender.Send(new GetTaskByIdQuery(taskId), cancellationToken);
 
             return Ok(response);
         }

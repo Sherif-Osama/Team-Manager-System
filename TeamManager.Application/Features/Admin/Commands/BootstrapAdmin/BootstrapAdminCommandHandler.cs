@@ -1,7 +1,7 @@
 ﻿using MediatR;
 using TeamManager.Application.Abstractions.Configuration;
-using TeamManager.Application.Abstractions.DefaultValues;
 using TeamManager.Application.Abstractions.Persistence;
+using TeamManager.Application.Common.DefaultValues;
 using TeamManager.Application.Common.Exceptions;
 
 namespace TeamManager.Application.Features.Admin.Commands.BootstrapAdmin

@@ -1,9 +1,9 @@
 ﻿using MediatR;
 using System.Text.Json;
 using TeamManager.Application.Abstractions.Authentication;
-using TeamManager.Application.Abstractions.DefaultValues;
 using TeamManager.Application.Abstractions.Persistence;
 using TeamManager.Application.Abstractions.Security;
+using TeamManager.Application.Common.DefaultValues;
 using TeamManager.Application.Common.Exceptions;
 using TeamManager.Application.Common.Outbox;
 using TeamManager.Domain.Entities;

@@ -12,6 +12,13 @@ namespace TeamManager.Infrastructure.Persistence.Repositories
             await context.AddAsync(newTask, cancellationToken);
         }
 
+        public async Task<TaskItem?> GetByIdAsync(long taskId, CancellationToken cancellationToken)
+        {
+            var task = await context.Tasks.FindAsync(taskId, cancellationToken);
+
+            return task is null || task.DeletedAtUtc is not null ? null : task;
+        }
+
         public async Task<IReadOnlyList<string>> GetConflictingWithProjectDatesAsync(Guid projectId, DateOnly? projectStartDate,
             DateOnly? projectDueDate, int maxResults, CancellationToken cancellationToken)
         {

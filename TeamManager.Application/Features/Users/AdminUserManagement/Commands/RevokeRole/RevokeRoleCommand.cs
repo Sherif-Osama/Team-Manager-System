@@ -1,6 +1,6 @@
 ﻿using MediatR;
-using TeamManager.Application.Abstractions.DefaultValues;
 using TeamManager.Application.Common.Authorization;
+using TeamManager.Application.Common.DefaultValues;
 
 namespace TeamManager.Application.Features.Users.AdminUserManagement.Commands.RevokeRole
 {

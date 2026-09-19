@@ -15,11 +15,10 @@ namespace TeamManager.Application
                 configuration.AddOpenBehavior(typeof(ValidationBehavior<,>));
 
                 configuration.AddOpenBehavior(typeof(PermissionAuthorizationBehavior<,>));
-
                 configuration.AddOpenBehavior(typeof(ConfirmedEmailBehavior<,>));
-
                 configuration.AddOpenBehavior(typeof(TeamAuthorizationBehavior<,>));
                 configuration.AddOpenBehavior(typeof(ProjectAuthorizationBehavior<,>));
+                configuration.AddOpenBehavior(typeof(TaskAuthorizationBehavior<,>));
             });
 
             services.AddValidatorsFromAssembly(typeof(DependencyInjection).Assembly);

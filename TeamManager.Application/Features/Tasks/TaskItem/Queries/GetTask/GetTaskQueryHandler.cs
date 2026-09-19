@@ -9,7 +9,7 @@ namespace TeamManager.Application.Features.Tasks.TaskItem.Queries.GetTask
         public async Task<GetTaskResponse> Handle(GetTaskQuery request, CancellationToken cancellationToken)
         {
             var task = await context.Tasks.AsNoTracking()
-                .Where(x => x.Id == request.TaskId && x.DeletedAtUtc == null)
+                .Where(x => x.Id == request.TaskId && x.ProjectId == request.ProjectId && x.DeletedAtUtc == null)
                 .Select(x => new GetTaskResponse(x.Id, x.ProjectId, x.Project.Name, x.Title, x.Description,
                 x.Status, x.Priority, x.CreatedBy, x.Creator.DisplayName, x.AssigneeUserId,
                 x.Assignee != null ? x.Assignee.DisplayName : null, x.StartDate, x.DueDate, x.CompletedAtUtc, x.CreatedAtUtc,

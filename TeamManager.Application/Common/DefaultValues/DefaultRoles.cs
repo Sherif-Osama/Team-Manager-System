@@ -1,4 +1,4 @@
-﻿namespace TeamManager.Application.Abstractions.DefaultValues
+﻿namespace TeamManager.Application.Common.DefaultValues
 {
     public static class DefaultRoles
     {

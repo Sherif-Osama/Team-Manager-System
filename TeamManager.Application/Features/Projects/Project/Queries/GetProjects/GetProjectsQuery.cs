@@ -1,6 +1,6 @@
 ﻿using MediatR;
-using TeamManager.Application.Abstractions.DefaultValues;
 using TeamManager.Application.Common.Authorization;
+using TeamManager.Application.Common.DefaultValues;
 using TeamManager.Domain.Enums;
 
 namespace TeamManager.Application.Features.Projects.Project.Queries.GetProjects
