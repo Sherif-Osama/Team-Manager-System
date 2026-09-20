@@ -4,11 +4,12 @@ using TeamManager.Application.Abstractions.Authentication;
 using TeamManager.Application.Abstractions.Persistence;
 using TeamManager.Application.Common.Authorization;
 using TeamManager.Application.Common.Exceptions;
+using TeamManager.Domain.Enums;
 
 namespace TeamManager.Application.Common.Behaviors
 {
     public sealed class TaskAuthorizationBehavior<TRequest, TResponse>(ITaskRepository taskRepository, IProjectRepository projectRepository,
-        ICurrentUser currentUser) : IPipelineBehavior<TRequest, TResponse> where TRequest : ITaskScopedRequest
+        ICurrentUser currentUser, ITeamRepository teamRepository) : IPipelineBehavior<TRequest, TResponse> where TRequest : ITaskScopedRequest
     {
         public async Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next, CancellationToken cancellationToken)
         {
@@ -24,8 +25,19 @@ namespace TeamManager.Application.Common.Behaviors
 
             var hasProjectRole = await projectRepository.HasActiveRoleAsync(task.ProjectId, userId, request.RequiredProjectRoles, cancellationToken);
 
-            if (!hasProjectRole)
-                throw new ForbiddenException("You do not have permission to access this task.");
+            if (hasProjectRole)
+                return await next();
+
+            var project = await projectRepository.GetByIdAsync(task.ProjectId, cancellationToken);
+
+            if (project == null)
+                throw new ProjectNotFoundException(task.ProjectId);
+
+            var isTeamOwner = await teamRepository.HasActiveRoleAsync(project.TeamId, currentUser.UserId.Value, [TeamRole.Owner],
+                cancellationToken);
+
+            if (!isTeamOwner)
+                throw new ForbiddenException("You do not have permission to perform this action on this project.");
 
             return await next();
         }

@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using TeamManager.Application.Features.Tasks.TaskItem.Commands.CreateTask;
+using TeamManager.Application.Features.Tasks.TaskItem.Commands.RescheduleTask;
 using TeamManager.Application.Features.Tasks.TaskItem.Commands.UpdateTask;
 using TeamManager.Application.Features.Tasks.TaskItem.Queries.GetMyTasks;
 using TeamManager.Application.Features.Tasks.TaskItem.Queries.GetTask;
@@ -28,6 +29,16 @@ namespace TeamManager.Api.Controllers.Tasks
         public async Task<IActionResult> UpdateTask(long taskId, [FromBody] UpdateTaskRequest request, CancellationToken cancellationToken)
         {
             await sender.Send(new UpdateTaskCommand(taskId, request.Title, request.Description), cancellationToken);
+
+            return NoContent();
+        }
+
+        [HttpPut("{taskId:long}/schedule")]
+        [Authorize]
+        public async Task<IActionResult> RescheduleTask(long taskId, [FromBody] RescheduleTaskRequest request,
+            CancellationToken cancellationToken)
+        {
+            await sender.Send(new RescheduleTaskCommand(taskId, request.StartDate, request.DueDate), cancellationToken);
 
             return NoContent();
         }
