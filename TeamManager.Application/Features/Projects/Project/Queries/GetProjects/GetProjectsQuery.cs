@@ -1,5 +1,5 @@
 ﻿using MediatR;
-using TeamManager.Application.Common.Authorization;
+using TeamManager.Application.Common.Authorization.Scopes;
 using TeamManager.Application.Common.DefaultValues;
 using TeamManager.Domain.Enums;
 

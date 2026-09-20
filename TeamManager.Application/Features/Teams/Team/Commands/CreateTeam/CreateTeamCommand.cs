@@ -1,5 +1,5 @@
 ﻿using MediatR;
-using TeamManager.Application.Common.Authorization;
+using TeamManager.Application.Common.Authorization.Scopes;
 
 namespace TeamManager.Application.Features.Teams.Team.Commands.CreateTeam
 {

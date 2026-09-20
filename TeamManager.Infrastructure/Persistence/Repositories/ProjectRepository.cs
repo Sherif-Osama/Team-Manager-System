@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using TeamManager.Application.Abstractions;
+using TeamManager.Application.Abstractions.Persistence;
+using TeamManager.Application.Common.Authorization.AuthorizationInfo;
 using TeamManager.Domain.Entities;
 using TeamManager.Domain.Enums;
 
@@ -89,6 +90,17 @@ namespace TeamManager.Infrastructure.Persistence.Repositories
                     && (pm.Status == ProjectMemberStatus.Active || pm.Status == ProjectMemberStatus.Suspended) && pm.ProjectRole
                     != ProjectRole.Owner).ExecuteUpdateAsync(s => s.SetProperty(x => x.Status, ProjectMemberStatus.Removed)
                     .SetProperty(x => x.RemovedAtUtc, DateTime.UtcNow), cancellationToken);
+        }
+
+        public async Task<ProjectAuthorizationInfo?> GetAuthorizationInfoAsync(Guid projectId, Guid userId, ProjectRole[] requiredRoles,
+            CancellationToken cancellationToken)
+        {
+            return await context.Projects.AsNoTracking().Where(p => p.Id == projectId && p.DeletedAtUtc == null)
+                .Select(p => new ProjectAuthorizationInfo(true, p.Members.Any(m => m.UserId == userId &&
+                m.Status == ProjectMemberStatus.Active && m.User.IsActive
+                && requiredRoles.Contains(m.ProjectRole)), p.Team.Members.Any(tm => tm.UserId == userId &&
+                tm.Status == TeamMemberStatus.Active && tm.User.IsActive &&
+                tm.TeamRole == TeamRole.Owner))).FirstOrDefaultAsync(cancellationToken);
         }
     }
 }

@@ -1,7 +1,8 @@
-﻿using TeamManager.Domain.Entities;
+﻿using TeamManager.Application.Common.Authorization.AuthorizationInfo;
+using TeamManager.Domain.Entities;
 using TeamManager.Domain.Enums;
 
-namespace TeamManager.Application.Abstractions
+namespace TeamManager.Application.Abstractions.Persistence
 {
     public interface IProjectRepository
     {
@@ -17,5 +18,6 @@ namespace TeamManager.Application.Abstractions
         Task ReactivateSuspendedMembershipsAsync(Guid userId, CancellationToken cancellationToken);
         Task RemoveMembershipsByTeamAsync(Guid teamId, Guid userId, CancellationToken cancellationToken);
         Task<bool> IsActiveMemberAsync(Guid projectId, Guid userId, CancellationToken cancellationToken);
+        Task<ProjectAuthorizationInfo?> GetAuthorizationInfoAsync(Guid projectId, Guid userId, ProjectRole[] requiredRoles, CancellationToken cancellationToken);
     }
 }
