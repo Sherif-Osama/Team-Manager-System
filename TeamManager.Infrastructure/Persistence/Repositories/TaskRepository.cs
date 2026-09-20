@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using TeamManager.Application.Abstractions.Persistence;
+using TeamManager.Application.Common.Authorization.AuthorizationInfo;
 using TeamManager.Domain.Entities;
 using TeamManager.Domain.Enums;
 
@@ -11,6 +12,7 @@ namespace TeamManager.Infrastructure.Persistence.Repositories
         {
             await context.AddAsync(newTask, cancellationToken);
         }
+
 
         public async Task<TaskItem?> GetByIdAsync(long taskId, CancellationToken cancellationToken)
         {
@@ -27,6 +29,16 @@ namespace TeamManager.Infrastructure.Persistence.Repositories
                 .Where(t => (projectStartDate.HasValue && t.StartDate.HasValue && t.StartDate.Value < projectStartDate.Value)
                 || (projectDueDate.HasValue && t.DueDate.HasValue && t.DueDate.Value > projectDueDate.Value)).OrderBy(t => t.Id)
                 .Select(t => t.Title).Take(maxResults).ToListAsync(cancellationToken);
+        }
+
+        public async Task<TaskAuthorizationInfo?> GetAuthorizationInfoAsync(long taskId, Guid userId, ProjectRole[] requiredRoles, CancellationToken cancellationToken)
+        {
+            return await context.Tasks.AsNoTracking().Where(t => t.Id == taskId && t.DeletedAtUtc == null
+            && t.Project.DeletedAtUtc == null).Select(t => new TaskAuthorizationInfo(true,
+            t.Project.Members.Any(pm => pm.UserId == userId && pm.Status == ProjectMemberStatus.Active && pm.User.IsActive
+            && requiredRoles.Contains(pm.ProjectRole)), t.Project.Team.Members.Any(tm => tm.UserId == userId &&
+            tm.Status == TeamMemberStatus.Active && tm.User.IsActive && tm.TeamRole == TeamRole.Owner
+            && tm.Team.DeletedAtUtc == null))).FirstOrDefaultAsync(cancellationToken);
         }
     }
 }

@@ -99,7 +99,7 @@ namespace TeamManager.Infrastructure.Persistence.Repositories
                 .Select(p => new ProjectAuthorizationInfo(true, p.Members.Any(m => m.UserId == userId &&
                 m.Status == ProjectMemberStatus.Active && m.User.IsActive
                 && requiredRoles.Contains(m.ProjectRole)), p.Team.Members.Any(tm => tm.UserId == userId &&
-                tm.Status == TeamMemberStatus.Active && tm.User.IsActive &&
+                tm.Status == TeamMemberStatus.Active && tm.Team.DeletedAtUtc == null && tm.User.IsActive &&
                 tm.TeamRole == TeamRole.Owner))).FirstOrDefaultAsync(cancellationToken);
         }
     }
