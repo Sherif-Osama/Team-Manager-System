@@ -1,6 +1,7 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using TeamManager.Application.Features.Tasks.TaskItem.Commands.ChangeTaskStatus;
 using TeamManager.Application.Features.Tasks.TaskItem.Commands.CreateTask;
 using TeamManager.Application.Features.Tasks.TaskItem.Commands.RescheduleTask;
 using TeamManager.Application.Features.Tasks.TaskItem.Commands.UpdateTask;
@@ -29,6 +30,15 @@ namespace TeamManager.Api.Controllers.Tasks
         public async Task<IActionResult> UpdateTask(long taskId, [FromBody] UpdateTaskRequest request, CancellationToken cancellationToken)
         {
             await sender.Send(new UpdateTaskCommand(taskId, request.Title, request.Description), cancellationToken);
+
+            return NoContent();
+        }
+
+        [HttpPut("{taskId:long}/status")]
+        [Authorize]
+        public async Task<IActionResult> ChangeTaskStatus(long taskId, [FromBody] ChangeTaskStatusRequest request, CancellationToken cancellationToken)
+        {
+            await sender.Send(new ChangeTaskStatusCommand(taskId, request.Status), cancellationToken);
 
             return NoContent();
         }

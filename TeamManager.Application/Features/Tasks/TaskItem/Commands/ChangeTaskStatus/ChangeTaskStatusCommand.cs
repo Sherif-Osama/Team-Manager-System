@@ -6,6 +6,6 @@ namespace TeamManager.Application.Features.Tasks.TaskItem.Commands.ChangeTaskSta
 {
     public sealed record ChangeTaskStatusCommand(long TaskId, TaskItemStatus Status) : IRequest, ITaskScopedRequest
     {
-        public ProjectRole[] RequiredProjectRoles => [ProjectRole.Owner, ProjectRole.Admin];
+        public ProjectRole[] RequiredProjectRoles => [ProjectRole.Owner, ProjectRole.Admin, ProjectRole.Member];
     }
 }
