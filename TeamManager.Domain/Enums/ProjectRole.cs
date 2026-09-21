@@ -7,5 +7,4 @@
         Member = 3,
         Viewer = 4
     }
-
 }

@@ -1,6 +1,7 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using TeamManager.Application.Features.Tasks.TaskItem.Commands.ChangeTaskPriority;
 using TeamManager.Application.Features.Tasks.TaskItem.Commands.ChangeTaskStatus;
 using TeamManager.Application.Features.Tasks.TaskItem.Commands.CreateTask;
 using TeamManager.Application.Features.Tasks.TaskItem.Commands.RescheduleTask;
@@ -49,6 +50,16 @@ namespace TeamManager.Api.Controllers.Tasks
             CancellationToken cancellationToken)
         {
             await sender.Send(new RescheduleTaskCommand(taskId, request.StartDate, request.DueDate), cancellationToken);
+
+            return NoContent();
+        }
+
+        [HttpPut("{taskId:long}/priority")]
+        [Authorize]
+        public async Task<IActionResult> ChangeTaskPriority(long taskId, [FromBody] ChangeTaskPriorityRequest request,
+            CancellationToken cancellationToken)
+        {
+            await sender.Send(new ChangeTaskPriorityCommand(taskId, request.Priority), cancellationToken);
 
             return NoContent();
         }
