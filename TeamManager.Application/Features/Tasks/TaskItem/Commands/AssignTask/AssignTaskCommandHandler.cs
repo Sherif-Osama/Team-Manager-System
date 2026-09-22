@@ -9,19 +9,21 @@ namespace TeamManager.Application.Features.Tasks.TaskItem.Commands.AssignTask
     {
         public async Task Handle(AssignTaskCommand request, CancellationToken cancellationToken)
         {
-            var task = await taskRepository.GetByIdAsync(request.TaskId, cancellationToken);
+            await unitOfWork.ExecuteInSerializableTransactionAsync(async ct =>
+            {
+                var task = await taskRepository.GetByIdAsync(request.TaskId, ct);
 
-            if (task is null)
-                throw new TaskNotFoundException(request.TaskId);
+                if (task is null)
+                    throw new TaskNotFoundException(request.TaskId);
 
-            var isActiveMember = await projectRepository.IsActiveMemberAsync(task.ProjectId, request.UserId, cancellationToken);
+                var isActiveMember = await projectRepository.IsActiveMemberAsync(task.ProjectId, request.UserId, ct);
 
-            if (!isActiveMember)
-                throw new UserNotMemberOfProjectException(task.ProjectId, request.UserId);
+                if (!isActiveMember)
+                    throw new UserNotMemberOfProjectException(task.ProjectId, request.UserId);
 
-            task.Assign(request.UserId);
+                task.Assign(request.UserId);
 
-            await unitOfWork.SaveChangesAsync(cancellationToken);
+            }, cancellationToken);
         }
     }
 }

@@ -13,7 +13,6 @@ namespace TeamManager.Infrastructure.Persistence.Repositories
             await context.AddAsync(newTask, cancellationToken);
         }
 
-
         public async Task<TaskItem?> GetByIdAsync(long taskId, CancellationToken cancellationToken)
         {
             var task = await context.Tasks.FindAsync([taskId], cancellationToken);
@@ -39,6 +38,14 @@ namespace TeamManager.Infrastructure.Persistence.Repositories
             && requiredRoles.Contains(pm.ProjectRole)), t.Project.Team.Members.Any(tm => tm.UserId == userId &&
             tm.Status == TeamMemberStatus.Active && tm.User.IsActive && tm.TeamRole == TeamRole.Owner
             && tm.Team.DeletedAtUtc == null))).FirstOrDefaultAsync(cancellationToken);
+        }
+
+        public async Task UnassignActiveTasksAsync(Guid userId, CancellationToken cancellationToken)
+        {
+            await context.Tasks.Where(t => t.AssigneeUserId == userId && t.DeletedAtUtc == null && t.Status != TaskItemStatus.Done)
+                .ExecuteUpdateAsync(setters => setters.SetProperty(x => x.AssigneeUserId, (Guid?)null)
+                .SetProperty(x => x.UpdatedAtUtc, DateTime.UtcNow).SetProperty(x => x.Status,
+                x => x.Status == TaskItemStatus.InProgress ? TaskItemStatus.Todo : x.Status), cancellationToken);
         }
     }
 }

@@ -1,6 +1,5 @@
 ﻿using MediatR;
 using System.Text.Json;
-using TeamManager.Application.Abstractions;
 using TeamManager.Application.Abstractions.Authentication;
 using TeamManager.Application.Abstractions.Persistence;
 using TeamManager.Application.Common.Exceptions;
@@ -10,7 +9,8 @@ namespace TeamManager.Application.Features.Users.SelfManagement.Commands.DeleteM
 {
     public sealed class DeleteMyAccountCommandHandler(ICurrentUser currentUser, IUserRepository userRepository,
         ITeamRepository teamRepository, IPasswordHasher passwordHasher, IUnitOfWork unitOfWork,
-        IProjectRepository projectRepository, IOutbox outbox) : IRequestHandler<DeleteMyAccountCommand>
+        IProjectRepository projectRepository, ITaskRepository taskRepository, IOutbox outbox)
+        : IRequestHandler<DeleteMyAccountCommand>
     {
         public async Task Handle(DeleteMyAccountCommand request, CancellationToken cancellationToken)
         {
@@ -49,6 +49,8 @@ namespace TeamManager.Application.Features.Users.SelfManagement.Commands.DeleteM
                 await teamRepository.RemoveActiveMembershipsAsync(userId, ct);
 
                 await projectRepository.RemoveActiveMembershipsAsync(userId, ct);
+
+                await taskRepository.UnassignActiveTasksAsync(user.Id, ct);
 
                 await userRepository.RevokeAllRefreshTokensAsync(userId, ct);
 

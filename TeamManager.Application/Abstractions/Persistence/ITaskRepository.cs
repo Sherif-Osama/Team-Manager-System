@@ -11,5 +11,6 @@ namespace TeamManager.Application.Abstractions.Persistence
         Task<IReadOnlyList<string>> GetConflictingWithProjectDatesAsync(Guid projectId, DateOnly? projectStartDate, DateOnly? projectDueDate,
             int maxResults, CancellationToken cancellationToken);
         Task<TaskAuthorizationInfo?> GetAuthorizationInfoAsync(long taskId, Guid userId, ProjectRole[] requiredRoles, CancellationToken cancellationToken);
+        Task UnassignActiveTasksAsync(Guid userId, CancellationToken cancellationToken);
     }
 }

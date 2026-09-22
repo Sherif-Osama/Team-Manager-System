@@ -1,6 +1,5 @@
 ﻿using MediatR;
 using System.Text.Json;
-using TeamManager.Application.Abstractions;
 using TeamManager.Application.Abstractions.Authentication;
 using TeamManager.Application.Abstractions.Persistence;
 using TeamManager.Application.Common.Exceptions;
@@ -10,7 +9,7 @@ namespace TeamManager.Application.Features.Users.SelfManagement.Commands.Deactiv
 {
     public sealed class DeactivateMyAccountCommandHandler(ICurrentUser currentUser, IUserRepository
         userRepository, IUnitOfWork unitOfWork, ITeamRepository teamRepository, IPasswordHasher passwordHasher,
-        IProjectRepository projectRepository, IOutbox outbox)
+        IProjectRepository projectRepository, ITaskRepository taskRepository, IOutbox outbox)
         : IRequestHandler<DeactivateMyAccountCommand>
     {
         public async Task Handle(DeactivateMyAccountCommand request, CancellationToken cancellationToken)
@@ -40,6 +39,8 @@ namespace TeamManager.Application.Features.Users.SelfManagement.Commands.Deactiv
 
                 await projectRepository.DeactivateOwnedProjectsAsync(user.Id, ct);
                 await projectRepository.SuspendActiveMembershipsAsync(user.Id, ct);
+
+                await taskRepository.UnassignActiveTasksAsync(user.Id, ct);
 
                 await userRepository.RevokeAllRefreshTokensAsync(user.Id, ct);
 
