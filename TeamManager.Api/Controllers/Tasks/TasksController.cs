@@ -5,6 +5,7 @@ using TeamManager.Application.Features.Tasks.TaskItem.Commands.AssignTask;
 using TeamManager.Application.Features.Tasks.TaskItem.Commands.ChangeTaskPriority;
 using TeamManager.Application.Features.Tasks.TaskItem.Commands.ChangeTaskStatus;
 using TeamManager.Application.Features.Tasks.TaskItem.Commands.CreateTask;
+using TeamManager.Application.Features.Tasks.TaskItem.Commands.DeleteTask;
 using TeamManager.Application.Features.Tasks.TaskItem.Commands.RescheduleTask;
 using TeamManager.Application.Features.Tasks.TaskItem.Commands.UnassignTask;
 using TeamManager.Application.Features.Tasks.TaskItem.Commands.UpdateTask;
@@ -73,6 +74,16 @@ namespace TeamManager.Api.Controllers.Tasks
             await sender.Send(new AssignTaskCommand(taskId, request.UserId), cancellationToken);
 
             return NoContent();
+        }
+
+        [HttpDelete("{taskId:long}")]
+        [Authorize]
+        public async Task<IActionResult> DeleteTask(long taskId, CancellationToken cancellationToken)
+        {
+            await sender.Send(new DeleteTaskCommand(taskId), cancellationToken);
+
+            return NoContent();
+
         }
 
         [HttpDelete("{taskId:long}/assignee")]
