@@ -82,6 +82,9 @@ namespace TeamManager.Domain.Entities
 
             EnsureNotCancelled("cannot assigned cancelled task");
 
+            if (AssigneeUserId == userId)
+                throw new DomainException("Task already assigned to this user");
+
             AssigneeUserId = userId;
             Touch();
         }

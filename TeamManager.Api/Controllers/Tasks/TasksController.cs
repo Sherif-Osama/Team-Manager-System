@@ -1,6 +1,7 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using TeamManager.Application.Features.Tasks.TaskItem.Commands.AssignTask;
 using TeamManager.Application.Features.Tasks.TaskItem.Commands.ChangeTaskPriority;
 using TeamManager.Application.Features.Tasks.TaskItem.Commands.ChangeTaskStatus;
 using TeamManager.Application.Features.Tasks.TaskItem.Commands.CreateTask;
@@ -60,6 +61,15 @@ namespace TeamManager.Api.Controllers.Tasks
             CancellationToken cancellationToken)
         {
             await sender.Send(new ChangeTaskPriorityCommand(taskId, request.Priority), cancellationToken);
+
+            return NoContent();
+        }
+
+        [HttpPut("{taskId:long}/assignee")]
+        [Authorize]
+        public async Task<IActionResult> AssignTask(long taskId, [FromBody] AssignTaskRequest request, CancellationToken cancellationToken)
+        {
+            await sender.Send(new AssignTaskCommand(taskId, request.UserId), cancellationToken);
 
             return NoContent();
         }
