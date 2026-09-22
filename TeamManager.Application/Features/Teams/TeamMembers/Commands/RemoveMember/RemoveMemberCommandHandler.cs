@@ -1,5 +1,4 @@
 ﻿using MediatR;
-using TeamManager.Application.Abstractions;
 using TeamManager.Application.Abstractions.Authentication;
 using TeamManager.Application.Abstractions.Persistence;
 using TeamManager.Application.Common.Exceptions;
@@ -7,7 +6,7 @@ using TeamManager.Application.Common.Exceptions;
 namespace TeamManager.Application.Features.Teams.TeamMembers.Commands.RemoveMember
 {
     public sealed class RemoveMemberCommandHandler(ITeamRepository teamRepository, IProjectRepository projectRepository,
-        ICurrentUser currentUser, IUnitOfWork unitOfWork) : IRequestHandler<RemoveMemberCommand>
+        ICurrentUser currentUser, ITaskRepository taskRepository, IUnitOfWork unitOfWork) : IRequestHandler<RemoveMemberCommand>
     {
         public async Task Handle(RemoveMemberCommand request, CancellationToken cancellationToken)
         {
@@ -27,8 +26,8 @@ namespace TeamManager.Application.Features.Teams.TeamMembers.Commands.RemoveMemb
             await unitOfWork.ExecuteInTransactionAsync(async ct =>
             {
                 team.RemoveMember(request.MemberId, currentUser.UserId!.Value);
-                await projectRepository.RemoveMembershipsByTeamAsync(request.TeamId, memberToRemove.UserId, ct);
-                await unitOfWork.SaveChangesAsync(ct);
+                await projectRepository.RemoveMembershipsByTeamAsync(team.Id, memberToRemove.UserId, ct);
+                await taskRepository.UnassignActiveTasksByTeamAsync(team.Id, memberToRemove.UserId, ct);
             }, cancellationToken);
         }
     }

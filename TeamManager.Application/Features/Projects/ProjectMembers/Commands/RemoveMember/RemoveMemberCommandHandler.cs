@@ -1,12 +1,12 @@
 ﻿using MediatR;
-using TeamManager.Application.Abstractions;
 using TeamManager.Application.Abstractions.Authentication;
 using TeamManager.Application.Abstractions.Persistence;
 using TeamManager.Application.Common.Exceptions;
 
 namespace TeamManager.Application.Features.Projects.ProjectMembers.Commands.RemoveMember
 {
-    public sealed class RemoveProjectMemberCommandHandler(IProjectRepository projectRepository, ICurrentUser currentUser, IUnitOfWork unitOfWork)
+    public sealed class RemoveProjectMemberCommandHandler(IProjectRepository projectRepository, ICurrentUser currentUser,
+        ITaskRepository taskRepository, IUnitOfWork unitOfWork)
         : IRequestHandler<RemoveMemberCommand>
     {
         public async Task Handle(RemoveMemberCommand request, CancellationToken cancellationToken)
@@ -19,9 +19,11 @@ namespace TeamManager.Application.Features.Projects.ProjectMembers.Commands.Remo
             if (project is null)
                 throw new ProjectNotFoundException(request.ProjectId);
 
-            project.RemoveMember(request.MemberId, currentUser.UserId.Value);
-
-            await unitOfWork.SaveChangesAsync(cancellationToken);
+            await unitOfWork.ExecuteInTransactionAsync(async ct =>
+            {
+                project.RemoveMember(request.MemberId, currentUser.UserId.Value);
+                await taskRepository.UnassignActiveTasksByProjectAsync(project.Id, currentUser.UserId.Value, ct);
+            }, cancellationToken);
         }
     }
 }

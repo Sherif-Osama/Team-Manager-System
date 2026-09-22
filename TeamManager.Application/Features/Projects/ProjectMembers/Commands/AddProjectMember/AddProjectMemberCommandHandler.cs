@@ -1,5 +1,4 @@
 ﻿using MediatR;
-using TeamManager.Application.Abstractions;
 using TeamManager.Application.Abstractions.Authentication;
 using TeamManager.Application.Abstractions.Persistence;
 using TeamManager.Application.Common.Exceptions;
@@ -9,32 +8,39 @@ namespace TeamManager.Application.Features.Projects.ProjectMembers.Commands.AddP
 {
     public sealed class AddProjectMemberCommandHandler(ICurrentUser currentUser, IProjectRepository projectRepository,
         IUserRepository userRepository, ITeamRepository teamRepository, IUnitOfWork unitOfWork)
-        : IRequestHandler<AddProjectMemberCommand>
+        : IRequestHandler<AddProjectMemberCommand, long>
     {
-        public async Task Handle(AddProjectMemberCommand request, CancellationToken cancellationToken)
+        public async Task<long> Handle(AddProjectMemberCommand request, CancellationToken cancellationToken)
         {
             if (!currentUser.IsAuthenticated || !currentUser.UserId.HasValue)
                 throw new UnauthorizedAccessException("User is not authenticated.");
 
-            var project = await projectRepository.GetByIdWithMembersAsync(request.ProjectId, cancellationToken);
+            long memberId = default;
 
-            if (project is null)
-                throw new ProjectNotFoundException(request.ProjectId);
+            await unitOfWork.ExecuteInSerializableTransactionAsync(async ct =>
+            {
+                var project = await projectRepository.GetByIdWithMembersAsync(request.ProjectId, cancellationToken);
 
-            var user = await userRepository.GetByIdAsync(request.UserId, cancellationToken);
+                if (project is null)
+                    throw new ProjectNotFoundException(request.ProjectId);
 
-            if (user is null || !user.IsActive)
-                throw new UserNotFoundException(request.UserId);
+                var user = await userRepository.GetByIdAsync(request.UserId, cancellationToken);
 
-            var isActiveTeamMember = await teamRepository.HasActiveRoleAsync(project.TeamId, request.UserId,
-                [TeamRole.Owner, TeamRole.Admin, TeamRole.Member, TeamRole.Viewer], cancellationToken);
+                if (user is null || !user.IsActive)
+                    throw new UserNotFoundException(request.UserId);
 
-            if (!isActiveTeamMember)
-                throw new ForbiddenException("Only active team members can be added to a project.");
+                var isActiveTeamMember = await teamRepository.HasActiveRoleAsync(project.TeamId, request.UserId,
+                    [TeamRole.Owner, TeamRole.Admin, TeamRole.Member, TeamRole.Viewer], cancellationToken);
 
-            project.AddMember(request.UserId, request.ProjectRole, currentUser.UserId!.Value);
+                if (!isActiveTeamMember)
+                    throw new ForbiddenException("Only active team members can be added to a project.");
 
-            await unitOfWork.SaveChangesAsync(cancellationToken);
+                var member = project.AddMember(request.UserId, request.ProjectRole, currentUser.UserId!.Value);
+
+                memberId = member.Id;
+            }, cancellationToken);
+
+            return memberId;
         }
     }
 }

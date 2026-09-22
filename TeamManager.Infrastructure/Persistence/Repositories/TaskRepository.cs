@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using System.Linq.Expressions;
 using TeamManager.Application.Abstractions.Persistence;
 using TeamManager.Application.Common.Authorization.AuthorizationInfo;
 using TeamManager.Domain.Entities;
@@ -40,12 +41,23 @@ namespace TeamManager.Infrastructure.Persistence.Repositories
             && tm.Team.DeletedAtUtc == null))).FirstOrDefaultAsync(cancellationToken);
         }
 
-        public async Task UnassignActiveTasksAsync(Guid userId, CancellationToken cancellationToken)
+        public Task UnassignActiveTasksAsync(Guid userId, CancellationToken cancellationToken)
+            => UnassignActiveTasksAsync(t => t.AssigneeUserId == userId, cancellationToken);
+
+        public Task UnassignActiveTasksByTeamAsync(Guid teamId, Guid userId, CancellationToken cancellationToken)
+            => UnassignActiveTasksAsync(t => t.Project.TeamId == teamId && t.AssigneeUserId == userId, cancellationToken);
+
+        public Task UnassignActiveTasksByProjectAsync(Guid projectId, Guid userId, CancellationToken cancellationToken)
+            => UnassignActiveTasksAsync(t => t.ProjectId == projectId && t.AssigneeUserId == userId, cancellationToken);
+
+        private Task UnassignActiveTasksAsync(Expression<Func<TaskItem, bool>> scope, CancellationToken cancellationToken)
         {
-            await context.Tasks.Where(t => t.AssigneeUserId == userId && t.DeletedAtUtc == null && t.Status != TaskItemStatus.Done)
-                .ExecuteUpdateAsync(setters => setters.SetProperty(x => x.AssigneeUserId, (Guid?)null)
-                .SetProperty(x => x.UpdatedAtUtc, DateTime.UtcNow).SetProperty(x => x.Status,
-                x => x.Status == TaskItemStatus.InProgress ? TaskItemStatus.Todo : x.Status), cancellationToken);
+            return context.Tasks.Where(scope).Where(t => t.DeletedAtUtc == null && t.Status != TaskItemStatus.Done)
+                .ExecuteUpdateAsync(setters => setters
+                    .SetProperty(x => x.AssigneeUserId, (Guid?)null)
+                    .SetProperty(x => x.UpdatedAtUtc, DateTime.UtcNow)
+                    .SetProperty(x => x.Status, x => x.Status == TaskItemStatus.InProgress ? TaskItemStatus.Todo : x.Status),
+                    cancellationToken);
         }
     }
 }

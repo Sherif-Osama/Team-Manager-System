@@ -9,21 +9,25 @@ namespace TeamManager.Application.Features.Teams.TeamMembers.Commands.AddMember
     {
         public async Task<long> Handle(AddMemberCommand request, CancellationToken cancellationToken)
         {
-            var team = await teamRepository.GetByIdWithMembersAsync(request.TeamId, cancellationToken);
+            long memberId = default;
 
-            if (team is null)
-                throw new TeamNotFoundException(request.TeamId);
+            await unitOfWork.ExecuteInSerializableTransactionAsync(async ct =>
+            {
+                var team = await teamRepository.GetByIdWithMembersAsync(request.TeamId, ct);
+                if (team is null)
+                    throw new TeamNotFoundException(request.TeamId);
 
-            var user = await userRepository.GetByIdAsync(request.UserId, cancellationToken);
+                var user = await userRepository.GetByIdAsync(request.UserId, ct);
 
-            if (user is null || !user.IsActive)
-                throw new UserNotFoundException(request.UserId);
+                if (user is null || !user.IsActive)
+                    throw new UserNotFoundException(request.UserId);
 
-            var member = team.AddMember(request.UserId, request.TeamRole);
+                var member = team.AddMember(request.UserId, request.TeamRole);
 
-            await unitOfWork.SaveChangesAsync(cancellationToken);
+                memberId = member.Id;
+            }, cancellationToken);
 
-            return member.Id;
+            return memberId;
         }
     }
 }

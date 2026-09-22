@@ -12,5 +12,7 @@ namespace TeamManager.Application.Abstractions.Persistence
             int maxResults, CancellationToken cancellationToken);
         Task<TaskAuthorizationInfo?> GetAuthorizationInfoAsync(long taskId, Guid userId, ProjectRole[] requiredRoles, CancellationToken cancellationToken);
         Task UnassignActiveTasksAsync(Guid userId, CancellationToken cancellationToken);
+        Task UnassignActiveTasksByTeamAsync(Guid teamId, Guid userId, CancellationToken cancellationToken);
+        Task UnassignActiveTasksByProjectAsync(Guid projectId, Guid userId, CancellationToken cancellationToken);
     }
 }

@@ -1,5 +1,4 @@
 ﻿using MediatR;
-using TeamManager.Application.Abstractions;
 using TeamManager.Application.Abstractions.Persistence;
 using TeamManager.Application.Common.Exceptions;
 
@@ -23,9 +22,6 @@ namespace TeamManager.Application.Features.Projects.Project.Commands.SchedulePro
 
                 if (conflictingTitles.Count > 0)
                     throw new TaskDateConflictException(conflictingTitles);
-
-                await unitOfWork.SaveChangesAsync(ct);
-
             }, cancellationToken);
         }
     }

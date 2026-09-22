@@ -19,9 +19,9 @@ namespace TeamManager.Api.Controllers.Projects
         public async Task<IActionResult> AddProjectMember(Guid projectId, [FromBody] AddProjectMemberRequest request,
             CancellationToken cancellationToken)
         {
-            await sender.Send(new AddProjectMemberCommand(projectId, request.UserId, request.ProjectRole), cancellationToken);
+            var memberId = await sender.Send(new AddProjectMemberCommand(projectId, request.UserId, request.ProjectRole), cancellationToken);
 
-            return NoContent();
+            return Ok(memberId);
         }
 
         [HttpDelete("{projectId:guid}/members/{memberId:long}")]

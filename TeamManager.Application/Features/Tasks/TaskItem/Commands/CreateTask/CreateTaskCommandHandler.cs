@@ -1,5 +1,4 @@
 ﻿using MediatR;
-using TeamManager.Application.Abstractions;
 using TeamManager.Application.Abstractions.Authentication;
 using TeamManager.Application.Abstractions.Persistence;
 using TeamManager.Application.Common.Exceptions;
@@ -38,9 +37,6 @@ namespace TeamManager.Application.Features.Tasks.TaskItem.Commands.CreateTask
                     request.Description, request.AssigneeUserId, request.StartDate, request.DueDate, project.StartDate, project.DueDate);
 
                 await taskRepository.AddAsync(task, ct);
-
-                await unitOfWork.SaveChangesAsync(ct);
-
                 taskId = task.Id;
 
             }, cancellationToken);
