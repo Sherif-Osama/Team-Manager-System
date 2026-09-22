@@ -92,7 +92,8 @@ namespace TeamManager.Domain.Entities
         public void Unassign()
         {
             EnsureNotDeleted("cannot modify deleted task");
-
+            if (AssigneeUserId == null)
+                throw new DomainException("The task is not currently assigned.");
             AssigneeUserId = null;
             Touch();
         }
@@ -103,6 +104,11 @@ namespace TeamManager.Domain.Entities
 
             EnsureNotCancelled("cannot change priority cancelled task");
 
+            if (Status == TaskItemStatus.Done)
+                throw new DomainException("cannot change priority of a completed task.");
+
+            if (Priority == priority)
+                throw new DomainException($"Task already has priority {priority}.");
             Priority = priority;
             Touch();
         }

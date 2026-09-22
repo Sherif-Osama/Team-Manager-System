@@ -6,6 +6,7 @@ using TeamManager.Application.Features.Tasks.TaskItem.Commands.ChangeTaskPriorit
 using TeamManager.Application.Features.Tasks.TaskItem.Commands.ChangeTaskStatus;
 using TeamManager.Application.Features.Tasks.TaskItem.Commands.CreateTask;
 using TeamManager.Application.Features.Tasks.TaskItem.Commands.RescheduleTask;
+using TeamManager.Application.Features.Tasks.TaskItem.Commands.UnassignTask;
 using TeamManager.Application.Features.Tasks.TaskItem.Commands.UpdateTask;
 using TeamManager.Application.Features.Tasks.TaskItem.Queries.GetMyTasks;
 using TeamManager.Application.Features.Tasks.TaskItem.Queries.GetTask;
@@ -70,6 +71,15 @@ namespace TeamManager.Api.Controllers.Tasks
         public async Task<IActionResult> AssignTask(long taskId, [FromBody] AssignTaskRequest request, CancellationToken cancellationToken)
         {
             await sender.Send(new AssignTaskCommand(taskId, request.UserId), cancellationToken);
+
+            return NoContent();
+        }
+
+        [HttpDelete("{taskId:long}/assignee")]
+        [Authorize]
+        public async Task<IActionResult> UnassignTask(long taskId, CancellationToken cancellationToken)
+        {
+            await sender.Send(new UnassignTaskCommand(taskId), cancellationToken);
 
             return NoContent();
         }
