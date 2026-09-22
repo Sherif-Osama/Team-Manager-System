@@ -19,10 +19,15 @@ namespace TeamManager.Application.Features.Projects.ProjectMembers.Commands.Remo
             if (project is null)
                 throw new ProjectNotFoundException(request.ProjectId);
 
+            var memberToRemove = project.Members.FirstOrDefault(m => m.Id == request.MemberId);
+
+            if (memberToRemove is null)
+                throw new ProjectMemberNotFoundException(project.Id, request.MemberId);
+
             await unitOfWork.ExecuteInTransactionAsync(async ct =>
             {
                 project.RemoveMember(request.MemberId, currentUser.UserId.Value);
-                await taskRepository.UnassignActiveTasksByProjectAsync(project.Id, currentUser.UserId.Value, ct);
+                await taskRepository.UnassignActiveTasksByProjectAsync(memberToRemove.UserId, currentUser.UserId.Value, ct);
             }, cancellationToken);
         }
     }
