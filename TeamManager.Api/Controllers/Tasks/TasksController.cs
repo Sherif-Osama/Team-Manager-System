@@ -7,6 +7,7 @@ using TeamManager.Application.Features.Tasks.TaskItem.Commands.ChangeTaskStatus;
 using TeamManager.Application.Features.Tasks.TaskItem.Commands.CreateTask;
 using TeamManager.Application.Features.Tasks.TaskItem.Commands.DeleteTask;
 using TeamManager.Application.Features.Tasks.TaskItem.Commands.RescheduleTask;
+using TeamManager.Application.Features.Tasks.TaskItem.Commands.TaskDependency;
 using TeamManager.Application.Features.Tasks.TaskItem.Commands.UnassignTask;
 using TeamManager.Application.Features.Tasks.TaskItem.Commands.UpdateTask;
 using TeamManager.Application.Features.Tasks.TaskItem.Queries.GetMyTasks;
@@ -65,6 +66,16 @@ namespace TeamManager.Api.Controllers.Tasks
             await sender.Send(new ChangeTaskPriorityCommand(taskId, request.Priority), cancellationToken);
 
             return NoContent();
+        }
+
+        [HttpPost("{taskId:long}/dependencies")]
+        [Authorize]
+        public async Task<ActionResult<long>> AddTaskDependency(long taskId, [FromBody] AddTaskDependencyRequest request,
+            CancellationToken cancellationToken)
+        {
+            var dependencyId = await sender.Send(new AddTaskDependencyCommand(taskId, request.DependsOnTaskId), cancellationToken);
+
+            return Ok(dependencyId);
         }
 
         [HttpPut("{taskId:long}/assignee")]

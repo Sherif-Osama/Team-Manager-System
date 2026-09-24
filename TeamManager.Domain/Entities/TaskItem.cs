@@ -204,6 +204,8 @@ namespace TeamManager.Domain.Entities
 
             _dependencies.Add(dependency);
 
+            Touch();
+
             return dependency;
         }
 

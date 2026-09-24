@@ -11,32 +11,41 @@ namespace TeamManager.Application.Features.Tasks.TaskItem.Commands.ChangeTaskSta
     {
         public async Task Handle(ChangeTaskStatusCommand request, CancellationToken cancellationToken)
         {
-            if (!currentUser.IsAuthenticated || !currentUser.UserId.HasValue)
+            if (!currentUser.UserId.HasValue || !currentUser.IsAuthenticated)
                 throw new UnauthorizedAccessException("User is not authenticated.");
 
-            var task = await taskRepository.GetByIdAsync(request.TaskId, cancellationToken);
+            await unitOfWork.ExecuteInSerializableTransactionAsync(async ct =>
+            {
+                var task = await taskRepository.GetByIdAsync(request.TaskId, ct);
 
-            if (task is null)
-                throw new TaskNotFoundException(request.TaskId);
+                if (task is null)
+                    throw new TaskNotFoundException(request.TaskId);
 
-            var userId = currentUser.UserId.Value;
+                var userId = currentUser.UserId.Value;
 
-            var isAdminOrOwner = await projectRepository.HasActiveRoleAsync(task.ProjectId, userId,
-                [ProjectRole.Owner, ProjectRole.Admin], cancellationToken);
+                var isAdminOrOwner = await projectRepository.HasActiveRoleAsync(task.ProjectId, userId,
+                    [ProjectRole.Owner, ProjectRole.Admin], ct);
 
-            var isAssignee = task.AssigneeUserId == userId;
+                var isAssignee = task.AssigneeUserId == userId;
 
-            if (!isAdminOrOwner && !isAssignee)
-                throw new ForbiddenException("You do not have permission to change this task status.");
+                if (!isAdminOrOwner && !isAssignee)
+                    throw new ForbiddenException("You do not have permission to change this task status.");
 
-            // Assignees can only move tasks through their normal workflow states,
-            // while Owners and Admins are allowed to perform any valid domain transition.
-            if (!isAdminOrOwner && !CanAssigneeChangeStatus(task.Status, request.Status))
-                throw new ForbiddenException("You do not have permission to perform this status transition.");
+                // Assignees can only move tasks through their normal workflow states,
+                // while Owners and Admins are allowed to perform any valid domain transition.
+                if (!isAdminOrOwner && !CanAssigneeChangeStatus(task.Status, request.Status))
+                    throw new ForbiddenException("You do not have permission to perform this status transition.");
 
-            task.ChangeStatus(request.Status);
 
-            await unitOfWork.SaveChangesAsync(cancellationToken);
+                if (request.Status == TaskItemStatus.Done)
+                {
+                    var incomplete = await taskRepository.GetIncompleteDependencyTitlesAsync(task.Id, ct);
+                    if (incomplete.Count > 0)
+                        throw new TaskHasIncompleteDependenciesException(task.Id, incomplete);
+                }
+
+                task.ChangeStatus(request.Status);
+            }, cancellationToken);
         }
 
         private static bool CanAssigneeChangeStatus(TaskItemStatus currentStatus, TaskItemStatus newStatus)

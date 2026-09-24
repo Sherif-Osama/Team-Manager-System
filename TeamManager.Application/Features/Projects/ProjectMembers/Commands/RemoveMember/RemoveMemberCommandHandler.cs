@@ -27,7 +27,7 @@ namespace TeamManager.Application.Features.Projects.ProjectMembers.Commands.Remo
             await unitOfWork.ExecuteInTransactionAsync(async ct =>
             {
                 project.RemoveMember(request.MemberId, currentUser.UserId.Value);
-                await taskRepository.UnassignActiveTasksByProjectAsync(memberToRemove.UserId, currentUser.UserId.Value, ct);
+                await taskRepository.UnassignActiveTasksByProjectAsync(project.Id, memberToRemove.UserId, ct);
             }, cancellationToken);
         }
     }

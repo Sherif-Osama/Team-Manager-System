@@ -1,5 +1,4 @@
 ﻿using MediatR;
-using TeamManager.Application.Abstractions;
 using TeamManager.Application.Abstractions.Persistence;
 using TeamManager.Application.Common.Exceptions;
 
@@ -21,6 +20,13 @@ namespace TeamManager.Application.Features.Tasks.TaskItem.Commands.RescheduleTas
 
                 if (project is null)
                     throw new ProjectNotFoundException(task.ProjectId);
+
+                if (request.DueDate.HasValue)
+                {
+                    var violating = await taskRepository.GetDependentsViolatingDueDateAsync(task.Id, request.DueDate.Value, ct);
+                    if (violating.Count > 0)
+                        throw new TaskDueDateViolatesDependentTasksException(task.Id, violating);
+                }
 
                 task.Reschedule(request.StartDate, request.DueDate, project.StartDate, project.DueDate);
             }, cancellationToken);

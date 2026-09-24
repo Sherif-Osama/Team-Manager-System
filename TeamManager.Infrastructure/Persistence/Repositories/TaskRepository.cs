@@ -59,5 +59,55 @@ namespace TeamManager.Infrastructure.Persistence.Repositories
                     .SetProperty(x => x.Status, x => x.Status == TaskItemStatus.InProgress ? TaskItemStatus.Todo : x.Status),
                     cancellationToken);
         }
+
+        public async Task<bool> WouldCreateDependencyCycleAsync(Guid projectId, long taskId, long dependsOnTaskId,
+            CancellationToken cancellationToken)
+        {
+            var result = await context.Database.SqlQuery<bool>($"""
+            WITH DependencyGraph AS
+            (
+                SELECT td.DependsOnTaskId FROM TaskDependencies td
+                INNER JOIN Tasks t ON t.TaskId = td.TaskId
+                INNER JOIN Tasks dependsOn ON dependsOn.TaskId = td.DependsOnTaskId
+                WHERE td.TaskId = {dependsOnTaskId}    AND t.ProjectId = {projectId} AND t.DeletedAtUtc IS NULL AND 
+                dependsOn.DeletedAtUtc IS NULL
+
+                UNION ALL
+
+                SELECT td.DependsOnTaskId FROM TaskDependencies td
+                INNER JOIN DependencyGraph dg ON td.TaskId = dg.DependsOnTaskId
+                INNER JOIN Tasks t  ON t.TaskId = td.TaskId
+                INNER JOIN Tasks dependsOn ON dependsOn.TaskId = td.DependsOnTaskId
+                WHERE t.ProjectId = {projectId}  AND t.DeletedAtUtc IS NULL AND dependsOn.DeletedAtUtc IS NULL
+            )
+            SELECT CAST(
+                CASE
+                    WHEN EXISTS (SELECT 1 FROM DependencyGraph WHERE DependsOnTaskId = {taskId})
+                    THEN 1
+                    ELSE 0
+                END AS bit) 
+                AS [Value]
+            OPTION (MAXRECURSION 32767)
+            """).ToListAsync(cancellationToken);
+
+            return result.Single();
+        }
+
+        public async Task<IReadOnlyList<string>> GetIncompleteDependencyTitlesAsync(long taskId, CancellationToken cancellationToken)
+        {
+            return await context.TaskDependencies.AsNoTracking().Where(d => d.TaskId == taskId)
+                .Select(d => d.DependsOnTask).Where(t => t.DeletedAtUtc == null && t.Status != TaskItemStatus.Done &&
+                t.Status != TaskItemStatus.Cancelled).Select(t => t.Title).ToListAsync(cancellationToken);
+        }
+
+        public async Task<IReadOnlyList<(string Title, DateOnly DueDate)>> GetDependentsViolatingDueDateAsync(long taskId,
+            DateOnly newDueDate, CancellationToken cancellationToken)
+        {
+            return await context.TaskDependencies.AsNoTracking().Where(d => d.DependsOnTaskId == taskId).Select(d => d.Task)
+                .Where(t => t.DeletedAtUtc == null && t.Status != TaskItemStatus.Cancelled && t.DueDate.HasValue &&
+                t.DueDate.Value < newDueDate).Select(t => new { t.Title, t.DueDate }).ToListAsync(cancellationToken)
+                .ContinueWith(task => (IReadOnlyList<(string, DateOnly)>)task.Result.Select(x => (x.Title, x.DueDate!.Value))
+                .ToList(), cancellationToken);
+        }
     }
 }

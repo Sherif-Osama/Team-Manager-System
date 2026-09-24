@@ -14,5 +14,8 @@ namespace TeamManager.Application.Abstractions.Persistence
         Task UnassignActiveTasksAsync(Guid userId, CancellationToken cancellationToken);
         Task UnassignActiveTasksByTeamAsync(Guid teamId, Guid userId, CancellationToken cancellationToken);
         Task UnassignActiveTasksByProjectAsync(Guid projectId, Guid userId, CancellationToken cancellationToken);
+        Task<bool> WouldCreateDependencyCycleAsync(Guid projectId, long taskId, long dependsOnTaskId, CancellationToken cancellationToken);
+        Task<IReadOnlyList<string>> GetIncompleteDependencyTitlesAsync(long taskId, CancellationToken cancellationToken);
+        Task<IReadOnlyList<(string Title, DateOnly DueDate)>> GetDependentsViolatingDueDateAsync(long taskId, DateOnly newDueDate, CancellationToken cancellationToken);
     }
 }
