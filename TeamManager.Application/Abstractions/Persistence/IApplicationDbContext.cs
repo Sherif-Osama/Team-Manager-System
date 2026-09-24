@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using TeamManager.Domain.Entities;
 
 namespace TeamManager.Application.Abstractions.Persistence
@@ -14,5 +14,6 @@ namespace TeamManager.Application.Abstractions.Persistence
         DbSet<Project> Projects { get; }
         DbSet<ProjectMember> ProjectMembers { get; }
         DbSet<TaskItem> Tasks { get; }
+        DbSet<TaskDependency> TaskDependencies { get; }
     }
 }

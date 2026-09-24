@@ -1,6 +1,6 @@
 ﻿using FluentValidation;
 
-namespace TeamManager.Application.Features.Tasks.TaskItem.Commands.TaskDependency
+namespace TeamManager.Application.Features.Tasks.TaskDependency.Commands.TaskDependency
 {
     public sealed class AddTaskDependencyValidator : AbstractValidator<AddTaskDependencyCommand>
     {

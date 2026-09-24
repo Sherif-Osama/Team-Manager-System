@@ -1,13 +1,14 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using TeamManager.Application.Features.Tasks.TaskDependency.Commands.TaskDependency;
+using TeamManager.Application.Features.Tasks.TaskDependency.Queries.GetTaskDependencies;
 using TeamManager.Application.Features.Tasks.TaskItem.Commands.AssignTask;
 using TeamManager.Application.Features.Tasks.TaskItem.Commands.ChangeTaskPriority;
 using TeamManager.Application.Features.Tasks.TaskItem.Commands.ChangeTaskStatus;
 using TeamManager.Application.Features.Tasks.TaskItem.Commands.CreateTask;
 using TeamManager.Application.Features.Tasks.TaskItem.Commands.DeleteTask;
 using TeamManager.Application.Features.Tasks.TaskItem.Commands.RescheduleTask;
-using TeamManager.Application.Features.Tasks.TaskItem.Commands.TaskDependency;
 using TeamManager.Application.Features.Tasks.TaskItem.Commands.UnassignTask;
 using TeamManager.Application.Features.Tasks.TaskItem.Commands.UpdateTask;
 using TeamManager.Application.Features.Tasks.TaskItem.Queries.GetMyTasks;
@@ -95,6 +96,17 @@ namespace TeamManager.Api.Controllers.Tasks
 
             return NoContent();
 
+        }
+
+        [HttpGet("{taskId:long}/dependencies")]
+        [Authorize]
+        public async Task<ActionResult<GetTaskDependenciesResponse>> GetTaskDependencies(long taskId,
+            [FromQuery] GetTaskDependenciesRequest request, CancellationToken cancellationToken)
+        {
+            var response = await sender.Send(new GetTaskDependenciesQuery(taskId, request.Page, request.PageSize),
+                cancellationToken);
+
+            return Ok(response);
         }
 
         [HttpDelete("{taskId:long}/assignee")]
