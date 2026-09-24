@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 using TeamManager.Application.Abstractions.Persistence;
 using TeamManager.Application.Common.Authorization.AuthorizationInfo;
@@ -108,6 +108,17 @@ namespace TeamManager.Infrastructure.Persistence.Repositories
                 .Select(t => new { t.Title, t.DueDate }).ToListAsync(cancellationToken);
 
             return rows.Select(x => (x.Title, x.DueDate!.Value)).ToList();
+        }
+
+        public async Task<TaskItem?> GetByIdWithDependencyAsync(long taskId, long dependencyId, CancellationToken cancellationToken)
+        {
+            return await context.Tasks.Include(t => t.Dependencies.Where(d => d.Id == dependencyId))
+                .FirstOrDefaultAsync(t => t.Id == taskId && t.DeletedAtUtc == null, cancellationToken);
+        }
+
+        public void RemoveDependency(TaskDependency dependency)
+        {
+            context.TaskDependencies.Remove(dependency);
         }
     }
 }

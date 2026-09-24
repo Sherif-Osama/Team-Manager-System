@@ -73,6 +73,7 @@ namespace TeamManager.Api.Middleware
                 ProjectMemberNotFoundException => StatusCodes.Status404NotFound,
                 TaskHasIncompleteDependenciesException => StatusCodes.Status409Conflict,
                 TaskDueDateViolatesDependentTasksException => StatusCodes.Status409Conflict,
+                TaskDependencyNotFoundException => StatusCodes.Status404NotFound,
                 _ => StatusCodes.Status500InternalServerError
             };
 

@@ -1,6 +1,7 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using TeamManager.Application.Features.Tasks.TaskDependency.Commands.DeleteTaskDependency;
 using TeamManager.Application.Features.Tasks.TaskDependency.Commands.TaskDependency;
 using TeamManager.Application.Features.Tasks.TaskDependency.Queries.GetTaskDependencies;
 using TeamManager.Application.Features.Tasks.TaskItem.Commands.AssignTask;
@@ -77,6 +78,15 @@ namespace TeamManager.Api.Controllers.Tasks
             var dependencyId = await sender.Send(new AddTaskDependencyCommand(taskId, request.DependsOnTaskId), cancellationToken);
 
             return Ok(dependencyId);
+        }
+
+        [HttpDelete("{taskId:long}/dependencies/{dependencyId:long}")]
+        [Authorize]
+        public async Task<IActionResult> DeleteTaskDependency(long taskId, long dependencyId, CancellationToken cancellationToken)
+        {
+            await sender.Send(new DeleteTaskDependencyCommand(taskId, dependencyId), cancellationToken);
+
+            return NoContent();
         }
 
         [HttpPut("{taskId:long}/assignee")]

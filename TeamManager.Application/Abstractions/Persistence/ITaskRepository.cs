@@ -1,4 +1,4 @@
-﻿using TeamManager.Application.Common.Authorization.AuthorizationInfo;
+using TeamManager.Application.Common.Authorization.AuthorizationInfo;
 using TeamManager.Domain.Entities;
 using TeamManager.Domain.Enums;
 
@@ -17,5 +17,7 @@ namespace TeamManager.Application.Abstractions.Persistence
         Task<bool> WouldCreateDependencyCycleAsync(Guid projectId, long taskId, long dependsOnTaskId, CancellationToken cancellationToken);
         Task<IReadOnlyList<string>> GetIncompleteDependencyTitlesAsync(long taskId, CancellationToken cancellationToken);
         Task<IReadOnlyList<(string Title, DateOnly DueDate)>> GetDependentsViolatingDueDateAsync(long taskId, DateOnly newDueDate, CancellationToken cancellationToken);
+        Task<TaskItem?> GetByIdWithDependencyAsync(long taskId, long dependencyId, CancellationToken cancellationToken);
+        void RemoveDependency(TaskDependency dependency);
     }
 }
