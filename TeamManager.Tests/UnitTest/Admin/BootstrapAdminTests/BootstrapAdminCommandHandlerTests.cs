@@ -2,7 +2,8 @@ using Moq;
 using TeamManager.Application.Abstractions.Configuration;
 using TeamManager.Application.Abstractions.Persistence;
 using TeamManager.Application.Common.Authorization.Scopes;
-using TeamManager.Application.Common.Exceptions;
+using TeamManager.Application.Common.Exceptions.AuthorizationExceptions;
+using TeamManager.Application.Common.Exceptions.UserExceptions;
 using TeamManager.Application.Features.Admin.Commands.BootstrapAdmin;
 using TeamManager.Domain.Entities;
 

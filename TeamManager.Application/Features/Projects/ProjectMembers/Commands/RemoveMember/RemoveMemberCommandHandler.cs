@@ -1,7 +1,7 @@
 ﻿using MediatR;
 using TeamManager.Application.Abstractions.Authentication;
 using TeamManager.Application.Abstractions.Persistence;
-using TeamManager.Application.Common.Exceptions;
+using TeamManager.Application.Common.Exceptions.ProjectExceptions;
 
 namespace TeamManager.Application.Features.Projects.ProjectMembers.Commands.RemoveMember
 {

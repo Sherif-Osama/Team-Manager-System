@@ -2,7 +2,11 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Data;
-using TeamManager.Application.Common.Exceptions;
+using TeamManager.Application.Common.Exceptions.AuthorizationExceptions;
+using TeamManager.Application.Common.Exceptions.ProjectExceptions;
+using TeamManager.Application.Common.Exceptions.TaskExceptions;
+using TeamManager.Application.Common.Exceptions.TeamExceptions;
+using TeamManager.Application.Common.Exceptions.UserExceptions;
 using TeamManager.Domain.Exceptions;
 
 namespace TeamManager.Api.Middleware

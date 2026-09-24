@@ -1,4 +1,4 @@
-﻿namespace TeamManager.Application.Common.Exceptions
+﻿namespace TeamManager.Application.Common.Exceptions.UserExceptions
 {
     public sealed class UserNotFoundException : ApplicationExceptionBase
     {

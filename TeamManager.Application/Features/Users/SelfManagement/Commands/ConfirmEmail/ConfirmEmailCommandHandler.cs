@@ -2,7 +2,7 @@
 using TeamManager.Application.Abstractions.Authentication;
 using TeamManager.Application.Abstractions.Persistence;
 using TeamManager.Application.Abstractions.Security;
-using TeamManager.Application.Common.Exceptions;
+using TeamManager.Application.Common.Exceptions.UserExceptions;
 using TeamManager.Application.Features.Users.SelfManagement.Commands.ConfirmEmail;
 
 public sealed class ConfirmEmailCommandHandler(ICurrentUser currentUser, IUserRepository userRepository,

@@ -2,7 +2,8 @@
 using TeamManager.Application.Abstractions.Configuration;
 using TeamManager.Application.Abstractions.Persistence;
 using TeamManager.Application.Common.DefaultValues;
-using TeamManager.Application.Common.Exceptions;
+using TeamManager.Application.Common.Exceptions.AuthorizationExceptions;
+using TeamManager.Application.Common.Exceptions.UserExceptions;
 
 namespace TeamManager.Application.Features.Admin.Commands.BootstrapAdmin
 {

@@ -1,9 +1,8 @@
 ﻿using MediatR;
 using System.Text.Json;
-using TeamManager.Application.Abstractions;
 using TeamManager.Application.Abstractions.Authentication;
 using TeamManager.Application.Abstractions.Persistence;
-using TeamManager.Application.Common.Exceptions;
+using TeamManager.Application.Common.Exceptions.UserExceptions;
 using TeamManager.Application.Common.Outbox;
 
 namespace TeamManager.Application.Features.Authentication.Commands.Login;

@@ -1,7 +1,7 @@
 ﻿using MediatR;
 using Microsoft.EntityFrameworkCore;
 using TeamManager.Application.Abstractions.Persistence;
-using TeamManager.Application.Common.Exceptions;
+using TeamManager.Application.Common.Exceptions.ProjectExceptions;
 using TeamManager.Domain.Enums;
 
 namespace TeamManager.Application.Features.Projects.Project.Queries.GetProject

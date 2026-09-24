@@ -2,7 +2,7 @@
 using TeamManager.Application.Abstractions.Authentication;
 using TeamManager.Application.Abstractions.Persistence;
 using TeamManager.Application.Abstractions.Security;
-using TeamManager.Application.Common.Exceptions;
+using TeamManager.Application.Common.Exceptions.TeamExceptions;
 
 namespace TeamManager.Application.Features.Teams.Invitations.Commands.RejectInvitation
 {

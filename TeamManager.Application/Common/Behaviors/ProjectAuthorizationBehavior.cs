@@ -2,7 +2,8 @@
 using TeamManager.Application.Abstractions.Authentication;
 using TeamManager.Application.Abstractions.Persistence;
 using TeamManager.Application.Common.Authorization.Scopes;
-using TeamManager.Application.Common.Exceptions;
+using TeamManager.Application.Common.Exceptions.AuthorizationExceptions;
+using TeamManager.Application.Common.Exceptions.ProjectExceptions;
 namespace TeamManager.Application.Common.Behaviors
 {
     public class ProjectAuthorizationBehavior<TRequest, TResponse>(ICurrentUser currentUser, IProjectRepository projectRepository)

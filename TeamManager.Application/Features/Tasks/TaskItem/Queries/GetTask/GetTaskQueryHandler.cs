@@ -1,7 +1,7 @@
 ﻿using MediatR;
 using Microsoft.EntityFrameworkCore;
 using TeamManager.Application.Abstractions.Persistence;
-using TeamManager.Application.Common.Exceptions;
+using TeamManager.Application.Common.Exceptions.TaskExceptions;
 
 namespace TeamManager.Application.Features.Tasks.TaskItem.Queries.GetTask
 {

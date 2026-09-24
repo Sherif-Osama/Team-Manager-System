@@ -1,6 +1,7 @@
 ﻿using MediatR;
 using TeamManager.Application.Abstractions.Persistence;
-using TeamManager.Application.Common.Exceptions;
+using TeamManager.Application.Common.Exceptions.TeamExceptions;
+using TeamManager.Application.Common.Exceptions.UserExceptions;
 
 namespace TeamManager.Application.Features.Teams.Team.Commands.TransferOwnership
 {

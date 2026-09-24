@@ -1,4 +1,4 @@
-﻿namespace TeamManager.Application.Common.Exceptions
+﻿namespace TeamManager.Application.Common.Exceptions.TeamExceptions
 {
     public sealed class UserOwnsActiveTeamException : ApplicationExceptionBase
     {

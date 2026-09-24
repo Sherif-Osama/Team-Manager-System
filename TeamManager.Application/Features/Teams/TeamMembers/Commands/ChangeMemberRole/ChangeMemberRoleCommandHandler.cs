@@ -1,6 +1,6 @@
 ﻿using MediatR;
 using TeamManager.Application.Abstractions.Persistence;
-using TeamManager.Application.Common.Exceptions;
+using TeamManager.Application.Common.Exceptions.TeamExceptions;
 
 namespace TeamManager.Application.Features.Teams.TeamMembers.Commands.ChangeMemberRole
 {

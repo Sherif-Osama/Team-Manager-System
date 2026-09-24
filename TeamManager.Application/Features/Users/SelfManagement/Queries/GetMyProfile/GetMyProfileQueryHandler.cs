@@ -2,7 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using TeamManager.Application.Abstractions.Authentication;
 using TeamManager.Application.Abstractions.Persistence;
-using TeamManager.Application.Common.Exceptions;
+using TeamManager.Application.Common.Exceptions.UserExceptions;
 using TeamManager.Domain.Enums;
 
 namespace TeamManager.Application.Features.Users.SelfManagement.Queries.GetMyProfile

@@ -1,4 +1,4 @@
-﻿namespace TeamManager.Application.Common.Exceptions
+﻿namespace TeamManager.Application.Common.Exceptions.TaskExceptions
 {
     public sealed class TaskDateConflictException : ApplicationExceptionBase
     {
