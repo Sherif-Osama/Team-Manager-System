@@ -103,11 +103,11 @@ namespace TeamManager.Infrastructure.Persistence.Repositories
         public async Task<IReadOnlyList<(string Title, DateOnly DueDate)>> GetDependentsViolatingDueDateAsync(long taskId,
             DateOnly newDueDate, CancellationToken cancellationToken)
         {
-            return await context.TaskDependencies.AsNoTracking().Where(d => d.DependsOnTaskId == taskId).Select(d => d.Task)
-                .Where(t => t.DeletedAtUtc == null && t.Status != TaskItemStatus.Cancelled && t.DueDate.HasValue &&
-                t.DueDate.Value < newDueDate).Select(t => new { t.Title, t.DueDate }).ToListAsync(cancellationToken)
-                .ContinueWith(task => (IReadOnlyList<(string, DateOnly)>)task.Result.Select(x => (x.Title, x.DueDate!.Value))
-                .ToList(), cancellationToken);
+            var rows = await context.TaskDependencies.AsNoTracking().Where(d => d.DependsOnTaskId == taskId).Select(d => d.Task)
+                .Where(t => t.DeletedAtUtc == null && t.Status != TaskItemStatus.Cancelled && t.DueDate.HasValue && t.DueDate.Value < newDueDate)
+                .Select(t => new { t.Title, t.DueDate }).ToListAsync(cancellationToken);
+
+            return rows.Select(x => (x.Title, x.DueDate!.Value)).ToList();
         }
     }
 }
