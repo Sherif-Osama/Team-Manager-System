@@ -8,14 +8,17 @@ namespace TeamManager.Application.Features.Tasks.TaskItem.Commands.DeleteTask
     {
         public async Task Handle(DeleteTaskCommand request, CancellationToken cancellationToken)
         {
-            var task = await taskRepository.GetByIdAsync(request.TaskId, cancellationToken);
+            await unitOfWork.ExecuteInSerializableTransactionAsync(async ct =>
+            {
 
-            if (task is null)
-                throw new TaskNotFoundException(request.TaskId);
+                var task = await taskRepository.GetByIdAsync(request.TaskId, cancellationToken);
 
-            task.SoftDelete();
+                if (task is null)
+                    throw new TaskNotFoundException(request.TaskId);
 
-            await unitOfWork.SaveChangesAsync(cancellationToken);
+                task.SoftDelete();
+                await taskRepository.DeleteAllDependenciesAsync(task.Id, cancellationToken);
+            }, cancellationToken);
         }
     }
 }

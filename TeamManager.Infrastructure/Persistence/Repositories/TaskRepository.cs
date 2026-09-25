@@ -120,5 +120,11 @@ namespace TeamManager.Infrastructure.Persistence.Repositories
         {
             context.TaskDependencies.Remove(dependency);
         }
+
+        public async Task DeleteAllDependenciesAsync(long taskId, CancellationToken cancellationToken)
+        {
+            await context.TaskDependencies.Where(d => d.TaskId == taskId || d.DependsOnTaskId == taskId)
+                .ExecuteDeleteAsync(cancellationToken);
+        }
     }
 }

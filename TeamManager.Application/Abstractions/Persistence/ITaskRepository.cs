@@ -19,5 +19,6 @@ namespace TeamManager.Application.Abstractions.Persistence
         Task<IReadOnlyList<(string Title, DateOnly DueDate)>> GetDependentsViolatingDueDateAsync(long taskId, DateOnly newDueDate, CancellationToken cancellationToken);
         Task<TaskItem?> GetByIdWithDependencyAsync(long taskId, long dependencyId, CancellationToken cancellationToken);
         void RemoveDependency(TaskDependency dependency);
+        Task DeleteAllDependenciesAsync(long taskId, CancellationToken cancellationToken);
     }
 }
