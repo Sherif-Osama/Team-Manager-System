@@ -1,8 +1,8 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using TeamManager.Application.Features.Tasks.TaskDependency.Commands.AddTaskDependency;
 using TeamManager.Application.Features.Tasks.TaskDependency.Commands.DeleteTaskDependency;
-using TeamManager.Application.Features.Tasks.TaskDependency.Commands.TaskDependency;
 using TeamManager.Application.Features.Tasks.TaskDependency.Queries.GetTaskDependencies;
 using TeamManager.Application.Features.Tasks.TaskItem.Commands.AssignTask;
 using TeamManager.Application.Features.Tasks.TaskItem.Commands.ChangeTaskPriority;

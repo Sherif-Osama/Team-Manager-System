@@ -2,7 +2,7 @@
 using TeamManager.Application.Common.Authorization.Scopes;
 using TeamManager.Domain.Enums;
 
-namespace TeamManager.Application.Features.Tasks.TaskDependency.Commands.TaskDependency
+namespace TeamManager.Application.Features.Tasks.TaskDependency.Commands.AddTaskDependency
 {
     public sealed record AddTaskDependencyCommand(long TaskId, long DependsOnTaskId) : IRequest<long>, ITaskScopedRequest
     {

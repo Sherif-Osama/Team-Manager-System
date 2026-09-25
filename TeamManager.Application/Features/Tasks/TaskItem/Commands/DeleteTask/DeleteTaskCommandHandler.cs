@@ -17,7 +17,7 @@ namespace TeamManager.Application.Features.Tasks.TaskItem.Commands.DeleteTask
                     throw new TaskNotFoundException(request.TaskId);
 
                 task.SoftDelete();
-                await taskRepository.DeleteAllDependenciesAsync(task.Id, cancellationToken);
+                await taskRepository.DeleteAllDependenciesAsync(task.Id, ct);
             }, cancellationToken);
         }
     }

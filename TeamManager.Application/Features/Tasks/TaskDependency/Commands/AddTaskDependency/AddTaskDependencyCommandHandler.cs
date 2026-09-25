@@ -4,7 +4,7 @@ using TeamManager.Application.Abstractions.Persistence;
 using TeamManager.Application.Common.Exceptions.TaskExceptions;
 using TeamManager.Domain.Exceptions;
 
-namespace TeamManager.Application.Features.Tasks.TaskDependency.Commands.TaskDependency
+namespace TeamManager.Application.Features.Tasks.TaskDependency.Commands.AddTaskDependency
 {
     public sealed class AddTaskDependencyCommandHandler(ICurrentUser currentUser, ITaskRepository taskRepository,
         IUnitOfWork unitOfWork) : IRequestHandler<AddTaskDependencyCommand, long>
