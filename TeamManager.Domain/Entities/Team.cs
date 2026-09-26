@@ -1,11 +1,12 @@
 using TeamManager.Domain.Common;
+using TeamManager.Domain.Common.Events;
 using TeamManager.Domain.Enums;
 using TeamManager.Domain.Exceptions;
 
 namespace TeamManager.Domain.Entities
 {
 
-    public class Team : Entity<Guid>
+    public class Team : AggregateRoot<Guid>
     {
         private readonly List<TeamMember> _members = new();
         private readonly List<TeamInvitation> _invitations = new();
@@ -151,6 +152,7 @@ namespace TeamManager.Domain.Entities
                 throw new DomainException("The team owner cannot be removed from the team.");
 
             member.Remove(removedBy);
+            AddDomainEvent(new TeamMemberRemovedDomainEvent(Id, member.UserId));
         }
 
         public void ChangeMemberRole(long memberId, TeamRole role)

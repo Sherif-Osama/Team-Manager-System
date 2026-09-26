@@ -9,8 +9,7 @@ using TeamManager.Application.Common.Outbox;
 namespace TeamManager.Application.Features.Users.SelfManagement.Commands.DeactivateMyAccount
 {
     public sealed class DeactivateMyAccountCommandHandler(ICurrentUser currentUser, IUserRepository
-        userRepository, IUnitOfWork unitOfWork, ITeamRepository teamRepository, IPasswordHasher passwordHasher,
-        IProjectRepository projectRepository, ITaskRepository taskRepository, IOutbox outbox)
+        userRepository, IUnitOfWork unitOfWork, IPasswordHasher passwordHasher, IOutbox outbox)
         : IRequestHandler<DeactivateMyAccountCommand>
     {
         public async Task Handle(DeactivateMyAccountCommand request, CancellationToken cancellationToken)
@@ -35,16 +34,7 @@ namespace TeamManager.Application.Features.Users.SelfManagement.Commands.Deactiv
 
                 user.Deactivate();
 
-                await teamRepository.DeactivateOwnedTeamsAsync(user.Id, ct);
-                await teamRepository.SuspendActiveMembershipsAsync(user.Id, ct);
-
-                await projectRepository.DeactivateOwnedProjectsAsync(user.Id, ct);
-                await projectRepository.SuspendActiveMembershipsAsync(user.Id, ct);
-
-                await taskRepository.UnassignActiveTasksAsync(user.Id, ct);
-
                 await userRepository.RevokeAllRefreshTokensAsync(user.Id, ct);
-
 
                 var payload = JsonSerializer.Serialize(new
                 {

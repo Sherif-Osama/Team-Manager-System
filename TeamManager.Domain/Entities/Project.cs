@@ -1,11 +1,12 @@
 using TeamManager.Domain.Common;
+using TeamManager.Domain.Common.Events;
 using TeamManager.Domain.Enums;
 using TeamManager.Domain.Exceptions;
 
 namespace TeamManager.Domain.Entities
 {
 
-    public class Project : Entity<Guid>
+    public class Project : AggregateRoot<Guid>
     {
         private readonly List<ProjectMember> _members = new();
         private readonly List<TaskItem> _tasks = new();
@@ -201,6 +202,7 @@ namespace TeamManager.Domain.Entities
                 throw new DomainException("cannot remove project owner from project");
 
             member.Remove(removedBy);
+            AddDomainEvent(new ProjectMemberRemovedDomainEvent(Id, member.UserId));
         }
 
         private void Touch() => UpdatedAtUtc = DateTime.UtcNow;

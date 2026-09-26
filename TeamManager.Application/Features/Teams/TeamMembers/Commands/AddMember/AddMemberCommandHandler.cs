@@ -10,7 +10,7 @@ namespace TeamManager.Application.Features.Teams.TeamMembers.Commands.AddMember
     {
         public async Task<long> Handle(AddMemberCommand request, CancellationToken cancellationToken)
         {
-            long memberId = default;
+            Domain.Entities.TeamMember? member = null;
 
             await unitOfWork.ExecuteInSerializableTransactionAsync(async ct =>
             {
@@ -23,12 +23,10 @@ namespace TeamManager.Application.Features.Teams.TeamMembers.Commands.AddMember
                 if (user is null || !user.IsActive)
                     throw new UserNotFoundException(request.UserId);
 
-                var member = team.AddMember(request.UserId, request.TeamRole);
-
-                memberId = member.Id;
+                member = team.AddMember(request.UserId, request.TeamRole);
             }, cancellationToken);
 
-            return memberId;
+            return member?.Id ?? default;
         }
     }
 }

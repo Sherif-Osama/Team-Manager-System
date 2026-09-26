@@ -17,32 +17,31 @@ namespace TeamManager.Application.Features.Projects.ProjectMembers.Commands.AddP
             if (!currentUser.IsAuthenticated || !currentUser.UserId.HasValue)
                 throw new UnauthorizedAccessException("User is not authenticated.");
 
-            long memberId = default;
+            Domain.Entities.ProjectMember? member = null;
 
             await unitOfWork.ExecuteInSerializableTransactionAsync(async ct =>
-            {
-                var project = await projectRepository.GetByIdWithMembersAsync(request.ProjectId, cancellationToken);
+             {
+                 var project = await projectRepository.GetByIdWithMembersAsync(request.ProjectId, cancellationToken);
 
-                if (project is null)
-                    throw new ProjectNotFoundException(request.ProjectId);
+                 if (project is null)
+                     throw new ProjectNotFoundException(request.ProjectId);
 
-                var user = await userRepository.GetByIdAsync(request.UserId, cancellationToken);
+                 var user = await userRepository.GetByIdAsync(request.UserId, cancellationToken);
 
-                if (user is null || !user.IsActive)
-                    throw new UserNotFoundException(request.UserId);
+                 if (user is null || !user.IsActive)
+                     throw new UserNotFoundException(request.UserId);
 
-                var isActiveTeamMember = await teamRepository.HasActiveRoleAsync(project.TeamId, request.UserId,
-                    [TeamRole.Owner, TeamRole.Admin, TeamRole.Member, TeamRole.Viewer], cancellationToken);
+                 var isActiveTeamMember = await teamRepository.HasActiveRoleAsync(project.TeamId, request.UserId,
+                     [TeamRole.Owner, TeamRole.Admin, TeamRole.Member, TeamRole.Viewer], cancellationToken);
 
-                if (!isActiveTeamMember)
-                    throw new ForbiddenException("Only active team members can be added to a project.");
+                 if (!isActiveTeamMember)
+                     throw new ForbiddenException("Only active team members can be added to a project.");
 
-                var member = project.AddMember(request.UserId, request.ProjectRole, currentUser.UserId!.Value);
+                 member = project.AddMember(request.UserId, request.ProjectRole, currentUser.UserId!.Value);
 
-                memberId = member.Id;
-            }, cancellationToken);
+             }, cancellationToken);
 
-            return memberId;
+            return member?.Id ?? default;
         }
     }
 }

@@ -1,9 +1,10 @@
 using TeamManager.Domain.Common;
+using TeamManager.Domain.Common.Events;
 using TeamManager.Domain.Exceptions;
 
 namespace TeamManager.Domain.Entities;
 
-public class User : Entity<Guid>
+public class User : AggregateRoot<Guid>
 {
     private const int MaxFailedLoginAttempts = 5;
     private static readonly TimeSpan LockoutDuration = TimeSpan.FromMinutes(15);
@@ -156,6 +157,7 @@ public class User : Entity<Guid>
         {
             IsActive = true;
             Touch();
+            AddDomainEvent(new UserReactivatedDomainEvent(Id));
         }
 
         FailedLoginAttempts = 0;
@@ -179,6 +181,7 @@ public class User : Entity<Guid>
 
         IsActive = false;
         Touch();
+        AddDomainEvent(new UserDeactivatedDomainEvent(Id));
     }
 
     public void Activate()
@@ -200,6 +203,7 @@ public class User : Entity<Guid>
 
         DeletedAtUtc = DateTime.UtcNow;
         IsActive = false;
+        AddDomainEvent(new UserDeletedDomainEvent(Id));
     }
 
     public void AssignRole(int roleId)

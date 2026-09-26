@@ -1,13 +1,16 @@
-﻿using Microsoft.Data.SqlClient;
+﻿using MediatR;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using System.Data;
 using TeamManager.Application.Abstractions.Persistence;
+using TeamManager.Application.Common.Events;
+using TeamManager.Domain.Common;
 using TeamManager.Domain.Entities;
 using TeamManager.Infrastructure.Persistence.Outbox;
 namespace TeamManager.Infrastructure.Persistence
 {
 
-    public class TeamManagerDbContext(DbContextOptions<TeamManagerDbContext> options)
+    public class TeamManagerDbContext(DbContextOptions<TeamManagerDbContext> options, IPublisher publisher)
         : DbContext(options), IUnitOfWork, IApplicationDbContext
     {
         public DbSet<User> Users => Set<User>();
@@ -79,6 +82,26 @@ namespace TeamManager.Infrastructure.Persistence
                 await transaction.RollbackAsync(cancellationToken);
                 throw;
             }
+        }
+
+        public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+        {
+            var result = await base.SaveChangesAsync(cancellationToken);
+
+            var aggregatesWithEvents = ChangeTracker.Entries<IHasDomainEvents>().Select(e => e.Entity)
+                .Where(e => e.DomainEvents.Count > 0).ToList();
+
+            var events = aggregatesWithEvents.SelectMany(e => e.DomainEvents).ToList();
+            aggregatesWithEvents.ForEach(e => e.ClearDomainEvents());
+
+            foreach (var domainEvent in events)
+            {
+                var wrapperType = typeof(DomainEventNotification<>).MakeGenericType(domainEvent.GetType());
+                var notification = (INotification)Activator.CreateInstance(wrapperType, domainEvent)!;
+                await publisher.Publish(notification, cancellationToken);
+            }
+
+            return result;
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

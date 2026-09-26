@@ -30,7 +30,8 @@ namespace TeamManager.Application.Features.Tasks.TaskItem.Commands.CreateTask
                 {
                     var isActiveMember = await projectRepository.IsActiveMemberAsync(project.Id, request.AssigneeUserId.Value, ct);
 
-                    if (!isActiveMember) throw new UserNotMemberOfProjectException(request.AssigneeUserId.Value, project.Id);
+                    if (!isActiveMember)
+                        throw new UserNotMemberOfProjectException(request.AssigneeUserId.Value, project.Id);
                 }
 
                 var task = new Domain.Entities.TaskItem(project.Id, request.Title, currentUser.UserId.Value, request.Priority,
