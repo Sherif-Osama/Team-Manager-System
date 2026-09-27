@@ -5,9 +5,9 @@ namespace TeamManager.Infrastructure.Persistence.Outbox
 {
     public sealed class Outbox(TeamManagerDbContext context) : IOutbox
     {
-        public void Add(OutboxMessageType type, string payload)
+        public async Task Add(OutboxMessageType type, string payload)
         {
-            context.OutboxMessages.Add(new OutboxMessage
+            await context.OutboxMessages.AddAsync(new OutboxMessage
             {
                 Type = type.ToString(),
                 Payload = payload,

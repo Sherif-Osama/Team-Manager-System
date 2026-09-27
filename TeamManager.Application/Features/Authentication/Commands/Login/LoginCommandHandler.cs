@@ -1,15 +1,13 @@
 ﻿using MediatR;
-using System.Text.Json;
 using TeamManager.Application.Abstractions.Authentication;
 using TeamManager.Application.Abstractions.Persistence;
 using TeamManager.Application.Common.Exceptions.UserExceptions;
-using TeamManager.Application.Common.Outbox;
 
 namespace TeamManager.Application.Features.Authentication.Commands.Login;
 
 public sealed class LoginCommandHandler(IUserRepository userRepository, IPasswordHasher passwordHasher,
         IAccessTokenService accessTokenService, IRefreshTokenService refreshTokenService, IUnitOfWork unitOfWork,
-        ICurrentUser currentUser, IOutbox outbox) : IRequestHandler<LoginCommand, LoginResponse>
+        ICurrentUser currentUser) : IRequestHandler<LoginCommand, LoginResponse>
 {
     public async Task<LoginResponse> Handle(LoginCommand request, CancellationToken cancellationToken)
     {
@@ -48,19 +46,6 @@ public sealed class LoginCommandHandler(IUserRepository userRepository, IPasswor
                 refreshTokenService.GetExpiration(), currentUser.DeviceInfo, currentUser.IpAddress);
 
             await userRepository.AddRefreshTokenAsync(refreshTokenEntity, ct);
-
-            if (wasInactive)
-            {
-                var payload = JsonSerializer.Serialize(new
-                {
-                    To = user.Email,
-                    ActivatedAtUtc = DateTime.UtcNow,
-                    DeviceInfo = currentUser.DeviceInfo
-                });
-
-                outbox.Add(OutboxMessageType.AccountActivationEmail, payload);
-            }
-
         }, cancellationToken);
 
         return new LoginResponse(accessToken, refreshToken);

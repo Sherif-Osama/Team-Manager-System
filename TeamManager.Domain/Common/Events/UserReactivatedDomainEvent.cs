@@ -1,4 +1,4 @@
 ﻿namespace TeamManager.Domain.Common.Events
 {
-    public sealed record UserReactivatedDomainEvent(Guid UserId) : IDomainEvent;
+    public sealed record UserReactivatedDomainEvent(Guid UserId, string Email) : IDomainEvent;
 }

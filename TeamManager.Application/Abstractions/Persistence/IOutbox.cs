@@ -4,6 +4,6 @@ namespace TeamManager.Application.Abstractions.Persistence
 {
     public interface IOutbox
     {
-        void Add(OutboxMessageType type, string payload);
+        Task Add(OutboxMessageType type, string payload);
     }
 }

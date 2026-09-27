@@ -13,12 +13,10 @@ namespace TeamManager.Infrastructure.BackgroundJobs.ProcessOutboxMessages.Messag
 
         public Task HandleAsync(string payload, CancellationToken cancellationToken)
         {
-            var accountDeletedEmail = JsonSerializer.Deserialize<Payload>(payload)
-                ??
-                throw new InvalidOperationException("Invalid account deleted email payload");
+            var email = JsonSerializer.Deserialize<Payload>(payload)
+                ?? throw new InvalidOperationException("Invalid account deleted email payload");
 
-            return emailSender.SendAccountDeletedAsync(accountDeletedEmail.To, accountDeletedEmail.DeletedAtUtc,
-                accountDeletedEmail.DeviceInfo, cancellationToken);
+            return emailSender.SendAccountDeletedAsync(email.To, email.DeletedAtUtc, email.DeviceInfo, cancellationToken);
         }
     }
 }

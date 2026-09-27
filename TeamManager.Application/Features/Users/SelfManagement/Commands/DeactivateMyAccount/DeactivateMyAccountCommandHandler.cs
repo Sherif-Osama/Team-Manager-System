@@ -1,15 +1,13 @@
 ﻿using MediatR;
-using System.Text.Json;
 using TeamManager.Application.Abstractions.Authentication;
 using TeamManager.Application.Abstractions.Persistence;
 using TeamManager.Application.Common.Exceptions.AuthorizationExceptions;
 using TeamManager.Application.Common.Exceptions.UserExceptions;
-using TeamManager.Application.Common.Outbox;
 
 namespace TeamManager.Application.Features.Users.SelfManagement.Commands.DeactivateMyAccount
 {
     public sealed class DeactivateMyAccountCommandHandler(ICurrentUser currentUser, IUserRepository
-        userRepository, IUnitOfWork unitOfWork, IPasswordHasher passwordHasher, IOutbox outbox)
+        userRepository, IUnitOfWork unitOfWork, IPasswordHasher passwordHasher)
         : IRequestHandler<DeactivateMyAccountCommand>
     {
         public async Task Handle(DeactivateMyAccountCommand request, CancellationToken cancellationToken)
@@ -35,15 +33,6 @@ namespace TeamManager.Application.Features.Users.SelfManagement.Commands.Deactiv
                 user.Deactivate();
 
                 await userRepository.RevokeAllRefreshTokensAsync(user.Id, ct);
-
-                var payload = JsonSerializer.Serialize(new
-                {
-                    To = user.Email,
-                    DeactivatedAtUtc = DateTime.UtcNow,
-                    DeviceInfo = currentUser.DeviceInfo
-                });
-
-                outbox.Add(OutboxMessageType.AccountDeactivatedEmail, payload);
 
             }, cancellationToken);
         }

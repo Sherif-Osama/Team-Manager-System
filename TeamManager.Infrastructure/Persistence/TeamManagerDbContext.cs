@@ -86,10 +86,11 @@ namespace TeamManager.Infrastructure.Persistence
 
         public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
         {
+
             var result = await base.SaveChangesAsync(cancellationToken);
 
-            var aggregatesWithEvents = ChangeTracker.Entries<IHasDomainEvents>().Select(e => e.Entity)
-                .Where(e => e.DomainEvents.Count > 0).ToList();
+            var aggregatesWithEvents = ChangeTracker.Entries<IHasDomainEvents>()
+                .Select(e => e.Entity).Where(e => e.DomainEvents.Count > 0).ToList();
 
             var events = aggregatesWithEvents.SelectMany(e => e.DomainEvents).ToList();
             aggregatesWithEvents.ForEach(e => e.ClearDomainEvents());
@@ -100,6 +101,9 @@ namespace TeamManager.Infrastructure.Persistence
                 var notification = (INotification)Activator.CreateInstance(wrapperType, domainEvent)!;
                 await publisher.Publish(notification, cancellationToken);
             }
+
+            if (events.Count > 0 && ChangeTracker.HasChanges())
+                await base.SaveChangesAsync(cancellationToken);
 
             return result;
         }

@@ -157,7 +157,7 @@ public class User : AggregateRoot<Guid>
         {
             IsActive = true;
             Touch();
-            AddDomainEvent(new UserReactivatedDomainEvent(Id));
+            AddDomainEvent(new UserReactivatedDomainEvent(Id, Email));
         }
 
         FailedLoginAttempts = 0;
@@ -181,7 +181,7 @@ public class User : AggregateRoot<Guid>
 
         IsActive = false;
         Touch();
-        AddDomainEvent(new UserDeactivatedDomainEvent(Id));
+        AddDomainEvent(new UserDeactivatedDomainEvent(Id, Email));
     }
 
     public void Activate()
@@ -203,7 +203,7 @@ public class User : AggregateRoot<Guid>
 
         DeletedAtUtc = DateTime.UtcNow;
         IsActive = false;
-        AddDomainEvent(new UserDeletedDomainEvent(Id));
+        AddDomainEvent(new UserDeletedDomainEvent(Id, Email));
     }
 
     public void AssignRole(int roleId)

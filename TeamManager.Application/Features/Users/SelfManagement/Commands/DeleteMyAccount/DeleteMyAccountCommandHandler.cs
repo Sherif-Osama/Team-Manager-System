@@ -1,19 +1,16 @@
 ﻿using MediatR;
-using System.Text.Json;
 using TeamManager.Application.Abstractions.Authentication;
 using TeamManager.Application.Abstractions.Persistence;
 using TeamManager.Application.Common.Exceptions.AuthorizationExceptions;
 using TeamManager.Application.Common.Exceptions.ProjectExceptions;
 using TeamManager.Application.Common.Exceptions.TeamExceptions;
 using TeamManager.Application.Common.Exceptions.UserExceptions;
-using TeamManager.Application.Common.Outbox;
 
 namespace TeamManager.Application.Features.Users.SelfManagement.Commands.DeleteMyAccount
 {
     public sealed class DeleteMyAccountCommandHandler(ICurrentUser currentUser, IUserRepository userRepository,
         ITeamRepository teamRepository, IPasswordHasher passwordHasher, IUnitOfWork unitOfWork,
-        IProjectRepository projectRepository, IOutbox outbox)
-        : IRequestHandler<DeleteMyAccountCommand>
+        IProjectRepository projectRepository) : IRequestHandler<DeleteMyAccountCommand>
     {
         public async Task Handle(DeleteMyAccountCommand request, CancellationToken cancellationToken)
         {
@@ -50,16 +47,6 @@ namespace TeamManager.Application.Features.Users.SelfManagement.Commands.DeleteM
                 user.SoftDelete();
 
                 await userRepository.RevokeAllRefreshTokensAsync(userId, ct);
-
-                var payload = JsonSerializer.Serialize(new
-                {
-                    To = user.Email,
-                    DeletedAtUtc = DateTime.UtcNow,
-                    DeviceInfo = currentUser.DeviceInfo
-                });
-
-                outbox.Add(OutboxMessageType.AccountDeletedEmail, payload);
-
             }, cancellationToken);
         }
     }
