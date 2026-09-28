@@ -20,5 +20,6 @@ namespace TeamManager.Application.Abstractions.Persistence
         Task<TaskItem?> GetByIdWithDependencyAsync(long taskId, long dependencyId, CancellationToken cancellationToken);
         void RemoveDependency(TaskDependency dependency);
         Task DeleteAllDependenciesAsync(long taskId, CancellationToken cancellationToken);
+        Task<TaskItem?> GetByIdWithChecklistAsync(long taskId, CancellationToken cancellationToken);
     }
 }

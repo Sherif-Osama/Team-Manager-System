@@ -1,6 +1,7 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using TeamManager.Application.Features.Tasks.TaskChecklist.Commands.AddChecklistItem;
 using TeamManager.Application.Features.Tasks.TaskDependency.Commands.AddTaskDependency;
 using TeamManager.Application.Features.Tasks.TaskDependency.Commands.DeleteTaskDependency;
 using TeamManager.Application.Features.Tasks.TaskDependency.Queries.GetTaskDependencies;
@@ -126,6 +127,15 @@ namespace TeamManager.Api.Controllers.Tasks
             await sender.Send(new UnassignTaskCommand(taskId), cancellationToken);
 
             return NoContent();
+        }
+
+        [HttpPost("{taskId:long}/checklist")]
+        [Authorize]
+        public async Task<ActionResult<long>> AddChecklistItem(long taskId, [FromBody] AddChecklistItemRequest request, CancellationToken cancellationToken)
+        {
+            var itemId = await sender.Send(new AddChecklistItemCommand(taskId, request.Content), cancellationToken);
+
+            return Ok(itemId);
         }
 
         [HttpGet("{taskId:long}")]

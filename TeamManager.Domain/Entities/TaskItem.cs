@@ -240,13 +240,18 @@ namespace TeamManager.Domain.Entities
             EnsureNotCancelled("cannot add check list to cancelled task");
 
             short nextOrder = (short)(_checklistItems.Count == 0 ? 0 : _checklistItems.Max(c => c.SortOrder) + 1);
+
             var item = new TaskChecklistItem(Id, content, nextOrder);
+
             _checklistItems.Add(item);
+
+            Touch();
+
             return item;
         }
 
-        public TaskAttachment AddAttachment(string originalFileName, string storageKey, string contentType,
-            long sizeBytes, Guid uploadedBy, string? fileHash = null)
+        public TaskAttachment AddAttachment(string originalFileName, string storageKey, string contentType, long sizeBytes,
+            Guid uploadedBy, string? fileHash = null)
         {
             EnsureNotDeleted("cannot add attchment to deleted task");
 

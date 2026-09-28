@@ -26,10 +26,13 @@ public class TaskChecklistItemConfiguration : IEntityTypeConfiguration<TaskCheck
 
         builder.HasOne(x => x.Task).WithMany(x => x.ChecklistItems).HasForeignKey(x => x.TaskId)
             .HasConstraintName("FK_TaskChecklistItems_Tasks").OnDelete(DeleteBehavior.Cascade);
+        // Task is currently deleted using soft delete.
+        // Cascade delete is kept for possible future changes to the deletion behavior.
 
         builder.HasOne(x => x.CompletedByUser).WithMany().HasForeignKey(x => x.CompletedBy)
             .HasConstraintName("FK_TaskChecklistItems_CompletedBy").OnDelete(DeleteBehavior.NoAction);
 
-        builder.HasIndex(x => new { x.TaskId, x.SortOrder }).HasDatabaseName("IX_TaskChecklistItems_TaskId_SortOrder");
+        builder.HasIndex(x => new { x.TaskId, x.SortOrder }).IsUnique()
+            .HasDatabaseName("UQ_TaskChecklistItems_TaskId_SortOrder");
     }
 }

@@ -126,5 +126,11 @@ namespace TeamManager.Infrastructure.Persistence.Repositories
             await context.TaskDependencies.Where(d => d.TaskId == taskId || d.DependsOnTaskId == taskId)
                 .ExecuteDeleteAsync(cancellationToken);
         }
+
+        public async Task<TaskItem?> GetByIdWithChecklistAsync(long taskId, CancellationToken cancellationToken)
+        {
+            return await context.Tasks.Include(t => t.ChecklistItems)
+                .FirstOrDefaultAsync(t => t.Id == taskId && t.DeletedAtUtc == null, cancellationToken);
+        }
     }
 }
