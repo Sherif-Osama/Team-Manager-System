@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using TeamManager.Application.Features.Tasks.TaskChecklist.Commands.AddChecklistItem;
+using TeamManager.Application.Features.Tasks.TaskChecklist.Queries.GetTaskChecklist;
 using TeamManager.Application.Features.Tasks.TaskDependency.Commands.AddTaskDependency;
 using TeamManager.Application.Features.Tasks.TaskDependency.Commands.DeleteTaskDependency;
 using TeamManager.Application.Features.Tasks.TaskDependency.Queries.GetTaskDependencies;
@@ -97,6 +98,16 @@ namespace TeamManager.Api.Controllers.Tasks
             await sender.Send(new AssignTaskCommand(taskId, request.UserId), cancellationToken);
 
             return NoContent();
+        }
+
+        [HttpGet("{taskId:long}/checklist")]
+        [Authorize]
+        public async Task<ActionResult<IReadOnlyCollection<GetTaskChecklistResponse>>> GetTaskChecklist(long taskId,
+            CancellationToken cancellationToken)
+        {
+            var response = await sender.Send(new GetTaskChecklistQuery(taskId), cancellationToken);
+
+            return Ok(response);
         }
 
         [HttpDelete("{taskId:long}")]

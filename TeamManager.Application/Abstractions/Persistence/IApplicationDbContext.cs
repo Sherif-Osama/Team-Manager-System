@@ -15,5 +15,6 @@ namespace TeamManager.Application.Abstractions.Persistence
         DbSet<ProjectMember> ProjectMembers { get; }
         DbSet<TaskItem> Tasks { get; }
         DbSet<TaskDependency> TaskDependencies { get; }
+        DbSet<TaskChecklistItem> TaskChecklistItems { get; }
     }
 }
