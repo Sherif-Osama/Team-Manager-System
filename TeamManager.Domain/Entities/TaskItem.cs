@@ -284,7 +284,27 @@ namespace TeamManager.Domain.Entities
             if (item is null)
                 throw new DomainException("Checklist item not found.");
 
+            if (item.IsCompleted)
+                throw new DomainException("Checklist item is already completed");
+
             item.Complete(completedBy);
+            Touch();
+        }
+
+        public void ReopenChecklistItem(long checklistItemId)
+        {
+            EnsureNotDeleted("cannot modify deleted task");
+            EnsureNotCancelled("cannot modify cancelled task");
+
+            var item = _checklistItems.FirstOrDefault(x => x.Id == checklistItemId);
+
+            if (item is null)
+                throw new DomainException("Checklist item not found.");
+
+            if (!item.IsCompleted)
+                throw new DomainException("Checklist item is already incomplete");
+
+            item.Reopen();
             Touch();
         }
 
