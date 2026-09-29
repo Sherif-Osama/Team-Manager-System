@@ -123,6 +123,10 @@ namespace TeamManager.Domain.Entities
             if (!CanTransitionTo(status))
                 throw new DomainException($"Task cannot transition from {Status} to {status}.");
 
+            if (status == TaskItemStatus.Done && _checklistItems.Any(x => !x.IsCompleted))
+                throw new DomainException("Task cannot be completed while checklist items are incomplete.");
+
+
             Status = status;
 
             CompletedAtUtc = status == TaskItemStatus.Done ? DateTime.UtcNow : null;

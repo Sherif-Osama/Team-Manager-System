@@ -53,11 +53,9 @@ namespace TeamManager.Infrastructure.Persistence.Repositories
         private Task UnassignActiveTasksAsync(Expression<Func<TaskItem, bool>> scope, CancellationToken cancellationToken)
         {
             return context.Tasks.Where(scope).Where(t => t.DeletedAtUtc == null && t.Status != TaskItemStatus.Done)
-                .ExecuteUpdateAsync(setters => setters
-                    .SetProperty(x => x.AssigneeUserId, (Guid?)null)
-                    .SetProperty(x => x.UpdatedAtUtc, DateTime.UtcNow)
-                    .SetProperty(x => x.Status, x => x.Status == TaskItemStatus.InProgress ? TaskItemStatus.Todo : x.Status),
-                    cancellationToken);
+                .ExecuteUpdateAsync(setters => setters.SetProperty(x => x.AssigneeUserId, (Guid?)null)
+                .SetProperty(x => x.UpdatedAtUtc, DateTime.UtcNow).SetProperty(x => x.Status, x => x.Status
+                == TaskItemStatus.InProgress ? TaskItemStatus.Todo : x.Status), cancellationToken);
         }
 
         public async Task<bool> WouldCreateDependencyCycleAsync(Guid projectId, long taskId, long dependsOnTaskId,

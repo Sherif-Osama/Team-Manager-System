@@ -17,7 +17,7 @@ namespace TeamManager.Application.Features.Tasks.TaskItem.Commands.ChangeTaskSta
 
             await unitOfWork.ExecuteInSerializableTransactionAsync(async ct =>
             {
-                var task = await taskRepository.GetByIdAsync(request.TaskId, ct);
+                var task = await taskRepository.GetByIdWithChecklistAsync(request.TaskId, ct);
 
                 if (task is null)
                     throw new TaskNotFoundException(request.TaskId);
