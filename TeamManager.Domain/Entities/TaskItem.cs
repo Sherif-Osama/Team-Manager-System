@@ -274,6 +274,19 @@ namespace TeamManager.Domain.Entities
             return comment;
         }
 
+        public void CompleteChecklistItem(long checklistItemId, Guid completedBy)
+        {
+            EnsureNotDeleted("cannot modify deleted task");
+            EnsureNotCancelled("cannot modify cancelled task");
+
+            var item = _checklistItems.FirstOrDefault(x => x.Id == checklistItemId);
+
+            if (item is null)
+                throw new DomainException("Checklist item not found.");
+
+            item.Complete(completedBy);
+            Touch();
+        }
 
         private void EnsureNotDeleted(string message)
         {

@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using TeamManager.Application.Features.Tasks.TaskChecklist.Commands.AddChecklistItem;
+using TeamManager.Application.Features.Tasks.TaskChecklist.Commands.CompleteChecklistItem;
 using TeamManager.Application.Features.Tasks.TaskChecklist.Queries.GetTaskChecklist;
 using TeamManager.Application.Features.Tasks.TaskDependency.Commands.AddTaskDependency;
 using TeamManager.Application.Features.Tasks.TaskDependency.Commands.DeleteTaskDependency;
@@ -103,9 +104,9 @@ namespace TeamManager.Api.Controllers.Tasks
         [HttpGet("{taskId:long}/checklist")]
         [Authorize]
         public async Task<ActionResult<IReadOnlyCollection<GetTaskChecklistResponse>>> GetTaskChecklist(long taskId,
-            CancellationToken cancellationToken)
+            [FromQuery] string? search, [FromQuery] bool? isCompleted, CancellationToken cancellationToken)
         {
-            var response = await sender.Send(new GetTaskChecklistQuery(taskId), cancellationToken);
+            var response = await sender.Send(new GetTaskChecklistQuery(taskId, search, isCompleted), cancellationToken);
 
             return Ok(response);
         }
@@ -142,11 +143,22 @@ namespace TeamManager.Api.Controllers.Tasks
 
         [HttpPost("{taskId:long}/checklist")]
         [Authorize]
-        public async Task<ActionResult<long>> AddChecklistItem(long taskId, [FromBody] AddChecklistItemRequest request, CancellationToken cancellationToken)
+        public async Task<ActionResult<long>> AddChecklistItem(long taskId, [FromBody] AddChecklistItemRequest request,
+            CancellationToken cancellationToken)
         {
             var itemId = await sender.Send(new AddChecklistItemCommand(taskId, request.Content), cancellationToken);
 
             return Ok(itemId);
+        }
+
+        [HttpPut("{taskId:long}/checklist/{checklistItemId:long}/complete")]
+        [Authorize]
+        public async Task<IActionResult> CompleteChecklistItem(long taskId, long checklistItemId,
+            CancellationToken cancellationToken)
+        {
+            await sender.Send(new CompleteChecklistItemCommand(taskId, checklistItemId), cancellationToken);
+
+            return NoContent();
         }
 
         [HttpGet("{taskId:long}")]

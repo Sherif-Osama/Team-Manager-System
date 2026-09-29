@@ -4,8 +4,8 @@ using TeamManager.Domain.Enums;
 
 namespace TeamManager.Application.Features.Tasks.TaskChecklist.Queries.GetTaskChecklist
 {
-    public sealed record GetTaskChecklistQuery(long TaskId) : IRequest<IReadOnlyCollection<GetTaskChecklistResponse>>,
-          ITaskScopedRequest
+    public sealed record GetTaskChecklistQuery(long TaskId, string? Search = null, bool? IsCompleted = null)
+        : IRequest<IReadOnlyCollection<GetTaskChecklistResponse>>, ITaskScopedRequest
     {
         public ProjectRole[] RequiredProjectRoles => [ProjectRole.Owner, ProjectRole.Admin, ProjectRole.Member, ProjectRole.Viewer];
     }
