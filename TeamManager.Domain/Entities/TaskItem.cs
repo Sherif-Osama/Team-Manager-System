@@ -308,6 +308,20 @@ namespace TeamManager.Domain.Entities
             Touch();
         }
 
+        public void RemoveChecklistItem(long checklistItemId)
+        {
+            EnsureNotDeleted("cannot modify deleted task");
+            EnsureNotCancelled("cannot modify cancelled task");
+
+            var item = _checklistItems.FirstOrDefault(x => x.Id == checklistItemId);
+
+            if (item is null)
+                throw new DomainException("Checklist item not found.");
+
+            _checklistItems.Remove(item);
+            Touch();
+        }
+
         private void EnsureNotDeleted(string message)
         {
             if (DeletedAtUtc.HasValue)
