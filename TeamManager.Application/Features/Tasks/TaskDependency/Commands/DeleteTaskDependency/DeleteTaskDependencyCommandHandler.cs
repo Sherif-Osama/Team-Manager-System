@@ -13,10 +13,7 @@ namespace TeamManager.Application.Features.Tasks.TaskDependency.Commands.DeleteT
             if (task is null)
                 throw new TaskNotFoundException(request.TaskId);
 
-            var dependency = task.Dependencies.SingleOrDefault();
-            //need to refactor
-            if (dependency is null)
-                throw new TaskDependencyNotFoundException(request.TaskId, request.DependencyId);
+            var dependency = task.RemoveDependency(request.DependencyId);
 
             taskRepository.RemoveDependency(dependency);
 

@@ -213,6 +213,23 @@ namespace TeamManager.Domain.Entities
             return dependency;
         }
 
+        public TaskDependency RemoveDependency(long dependencyId)
+        {
+            EnsureNotDeleted("cannot modify deleted task");
+            EnsureNotCancelled("cannot modify cancelled task");
+
+            var dependency = _dependencies.FirstOrDefault(x => x.Id == dependencyId);
+
+            if (dependency is null)
+                throw new DomainException("Task dependency not found.");
+
+            _dependencies.Remove(dependency);
+
+            Touch();
+
+            return dependency;
+        }
+
         public TaskLabel AddLabel(long labelId)
         {
             EnsureNotDeleted("cannot add label to deleted task");
