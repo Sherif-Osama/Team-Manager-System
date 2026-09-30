@@ -64,7 +64,14 @@ namespace TeamManager.Infrastructure.Persistence.Repositories
                     t.DeletedAtUtc == null, cancellationToken);
         }
 
+        public async Task<Team?> GetByIdWithLabelsAsync(Guid teamId, CancellationToken cancellationToken)
+        {
+            return await context.Teams.Include(t => t.Labels).FirstOrDefaultAsync(t => t.Id == teamId && t.DeletedAtUtc == null,
+                cancellationToken);
+        }
+
         #endregion
+
         public Task LinkPendingInvitationsToUserAsync(string email, Guid userId, CancellationToken cancellationToken)
         {
             return context.TeamInvitations.Where(x => x.InvitedEmail == email && x.Status == TeamInvitationStatus.Pending

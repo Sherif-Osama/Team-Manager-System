@@ -1,6 +1,8 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using TeamManager.Application.Features.Teams.Labels.Commands.CreateLabel;
+using TeamManager.Application.Features.Teams.Labels.Queries.GetLabel;
 using TeamManager.Application.Features.Teams.Team.Commands.ActivateTeam;
 using TeamManager.Application.Features.Teams.Team.Commands.CreateTeam;
 using TeamManager.Application.Features.Teams.Team.Commands.DeactivateTeam;
@@ -96,6 +98,22 @@ namespace TeamManager.Api.Controllers.Teams
         public async Task<IActionResult> GetByName([FromQuery] GetTeamByNameQuery query, CancellationToken cancellationToken)
         {
             var result = await sender.Send(query, cancellationToken);
+
+            return Ok(result);
+        }
+
+        [HttpPost("{teamId:guid}/labels")]
+        public async Task<IActionResult> CreateLabel(Guid teamId, CreateLabelRequest request, CancellationToken cancellationToken)
+        {
+            var labelId = await sender.Send(new CreateLabelCommand(teamId, request.Name, request.ColorHex), cancellationToken);
+
+            return CreatedAtAction(nameof(GetLabelById), new { teamId, labelId }, new { labelId });
+        }
+
+        [HttpGet("{teamId:guid}/labels/{labelId:long}")]
+        public async Task<IActionResult> GetLabelById(Guid teamId, long labelId, CancellationToken cancellationToken)
+        {
+            var result = await sender.Send(new GetLabelByIdQuery(teamId, labelId), cancellationToken);
 
             return Ok(result);
         }

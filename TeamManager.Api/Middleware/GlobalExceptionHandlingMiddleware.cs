@@ -74,6 +74,7 @@ namespace TeamManager.Api.Middleware
                 TaskHasIncompleteDependenciesException => StatusCodes.Status409Conflict,
                 TaskDueDateViolatesDependentTasksException => StatusCodes.Status409Conflict,
                 TaskDependencyNotFoundException => StatusCodes.Status404NotFound,
+                LabelNotFoundException => StatusCodes.Status404NotFound,
                 _ => StatusCodes.Status500InternalServerError
             };
 

@@ -121,6 +121,22 @@ namespace TeamManager.Domain.Entities
             IsActive = false;
         }
 
+        public Label AddLabel(string name, string? colorHex = null)
+        {
+            EnsureNotDeleted("cannot add label to deleted team");
+
+            if (_labels.Any(x => x.Name.Equals(name.Trim(), StringComparison.OrdinalIgnoreCase)))
+                throw new DomainException("A label with this name already exists in the team.");
+
+            var label = new Label(Id, name, colorHex);
+
+            _labels.Add(label);
+
+            Touch();
+
+            return label;
+        }
+
         public TeamMember AddMember(Guid userId, TeamRole role, Guid? invitedBy = null)
         {
             EnsureNotDeleted("cannot add member to deleted team");
