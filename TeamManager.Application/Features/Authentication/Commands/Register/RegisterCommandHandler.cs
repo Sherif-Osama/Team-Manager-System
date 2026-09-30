@@ -19,7 +19,8 @@ namespace TeamManager.Application.Features.Authentication.Commands.Register
         {
             var exists = await userRepository.ExistsByEmailAsync(request.Email, cancellationToken);
 
-            if (exists) throw new EmailAlreadyExistsException(request.Email);
+            if (exists)
+                throw new EmailAlreadyExistsException(request.Email);
 
             var passwordHash = passwordHasher.Hash(request.Password);
 
@@ -46,7 +47,7 @@ namespace TeamManager.Application.Features.Authentication.Commands.Register
 
                 var payload = JsonSerializer.Serialize(new { To = request.Email, Token = token });
 
-                outbox.Add(OutboxMessageType.EmailConfirmationEmail, payload);
+                await outbox.Add(OutboxMessageType.EmailConfirmationEmail, payload);
             }, cancellationToken);
 
             return user.Id;

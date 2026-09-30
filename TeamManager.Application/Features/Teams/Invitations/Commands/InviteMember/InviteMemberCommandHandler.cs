@@ -35,7 +35,7 @@ namespace TeamManager.Application.Features.Teams.Invitations.Commands.InviteMemb
                 InvitedBy = currentUser.UserId!.Value
             });
 
-            outbox.Add(OutboxMessageType.InvitationEmail, payload);
+            await outbox.Add(OutboxMessageType.InvitationEmail, payload);
 
             await unitOfWork.SaveChangesAsync(cancellationToken);
 

@@ -29,8 +29,6 @@ public sealed class LoginCommandHandler(IUserRepository userRepository, IPasswor
             throw new UnauthorizedAccessException("Invalid email or password");
         }
 
-        var wasInactive = !user.IsActive;
-
         var accessToken = accessTokenService.GenerateAccessToken(user);
 
         var refreshToken = refreshTokenService.GenerateToken();

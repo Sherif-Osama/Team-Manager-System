@@ -32,7 +32,7 @@ namespace TeamManager.Application.Features.Users.SelfManagement.Commands.ResendE
 
             var payload = JsonSerializer.Serialize(new { To = targetEmail, Token = token });
 
-            outbox.Add(OutboxMessageType.EmailConfirmationEmail, payload);
+            await outbox.Add(OutboxMessageType.EmailConfirmationEmail, payload);
 
             await unitOfWork.SaveChangesAsync(cancellationToken);
         }

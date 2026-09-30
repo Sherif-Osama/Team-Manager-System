@@ -33,7 +33,7 @@ namespace TeamManager.Application.Features.Users.SelfManagement.Commands.ChangeP
 
             var payload = JsonSerializer.Serialize(new { To = user.Email });
 
-            outbox.Add(OutboxMessageType.PasswordChangedNotificationEmail, payload);
+            await outbox.Add(OutboxMessageType.PasswordChangedNotificationEmail, payload);
 
             await unitOfWork.SaveChangesAsync(cancellationToken);
         }
