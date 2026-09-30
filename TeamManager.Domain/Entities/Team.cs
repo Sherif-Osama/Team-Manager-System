@@ -153,6 +153,20 @@ namespace TeamManager.Domain.Entities
                 label.ChangeColor(colorHex);
         }
 
+        public Label RemoveLabel(long labelId)
+        {
+            EnsureNotDeleted("cannot modify deleted team");
+
+            var label = _labels.FirstOrDefault(x => x.Id == labelId);
+
+            if (label is null)
+                throw new DomainException("Label not found.");
+
+            _labels.Remove(label);
+            Touch();
+            return label;
+        }
+
         public TeamMember AddMember(Guid userId, TeamRole role, Guid? invitedBy = null)
         {
             EnsureNotDeleted("cannot add member to deleted team");

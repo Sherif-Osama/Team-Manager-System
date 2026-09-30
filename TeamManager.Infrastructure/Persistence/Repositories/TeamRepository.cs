@@ -86,6 +86,11 @@ namespace TeamManager.Infrastructure.Persistence.Repositories
                 .SetProperty(x => x.UpdatedAtUtc, DateTime.UtcNow), cancellationToken);
         }
 
+        public void DeleteLabel(Label label)
+        {
+            context.Labels.Remove(label);
+        }
+
         public Task RemoveActiveMembershipsAsync(Guid userId, CancellationToken cancellationToken)
         {
             return context.TeamMembers.Where(x => x.UserId == userId && TeamMemberStatuses.Occupied.Contains(x.Status) &&

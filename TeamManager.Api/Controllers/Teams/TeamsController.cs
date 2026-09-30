@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using TeamManager.Application.Features.Teams.Labels.Commands.CreateLabel;
+using TeamManager.Application.Features.Teams.Labels.Commands.DeleteLabel;
 using TeamManager.Application.Features.Teams.Labels.Commands.UpdateLabel;
 using TeamManager.Application.Features.Teams.Labels.Queries.GetLabel;
 using TeamManager.Application.Features.Teams.Team.Commands.ActivateTeam;
@@ -124,6 +125,14 @@ namespace TeamManager.Api.Controllers.Teams
             CancellationToken cancellationToken)
         {
             await sender.Send(new UpdateLabelCommand(teamId, labelId, request.Name, request.ColorHex), cancellationToken);
+
+            return NoContent();
+        }
+
+        [HttpDelete("{teamId:guid}/labels/{labelId:long}")]
+        public async Task<IActionResult> DeleteLabel(Guid teamId, long labelId, CancellationToken cancellationToken)
+        {
+            await sender.Send(new DeleteLabelCommand(teamId, labelId), cancellationToken);
 
             return NoContent();
         }
