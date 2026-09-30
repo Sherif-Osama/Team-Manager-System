@@ -19,7 +19,7 @@ public class Label : Entity<long>
     {
     }
 
-    public Label(Guid teamId, string name, string? colorHex = null)
+    internal Label(Guid teamId, string name, string? colorHex = null)
     {
         if (string.IsNullOrWhiteSpace(name))
             throw new DomainException("A label must have a name.");
@@ -31,7 +31,7 @@ public class Label : Entity<long>
         CreatedAtUtc = DateTime.UtcNow;
     }
 
-    public void Rename(string name)
+    internal void Rename(string name)
     {
         if (string.IsNullOrWhiteSpace(name))
             throw new DomainException("A label must have a name.");

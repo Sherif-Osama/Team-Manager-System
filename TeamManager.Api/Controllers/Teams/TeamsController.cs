@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using TeamManager.Application.Features.Teams.Labels.Commands.CreateLabel;
+using TeamManager.Application.Features.Teams.Labels.Commands.UpdateLabel;
 using TeamManager.Application.Features.Teams.Labels.Queries.GetLabel;
 using TeamManager.Application.Features.Teams.Team.Commands.ActivateTeam;
 using TeamManager.Application.Features.Teams.Team.Commands.CreateTeam;
@@ -116,6 +117,15 @@ namespace TeamManager.Api.Controllers.Teams
             var result = await sender.Send(new GetLabelByIdQuery(teamId, labelId), cancellationToken);
 
             return Ok(result);
+        }
+
+        [HttpPut("{teamId:guid}/labels/{labelId:long}")]
+        public async Task<IActionResult> UpdateLabel(Guid teamId, long labelId, UpdateLabelRequest request,
+            CancellationToken cancellationToken)
+        {
+            await sender.Send(new UpdateLabelCommand(teamId, labelId, request.Name, request.ColorHex), cancellationToken);
+
+            return NoContent();
         }
     }
 }
