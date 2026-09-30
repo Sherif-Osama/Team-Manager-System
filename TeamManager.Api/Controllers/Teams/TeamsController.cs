@@ -5,6 +5,7 @@ using TeamManager.Application.Features.Teams.Labels.Commands.CreateLabel;
 using TeamManager.Application.Features.Teams.Labels.Commands.DeleteLabel;
 using TeamManager.Application.Features.Teams.Labels.Commands.UpdateLabel;
 using TeamManager.Application.Features.Teams.Labels.Queries.GetLabel;
+using TeamManager.Application.Features.Teams.Labels.Queries.GetLabels;
 using TeamManager.Application.Features.Teams.Team.Commands.ActivateTeam;
 using TeamManager.Application.Features.Teams.Team.Commands.CreateTeam;
 using TeamManager.Application.Features.Teams.Team.Commands.DeactivateTeam;
@@ -84,8 +85,8 @@ namespace TeamManager.Api.Controllers.Teams
             return NoContent();
         }
 
-        [Authorize]
         [HttpGet]
+        [Authorize]
         public async Task<IActionResult> GetTeams([FromQuery] GetTeamsQuery request, CancellationToken cancellationToken)
         {
 
@@ -105,6 +106,7 @@ namespace TeamManager.Api.Controllers.Teams
         }
 
         [HttpPost("{teamId:guid}/labels")]
+        [Authorize]
         public async Task<IActionResult> CreateLabel(Guid teamId, CreateLabelRequest request, CancellationToken cancellationToken)
         {
             var labelId = await sender.Send(new CreateLabelCommand(teamId, request.Name, request.ColorHex), cancellationToken);
@@ -113,6 +115,7 @@ namespace TeamManager.Api.Controllers.Teams
         }
 
         [HttpGet("{teamId:guid}/labels/{labelId:long}")]
+        [Authorize]
         public async Task<IActionResult> GetLabelById(Guid teamId, long labelId, CancellationToken cancellationToken)
         {
             var result = await sender.Send(new GetLabelByIdQuery(teamId, labelId), cancellationToken);
@@ -121,6 +124,7 @@ namespace TeamManager.Api.Controllers.Teams
         }
 
         [HttpPut("{teamId:guid}/labels/{labelId:long}")]
+        [Authorize]
         public async Task<IActionResult> UpdateLabel(Guid teamId, long labelId, UpdateLabelRequest request,
             CancellationToken cancellationToken)
         {
@@ -130,11 +134,22 @@ namespace TeamManager.Api.Controllers.Teams
         }
 
         [HttpDelete("{teamId:guid}/labels/{labelId:long}")]
+        [Authorize]
         public async Task<IActionResult> DeleteLabel(Guid teamId, long labelId, CancellationToken cancellationToken)
         {
             await sender.Send(new DeleteLabelCommand(teamId, labelId), cancellationToken);
 
             return NoContent();
+        }
+
+        [HttpGet("{teamId:guid}/labels")]
+        [Authorize]
+        public async Task<IActionResult> GetLabels(Guid teamId, [FromQuery] GetLabelsRequest request, CancellationToken cancellationToken)
+        {
+            var result = await sender.Send(new GetLabelsQuery(teamId, request.Search, request.Page, request.PageSize),
+                cancellationToken);
+
+            return Ok(result);
         }
     }
 }
