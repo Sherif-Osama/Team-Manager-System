@@ -53,10 +53,12 @@ namespace TeamManager.Domain.Entities
         {
             EnsureNotDeleted("cannot modify deleted team");
 
-            if (string.IsNullOrWhiteSpace(name))
+            var trimmedName = name.Trim();
+
+            if (string.IsNullOrWhiteSpace(trimmedName))
                 throw new DomainException("A team must have a name.");
 
-            Name = name;
+            Name = trimmedName;
             Touch();
         }
 
@@ -125,10 +127,12 @@ namespace TeamManager.Domain.Entities
         {
             EnsureNotDeleted("cannot add label to deleted team");
 
-            if (_labels.Any(x => x.Name.Equals(name.Trim(), StringComparison.OrdinalIgnoreCase)))
+            var trimmedName = name.Trim();
+
+            if (_labels.Any(x => x.Name.Equals(trimmedName, StringComparison.OrdinalIgnoreCase)))
                 throw new DomainException("A label with this name already exists in the team.");
 
-            var label = new Label(Id, name.Trim(), colorHex);
+            var label = new Label(Id, trimmedName, colorHex);
 
             _labels.Add(label);
 
@@ -141,15 +145,20 @@ namespace TeamManager.Domain.Entities
         {
             EnsureNotDeleted("cannot update label on deleted team");
 
+            var trimmedName = name.Trim();
+
+            if (string.IsNullOrWhiteSpace(trimmedName))
+                throw new DomainException("Label name cannot be empty.");
+
             var label = _labels.FirstOrDefault(x => x.Id == labelId);
 
             if (label is null)
                 throw new DomainException("Label not found.");
 
-            if (_labels.Any(x => x.Name.Equals(name.Trim(), StringComparison.OrdinalIgnoreCase)))
+            if (_labels.Any(x => x.Id != labelId && x.Name.Equals(trimmedName, StringComparison.OrdinalIgnoreCase)))
                 throw new DomainException("A label with this name already exists in the team.");
 
-            label.Rename(name);
+            label.Rename(trimmedName);
 
             if (!string.IsNullOrWhiteSpace(colorHex))
                 label.ChangeColor(colorHex);
