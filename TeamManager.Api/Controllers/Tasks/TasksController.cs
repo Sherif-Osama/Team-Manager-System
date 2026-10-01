@@ -19,6 +19,7 @@ using TeamManager.Application.Features.Tasks.TaskItem.Commands.UnassignTask;
 using TeamManager.Application.Features.Tasks.TaskItem.Commands.UpdateTask;
 using TeamManager.Application.Features.Tasks.TaskItem.Queries.GetMyTasks;
 using TeamManager.Application.Features.Tasks.TaskItem.Queries.GetTask;
+using TeamManager.Application.Features.Tasks.TaskItem.Queries.GetTeamTasks;
 using TeamManager.Application.Features.Tasks.TaskLabel.Command.AddTaskLabel;
 using TeamManager.Application.Features.Tasks.TaskLabel.Command.RemoveTaskLabel;
 
@@ -218,6 +219,17 @@ namespace TeamManager.Api.Controllers.Tasks
             await sender.Send(new RemoveTaskLabelCommand(taskId, labelId), cancellationToken);
 
             return NoContent();
+        }
+
+        [HttpGet("{teamId:guid}/tasks")]
+        [Authorize]
+        public async Task<ActionResult<GetTeamTasksResponse>> GetTeamTasks(Guid teamId, [FromQuery] GetTeamTasksRequest request, CancellationToken cancellationToken)
+        {
+
+            var response = await sender.Send(new GetTeamTasksQuery(teamId, request.Search,
+                request.ProjectId, request.Status, request.Priority, request.Page, request.PageSize), cancellationToken);
+
+            return Ok(response);
         }
     }
 }
