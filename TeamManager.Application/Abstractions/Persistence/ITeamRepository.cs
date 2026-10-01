@@ -20,7 +20,8 @@ namespace TeamManager.Application.Abstractions.Persistence
         Task RemoveActiveMembershipsAsync(Guid userId, CancellationToken cancellationToken);
         Task SuspendActiveMembershipsAsync(Guid userId, CancellationToken cancellationToken);
         Task ReactivateSuspendedMembershipsAsync(Guid userId, CancellationToken cancellationToken);
-        Task<Team?> GetByIdWithLabelsAsync(Guid teamId, CancellationToken cancellationToken);
         void DeleteLabel(Label label);
+        Task<bool> LabelExistsInTeamAsync(Guid teamId, long labelId, CancellationToken cancellationToken);
+        Task<Team?> GetByIdWithLabelsAsync(Guid teamId, CancellationToken cancellationToken);
     }
 }

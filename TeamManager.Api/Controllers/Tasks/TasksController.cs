@@ -19,6 +19,7 @@ using TeamManager.Application.Features.Tasks.TaskItem.Commands.UnassignTask;
 using TeamManager.Application.Features.Tasks.TaskItem.Commands.UpdateTask;
 using TeamManager.Application.Features.Tasks.TaskItem.Queries.GetMyTasks;
 using TeamManager.Application.Features.Tasks.TaskItem.Queries.GetTask;
+using TeamManager.Application.Features.Tasks.TaskLabel.Command.AddTaskLabel;
 
 namespace TeamManager.Api.Controllers.Tasks
 {
@@ -198,6 +199,15 @@ namespace TeamManager.Api.Controllers.Tasks
             var response = await sender.Send(query, cancellationToken);
 
             return Ok(response);
+        }
+
+        [HttpPost("{taskId:long}/labels/{labelId:long}")]
+        [Authorize]
+        public async Task<IActionResult> AddTaskLabel(long taskId, long labelId, CancellationToken cancellationToken)
+        {
+            await sender.Send(new AddTaskLabelCommand(taskId, labelId), cancellationToken);
+
+            return NoContent();
         }
     }
 }

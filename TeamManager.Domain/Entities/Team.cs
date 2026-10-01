@@ -128,7 +128,7 @@ namespace TeamManager.Domain.Entities
             if (_labels.Any(x => x.Name.Equals(name.Trim(), StringComparison.OrdinalIgnoreCase)))
                 throw new DomainException("A label with this name already exists in the team.");
 
-            var label = new Label(Id, name, colorHex);
+            var label = new Label(Id, name.Trim(), colorHex);
 
             _labels.Add(label);
 
@@ -139,6 +139,8 @@ namespace TeamManager.Domain.Entities
 
         public void UpdateLabel(long labelId, string name, string? colorHex = null)
         {
+            EnsureNotDeleted("cannot update label on deleted team");
+
             var label = _labels.FirstOrDefault(x => x.Id == labelId);
 
             if (label is null)
@@ -151,6 +153,8 @@ namespace TeamManager.Domain.Entities
 
             if (!string.IsNullOrWhiteSpace(colorHex))
                 label.ChangeColor(colorHex);
+
+            Touch();
         }
 
         public Label RemoveLabel(long labelId)

@@ -8,8 +8,7 @@ namespace TeamManager.Application.Abstractions.Persistence
     {
         Task AddAsync(TaskItem task, CancellationToken cancellationToken);
         Task<TaskItem?> GetByIdAsync(long taskId, CancellationToken cancellationToken);
-        Task<IReadOnlyList<string>> GetConflictingWithProjectDatesAsync(Guid projectId, DateOnly? projectStartDate, DateOnly? projectDueDate,
-            int maxResults, CancellationToken cancellationToken);
+        Task<IReadOnlyList<string>> GetConflictingWithProjectDatesAsync(Guid projectId, DateOnly? projectStartDate, DateOnly? projectDueDate, int maxResults, CancellationToken cancellationToken);
         Task<TaskAuthorizationInfo?> GetAuthorizationInfoAsync(long taskId, Guid userId, ProjectRole[] requiredRoles, CancellationToken cancellationToken);
         Task UnassignActiveTasksAsync(Guid userId, CancellationToken cancellationToken);
         Task UnassignActiveTasksByTeamAsync(Guid teamId, Guid userId, CancellationToken cancellationToken);
@@ -21,5 +20,6 @@ namespace TeamManager.Application.Abstractions.Persistence
         void RemoveDependency(TaskDependency dependency);
         Task DeleteAllDependenciesAsync(long taskId, CancellationToken cancellationToken);
         Task<TaskItem?> GetByIdWithChecklistAsync(long taskId, CancellationToken cancellationToken);
+        Task<TaskItem?> GetByIdWithLabelsAsync(long taskId, CancellationToken cancellationToken);
     }
 }

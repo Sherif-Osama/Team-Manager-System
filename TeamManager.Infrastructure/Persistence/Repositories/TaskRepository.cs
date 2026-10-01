@@ -130,5 +130,11 @@ namespace TeamManager.Infrastructure.Persistence.Repositories
             return await context.Tasks.Include(t => t.ChecklistItems)
                 .FirstOrDefaultAsync(t => t.Id == taskId && t.DeletedAtUtc == null, cancellationToken);
         }
+
+        public Task<TaskItem?> GetByIdWithLabelsAsync(long taskId, CancellationToken cancellationToken)
+        {
+            return context.Tasks.Include(t => t.Labels)
+                .FirstOrDefaultAsync(t => t.Id == taskId && t.DeletedAtUtc == null, cancellationToken);
+        }
     }
 }

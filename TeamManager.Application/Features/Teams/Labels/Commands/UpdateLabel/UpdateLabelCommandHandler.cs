@@ -12,7 +12,7 @@ namespace TeamManager.Application.Features.Teams.Labels.Commands.UpdateLabel
             var team = await teamRepository.GetByIdWithLabelsAsync(request.TeamId, cancellationToken);
 
             if (team is null)
-                throw new LabelNotFoundException(request.LabelId);
+                throw new TeamNotFoundException(request.TeamId);
 
             team.UpdateLabel(request.LabelId, request.Name, request.ColorHex);
 

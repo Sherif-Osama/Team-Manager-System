@@ -233,6 +233,7 @@ namespace TeamManager.Domain.Entities
         public TaskLabel AddLabel(long labelId)
         {
             EnsureNotDeleted("cannot add label to deleted task");
+            EnsureNotCancelled("cannot add label to cancelled task");
 
             if (_labels.Any(l => l.LabelId == labelId))
                 throw new DomainException("This label is already applied to the task.");
@@ -245,6 +246,7 @@ namespace TeamManager.Domain.Entities
         public void RemoveLabel(long labelId)
         {
             EnsureNotDeleted("cannot modify deleted task");
+            EnsureNotCancelled("cannot remove label from cancelled task");
 
             var taskLabel = _labels.FirstOrDefault(l => l.LabelId == labelId);
 

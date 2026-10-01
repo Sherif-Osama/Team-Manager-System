@@ -122,6 +122,11 @@ namespace TeamManager.Infrastructure.Persistence.Repositories
             && m.Status == TeamMemberStatus.Active && roles.Contains(m.TeamRole), cancellationToken);
         }
 
+        public async Task<bool> LabelExistsInTeamAsync(Guid teamId, long labelId, CancellationToken cancellationToken)
+        {
+            return await context.Labels.AnyAsync(label => label.TeamId == teamId && label.Id == labelId, cancellationToken);
+        }
+
         public Task<bool> HasActiveOwnedTeamsAsync(Guid userId, CancellationToken cancellationToken)
         {
             return context.Teams.AnyAsync(t => t.OwnerUserId == userId && t.DeletedAtUtc == null, cancellationToken);
