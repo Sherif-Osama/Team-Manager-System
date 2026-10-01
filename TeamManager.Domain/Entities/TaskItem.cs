@@ -230,7 +230,7 @@ namespace TeamManager.Domain.Entities
             return dependency;
         }
 
-        public TaskLabel AddLabel(long labelId)
+        public void AddLabel(long labelId)
         {
             EnsureNotDeleted("cannot add label to deleted task");
             EnsureNotCancelled("cannot add label to cancelled task");
@@ -240,7 +240,7 @@ namespace TeamManager.Domain.Entities
 
             var taskLabel = new TaskLabel(Id, labelId);
             _labels.Add(taskLabel);
-            return taskLabel;
+            Touch();
         }
 
         public void RemoveLabel(long labelId)
@@ -254,6 +254,7 @@ namespace TeamManager.Domain.Entities
                 throw new DomainException("this label does not apply to the task");
 
             _labels.Remove(taskLabel);
+            Touch();
         }
 
         public TaskChecklistItem AddChecklistItem(string content)

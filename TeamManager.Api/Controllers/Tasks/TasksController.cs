@@ -20,6 +20,7 @@ using TeamManager.Application.Features.Tasks.TaskItem.Commands.UpdateTask;
 using TeamManager.Application.Features.Tasks.TaskItem.Queries.GetMyTasks;
 using TeamManager.Application.Features.Tasks.TaskItem.Queries.GetTask;
 using TeamManager.Application.Features.Tasks.TaskLabel.Command.AddTaskLabel;
+using TeamManager.Application.Features.Tasks.TaskLabel.Command.RemoveTaskLabel;
 
 namespace TeamManager.Api.Controllers.Tasks
 {
@@ -206,6 +207,15 @@ namespace TeamManager.Api.Controllers.Tasks
         public async Task<IActionResult> AddTaskLabel(long taskId, long labelId, CancellationToken cancellationToken)
         {
             await sender.Send(new AddTaskLabelCommand(taskId, labelId), cancellationToken);
+
+            return NoContent();
+        }
+
+        [HttpDelete("{taskId:long}/labels/{labelId:long}")]
+        [Authorize]
+        public async Task<IActionResult> RemoveTaskLabel(long taskId, long labelId, CancellationToken cancellationToken)
+        {
+            await sender.Send(new RemoveTaskLabelCommand(taskId, labelId), cancellationToken);
 
             return NoContent();
         }
