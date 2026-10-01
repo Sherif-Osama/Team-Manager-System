@@ -2,7 +2,6 @@
 using Microsoft.EntityFrameworkCore;
 using TeamManager.Application.Abstractions.Authentication;
 using TeamManager.Application.Abstractions.Persistence;
-
 namespace TeamManager.Application.Features.Tasks.TaskItem.Queries.GetMyTasks
 {
     public sealed class GetMyTasksQueryHandler(IApplicationDbContext context, ICurrentUser currentUser)
@@ -36,11 +35,7 @@ namespace TeamManager.Application.Features.Tasks.TaskItem.Queries.GetMyTasks
 
             var totalCount = await query.CountAsync(cancellationToken);
 
-            var tasks = await query.OrderBy(x => x.DueDate == null).Skip((request.Page - 1) * request.PageSize)
-                .Take(request.PageSize).Select(x => new GetMyTasksItem(x.Id, x.ProjectId, x.AssigneeUserId!.Value,
-                x.Assignee!.DisplayName, x.Project.Name, x.Title, x.Description, x.Status, x.Priority, x.CreatedBy,
-                x.Creator.DisplayName, x.StartDate, x.DueDate, x.CompletedAtUtc, x.CreatedAtUtc, x.UpdatedAtUtc))
-                .ToListAsync(cancellationToken);
+            var tasks = await query.OrderBy(x => x.DueDate == null).Skip((request.Page - 1) * request.PageSize).Take(request.PageSize).Select(x => new GetMyTasksItem(x.Id, x.ProjectId, x.AssigneeUserId!.Value, x.Assignee!.DisplayName, x.Project.Name, x.Title, x.Description, x.Status, x.Priority, x.CreatedBy, x.Creator.DisplayName, x.StartDate, x.DueDate, x.CompletedAtUtc, x.CreatedAtUtc, x.UpdatedAtUtc, x.Labels.Select(label => new TaskLabelResponse(label.LabelId, label.Label.Name, label.Label.ColorHex)).ToList())).ToListAsync(cancellationToken);
 
             return new GetMyTasksResponse(tasks, totalCount, request.Page, request.PageSize);
         }
