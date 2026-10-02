@@ -1,15 +1,29 @@
 ﻿using MediatR;
 using Microsoft.EntityFrameworkCore;
+using TeamManager.Application.Abstractions.Authentication;
 using TeamManager.Application.Abstractions.Persistence;
+using TeamManager.Domain.Enums;
 
 namespace TeamManager.Application.Features.Tasks.TaskItem.Queries.GetTeamTasks
 {
-    public sealed class GetTeamTasksQueryHandler(IApplicationDbContext context) : IRequestHandler<GetTeamTasksQuery, GetTeamTasksResponse>
+    public sealed class GetTeamTasksQueryHandler(IApplicationDbContext context, ITeamRepository teamRepository,
+        ICurrentUser currentUser) : IRequestHandler<GetTeamTasksQuery, GetTeamTasksResponse>
     {
         public async Task<GetTeamTasksResponse> Handle(GetTeamTasksQuery request, CancellationToken cancellationToken)
         {
+            if (!currentUser.UserId.HasValue || !currentUser.IsAuthenticated)
+                throw new UnauthorizedAccessException("User is not authenticated.");
+
+            var userId = currentUser.UserId.Value;
+
             var query = context.Tasks.AsNoTracking().Where(x => x.Project.TeamId == request.TeamId && x.DeletedAtUtc == null &&
             x.Project.DeletedAtUtc == null);
+
+            var isTeamOwner = await teamRepository.HasActiveRoleAsync(request.TeamId, userId, [TeamRole.Owner], cancellationToken);
+
+            if (!isTeamOwner)
+                query = query.Where(x => x.Project.Members.Any(pm => pm.UserId == userId && pm.Status == ProjectMemberStatus.Active
+                && pm.User.IsActive));
 
             if (!string.IsNullOrWhiteSpace(request.Search))
             {
@@ -38,6 +52,7 @@ namespace TeamManager.Application.Features.Tasks.TaskItem.Queries.GetTeamTasks
                 label.Label.ColorHex)).ToList())).ToListAsync(cancellationToken);
 
             return new GetTeamTasksResponse(tasks, totalCount, request.Page, request.PageSize);
+
         }
     }
 }
