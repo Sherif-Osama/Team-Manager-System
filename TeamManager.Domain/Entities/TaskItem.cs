@@ -300,6 +300,36 @@ namespace TeamManager.Domain.Entities
             return comment;
         }
 
+        public void EditComment(long commentId, Guid authorUserId, string content)
+        {
+            EnsureNotDeleted("cannot modify comments on deleted task");
+            EnsureNotCancelled("cannot modify comments on cancelled task");
+
+            var comment = _comments.FirstOrDefault(x => x.Id == commentId && x.DeletedAtUtc == null);
+
+            if (comment is null)
+                throw new DomainException("Comment not found.");
+
+            comment.Edit(content);
+
+            Touch();
+        }
+
+        public void DeleteComment(long commentId, Guid userId)
+        {
+            EnsureNotDeleted("cannot modify comments on deleted task");
+            EnsureNotCancelled("cannot modify comments on cancelled task");
+
+            var comment = _comments.FirstOrDefault(x => x.Id == commentId && x.DeletedAtUtc == null);
+
+            if (comment is null)
+                throw new DomainException("Comment not found.");
+
+            comment.SoftDelete();
+
+            Touch();
+        }
+
         public void CompleteChecklistItem(long checklistItemId, Guid completedBy)
         {
             EnsureNotDeleted("cannot modify deleted task");

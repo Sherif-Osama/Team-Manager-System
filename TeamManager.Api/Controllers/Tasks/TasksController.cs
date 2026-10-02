@@ -7,6 +7,7 @@ using TeamManager.Application.Features.Tasks.TaskChecklist.Commands.RemoveCheckl
 using TeamManager.Application.Features.Tasks.TaskChecklist.Commands.ReopenChecklistItem;
 using TeamManager.Application.Features.Tasks.TaskChecklist.Queries.GetTaskChecklist;
 using TeamManager.Application.Features.Tasks.TaskComment.Commands.AddTaskComment;
+using TeamManager.Application.Features.Tasks.TaskComment.Commands.EditTaskComment;
 using TeamManager.Application.Features.Tasks.TaskDependency.Commands.AddTaskDependency;
 using TeamManager.Application.Features.Tasks.TaskDependency.Commands.DeleteTaskDependency;
 using TeamManager.Application.Features.Tasks.TaskDependency.Queries.GetTaskDependencies;
@@ -238,6 +239,16 @@ namespace TeamManager.Api.Controllers.Tasks
         public async Task<IActionResult> AddTaskComment(long taskId, [FromBody] AddTaskCommentRequest request, CancellationToken cancellationToken)
         {
             await sender.Send(new AddTaskCommentCommand(taskId, request.Content), cancellationToken);
+
+            return NoContent();
+        }
+
+        [HttpPut("{taskId:long}/comments/{commentId:long}")]
+        [Authorize]
+        public async Task<IActionResult> EditTaskComment(long taskId, long commentId, [FromBody] EditTaskCommentRequest request,
+            CancellationToken cancellationToken)
+        {
+            await sender.Send(new EditTaskCommentCommand(taskId, commentId, request.Content), cancellationToken);
 
             return NoContent();
         }
