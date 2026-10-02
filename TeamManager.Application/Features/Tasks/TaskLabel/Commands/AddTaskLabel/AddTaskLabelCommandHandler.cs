@@ -4,7 +4,7 @@ using TeamManager.Application.Common.Exceptions.ProjectExceptions;
 using TeamManager.Application.Common.Exceptions.TaskExceptions;
 using TeamManager.Application.Common.Exceptions.TeamExceptions;
 
-namespace TeamManager.Application.Features.Tasks.TaskLabel.Command.AddTaskLabel
+namespace TeamManager.Application.Features.Tasks.TaskLabel.Commands.AddTaskLabel
 {
     public sealed class AddTaskLabelCommandHandler(ITaskRepository taskRepository, IProjectRepository projectRepository,
         ITeamRepository teamRepository, IUnitOfWork unitOfWork) : IRequestHandler<AddTaskLabelCommand>

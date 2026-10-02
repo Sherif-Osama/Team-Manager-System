@@ -290,8 +290,10 @@ namespace TeamManager.Domain.Entities
         public TaskComment AddComment(Guid authorUserId, string content)
         {
             EnsureNotDeleted("cannot add comment to deleted task");
-
             EnsureNotCancelled("cannot add comment to cancelled task");
+
+            if (string.IsNullOrWhiteSpace(content))
+                throw new DomainException("Comment content cannot be empty.");
 
             var comment = new TaskComment(Id, authorUserId, content);
             _comments.Add(comment);

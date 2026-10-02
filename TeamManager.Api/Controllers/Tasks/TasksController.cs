@@ -6,6 +6,7 @@ using TeamManager.Application.Features.Tasks.TaskChecklist.Commands.CompleteChec
 using TeamManager.Application.Features.Tasks.TaskChecklist.Commands.RemoveChecklistItem;
 using TeamManager.Application.Features.Tasks.TaskChecklist.Commands.ReopenChecklistItem;
 using TeamManager.Application.Features.Tasks.TaskChecklist.Queries.GetTaskChecklist;
+using TeamManager.Application.Features.Tasks.TaskComment.Commands.AddTaskComment;
 using TeamManager.Application.Features.Tasks.TaskDependency.Commands.AddTaskDependency;
 using TeamManager.Application.Features.Tasks.TaskDependency.Commands.DeleteTaskDependency;
 using TeamManager.Application.Features.Tasks.TaskDependency.Queries.GetTaskDependencies;
@@ -20,8 +21,8 @@ using TeamManager.Application.Features.Tasks.TaskItem.Commands.UpdateTask;
 using TeamManager.Application.Features.Tasks.TaskItem.Queries.GetMyTasks;
 using TeamManager.Application.Features.Tasks.TaskItem.Queries.GetTask;
 using TeamManager.Application.Features.Tasks.TaskItem.Queries.GetTeamTasks;
-using TeamManager.Application.Features.Tasks.TaskLabel.Command.AddTaskLabel;
 using TeamManager.Application.Features.Tasks.TaskLabel.Command.RemoveTaskLabel;
+using TeamManager.Application.Features.Tasks.TaskLabel.Commands.AddTaskLabel;
 
 namespace TeamManager.Api.Controllers.Tasks
 {
@@ -230,6 +231,15 @@ namespace TeamManager.Api.Controllers.Tasks
                 request.ProjectId, request.Status, request.Priority, request.Page, request.PageSize), cancellationToken);
 
             return Ok(response);
+        }
+
+        [HttpPost("{taskId:long}/comments")]
+        [Authorize]
+        public async Task<IActionResult> AddTaskComment(long taskId, [FromBody] AddTaskCommentRequest request, CancellationToken cancellationToken)
+        {
+            await sender.Send(new AddTaskCommentCommand(taskId, request.Content), cancellationToken);
+
+            return NoContent();
         }
     }
 }

@@ -1,6 +1,6 @@
 ﻿using FluentValidation;
 
-namespace TeamManager.Application.Features.Tasks.TaskLabel.Command.AddTaskLabel
+namespace TeamManager.Application.Features.Tasks.TaskLabel.Commands.AddTaskLabel
 {
     public sealed class AddTaskLabelCommandValidator : AbstractValidator<AddTaskLabelCommand>
     {
