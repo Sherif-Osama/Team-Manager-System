@@ -7,6 +7,7 @@ using TeamManager.Application.Features.Tasks.TaskChecklist.Commands.RemoveCheckl
 using TeamManager.Application.Features.Tasks.TaskChecklist.Commands.ReopenChecklistItem;
 using TeamManager.Application.Features.Tasks.TaskChecklist.Queries.GetTaskChecklist;
 using TeamManager.Application.Features.Tasks.TaskComment.Commands.AddTaskComment;
+using TeamManager.Application.Features.Tasks.TaskComment.Commands.DeleteTaskComment;
 using TeamManager.Application.Features.Tasks.TaskComment.Commands.EditTaskComment;
 using TeamManager.Application.Features.Tasks.TaskDependency.Commands.AddTaskDependency;
 using TeamManager.Application.Features.Tasks.TaskDependency.Commands.DeleteTaskDependency;
@@ -249,6 +250,15 @@ namespace TeamManager.Api.Controllers.Tasks
             CancellationToken cancellationToken)
         {
             await sender.Send(new EditTaskCommentCommand(taskId, commentId, request.Content), cancellationToken);
+
+            return NoContent();
+        }
+
+        [HttpDelete("{taskId:long}/comments/{commentId:long}")]
+        [Authorize]
+        public async Task<IActionResult> DeleteTaskComment(long taskId, long commentId, CancellationToken cancellationToken)
+        {
+            await sender.Send(new DeleteTaskCommentCommand(taskId, commentId), cancellationToken);
 
             return NoContent();
         }

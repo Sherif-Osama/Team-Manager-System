@@ -297,10 +297,11 @@ namespace TeamManager.Domain.Entities
 
             var comment = new TaskComment(Id, authorUserId, content);
             _comments.Add(comment);
+            Touch();
             return comment;
         }
 
-        public void EditComment(long commentId, Guid authorUserId, string content)
+        public void EditComment(long commentId, string content)
         {
             EnsureNotDeleted("cannot modify comments on deleted task");
             EnsureNotCancelled("cannot modify comments on cancelled task");
@@ -315,7 +316,7 @@ namespace TeamManager.Domain.Entities
             Touch();
         }
 
-        public void DeleteComment(long commentId, Guid userId)
+        public void DeleteComment(long commentId)
         {
             EnsureNotDeleted("cannot modify comments on deleted task");
             EnsureNotCancelled("cannot modify comments on cancelled task");
