@@ -10,6 +10,7 @@ using TeamManager.Application.Features.Tasks.TaskComment.Commands.AddTaskComment
 using TeamManager.Application.Features.Tasks.TaskComment.Commands.DeleteTaskComment;
 using TeamManager.Application.Features.Tasks.TaskComment.Commands.EditTaskComment;
 using TeamManager.Application.Features.Tasks.TaskComment.Queries.GetMyComments;
+using TeamManager.Application.Features.Tasks.TaskComment.Queries.GetMyMentions;
 using TeamManager.Application.Features.Tasks.TaskComment.Queries.GetTaskComments;
 using TeamManager.Application.Features.Tasks.TaskDependency.Commands.AddTaskDependency;
 using TeamManager.Application.Features.Tasks.TaskDependency.Commands.DeleteTaskDependency;
@@ -278,6 +279,16 @@ namespace TeamManager.Api.Controllers.Tasks
         [HttpGet("my-comments")]
         [Authorize]
         public async Task<ActionResult<GetMyCommentsResponse>> GetMyComments([FromQuery] GetMyCommentsQuery query,
+            CancellationToken cancellationToken)
+        {
+            var response = await sender.Send(query, cancellationToken);
+
+            return Ok(response);
+        }
+
+        [HttpGet("my-mentions")]
+        [Authorize]
+        public async Task<ActionResult<GetMyMentionsResponse>> GetMyMentions([FromQuery] GetMyMentionsQuery query,
             CancellationToken cancellationToken)
         {
             var response = await sender.Send(query, cancellationToken);
