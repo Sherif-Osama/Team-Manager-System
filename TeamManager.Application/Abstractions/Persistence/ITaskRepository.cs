@@ -21,6 +21,6 @@ namespace TeamManager.Application.Abstractions.Persistence
         Task DeleteAllDependenciesAsync(long taskId, CancellationToken cancellationToken);
         Task<TaskItem?> GetByIdWithChecklistAsync(long taskId, CancellationToken cancellationToken);
         Task<TaskItem?> GetByIdWithLabelsAsync(long taskId, CancellationToken cancellationToken);
-        Task<TaskItem?> GetByIdWithCommentsAsync(long taskId, CancellationToken cancellationToken);
+        Task<TaskItem?> GetByIdWithCommentsAndMentionsAsync(long taskId, CancellationToken cancellationToken);
     }
 }

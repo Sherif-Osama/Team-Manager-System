@@ -20,16 +20,13 @@ public class TaskCommentConfiguration : IEntityTypeConfiguration<TaskComment>
 
         builder.Property(x => x.UpdatedAtUtc).HasColumnType("datetime2(3)");
 
-        builder.Property(x => x.DeletedAtUtc).HasColumnType("datetime2(3)");
-
         builder.HasOne(x => x.Task).WithMany(x => x.Comments).HasForeignKey(x => x.TaskId)
-            .HasConstraintName("FK_TaskComments_Tasks").OnDelete(DeleteBehavior.NoAction);
+            .HasConstraintName("FK_TaskComments_Tasks").OnDelete(DeleteBehavior.Cascade);
 
         builder.HasOne(x => x.Author).WithMany().HasForeignKey(x => x.AuthorUserId)
             .HasConstraintName("FK_TaskComments_Author").OnDelete(DeleteBehavior.NoAction);
 
-        builder.HasIndex(x => new { x.TaskId, x.CreatedAtUtc }).HasDatabaseName("IX_TaskComments_TaskId_CreatedAtUtc")
-            .HasFilter("[DeletedAtUtc] IS NULL");
+        builder.HasIndex(x => new { x.TaskId, x.CreatedAtUtc }).HasDatabaseName("IX_TaskComments_TaskId_CreatedAtUtc");
 
         builder.Navigation(x => x.Mentions).HasField("_mentions").UsePropertyAccessMode(PropertyAccessMode.Field);
     }

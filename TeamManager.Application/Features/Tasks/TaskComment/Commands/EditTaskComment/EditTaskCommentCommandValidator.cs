@@ -11,6 +11,9 @@ namespace TeamManager.Application.Features.Tasks.TaskComment.Commands.EditTaskCo
             RuleFor(x => x.CommentId).GreaterThan(0);
 
             RuleFor(x => x.Content).NotEmpty().MaximumLength(2000);
+
+            RuleFor(x => x.MentionedUserIds).Must(ids => ids == null || ids.All(id => id != Guid.Empty))
+                .WithMessage("Mentioned user IDs cannot be empty.");
         }
     }
 }

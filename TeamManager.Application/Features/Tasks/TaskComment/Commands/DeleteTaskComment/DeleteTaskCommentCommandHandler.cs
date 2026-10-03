@@ -10,7 +10,7 @@ namespace TeamManager.Application.Features.Tasks.TaskComment.Commands.DeleteTask
         public async Task Handle(DeleteTaskCommentCommand request, CancellationToken cancellationToken)
         {
 
-            var task = await taskRepository.GetByIdWithCommentsAsync(request.TaskId, cancellationToken);
+            var task = await taskRepository.GetByIdWithCommentsAndMentionsAsync(request.TaskId, cancellationToken);
 
             if (task is null)
                 throw new TaskNotFoundException(request.TaskId);

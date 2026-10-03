@@ -4,7 +4,7 @@ using TeamManager.Domain.Enums;
 
 namespace TeamManager.Application.Features.Tasks.TaskComment.Commands.EditTaskComment
 {
-    public sealed record EditTaskCommentCommand(long TaskId, long CommentId, string Content) : IRequest, ITaskScopedRequest
+    public sealed record EditTaskCommentCommand(long TaskId, long CommentId, string Content, IReadOnlyCollection<Guid>? MentionedUserIds = null) : IRequest, ITaskScopedRequest
     {
         public ProjectRole[] RequiredProjectRoles => [ProjectRole.Owner, ProjectRole.Admin, ProjectRole.Member];
     }

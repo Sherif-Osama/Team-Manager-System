@@ -41,10 +41,11 @@ namespace TeamManager.Infrastructure.Persistence.Repositories
             && tm.Team.DeletedAtUtc == null))).FirstOrDefaultAsync(cancellationToken);
         }
 
-        public async Task<TaskItem?> GetByIdWithCommentsAsync(long taskId, CancellationToken cancellationToken)
+        public async Task<TaskItem?> GetByIdWithCommentsAndMentionsAsync(long taskId, CancellationToken cancellationToken)
         {
-            return await context.Tasks.Include(x => x.Comments.Where(c => c.DeletedAtUtc == null))
-                .FirstOrDefaultAsync(x => x.Id == taskId && x.DeletedAtUtc == null, cancellationToken);
+            return await context.Tasks
+             .Include(x => x.Comments).ThenInclude(c => c.Mentions)
+             .FirstOrDefaultAsync(x => x.Id == taskId && x.DeletedAtUtc == null, cancellationToken);
         }
 
         public Task UnassignActiveTasksAsync(Guid userId, CancellationToken cancellationToken)

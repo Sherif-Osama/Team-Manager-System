@@ -14,7 +14,6 @@ public class TaskComment : Entity<long>
     public string Content { get; private set; } = null!;
     public DateTime CreatedAtUtc { get; private set; }
     public DateTime? UpdatedAtUtc { get; private set; }
-    public DateTime? DeletedAtUtc { get; private set; }
 
     public IReadOnlyCollection<CommentMention> Mentions => _mentions.AsReadOnly();
 
@@ -42,13 +41,26 @@ public class TaskComment : Entity<long>
         UpdatedAtUtc = DateTime.UtcNow;
     }
 
-    public void SoftDelete() => DeletedAtUtc = DateTime.UtcNow;
-
     public void Mention(Guid mentionedUserId)
     {
+
+        if (mentionedUserId == Guid.Empty)
+            throw new DomainException("Mentioned user ID cannot be empty.");
+
         if (_mentions.Any(m => m.MentionedUserId == mentionedUserId))
             return;
 
         _mentions.Add(new CommentMention(Id, mentionedUserId));
     }
-}
+
+    public void UpdateMentions(IReadOnlyCollection<Guid> mentionedUserIds)
+    {
+
+        var newMentionIds = mentionedUserIds.Distinct().ToHashSet();
+
+        _mentions.RemoveAll(m => !newMentionIds.Contains(m.MentionedUserId));
+
+        foreach (var userId in newMentionIds)
+            Mention(userId);
+    }
+};

@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using TeamManager.Infrastructure.Persistence;
 
@@ -11,9 +12,11 @@ using TeamManager.Infrastructure.Persistence;
 namespace TeamManager.Infrastructure.Migrations
 {
     [DbContext(typeof(TeamManagerDbContext))]
-    partial class TeamManagerDbContextModelSnapshot : ModelSnapshot
+    [Migration("20261003133548_RemoveTaskCommentSoftDelete")]
+    partial class RemoveTaskCommentSoftDelete
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1610,7 +1613,7 @@ namespace TeamManager.Infrastructure.Migrations
                     b.HasOne("TeamManager.Domain.Entities.TaskItem", "Task")
                         .WithMany("Comments")
                         .HasForeignKey("TaskId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired()
                         .HasConstraintName("FK_TaskComments_Tasks");
 

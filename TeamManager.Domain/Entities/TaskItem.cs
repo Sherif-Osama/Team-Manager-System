@@ -287,7 +287,7 @@ namespace TeamManager.Domain.Entities
             return attachment;
         }
 
-        public TaskComment AddComment(Guid authorUserId, string content)
+        public TaskComment AddComment(Guid authorUserId, string content, IReadOnlyCollection<Guid>? mentionedUserIds = null)
         {
             EnsureNotDeleted("cannot add comment to deleted task");
             EnsureNotCancelled("cannot add comment to cancelled task");
@@ -296,20 +296,28 @@ namespace TeamManager.Domain.Entities
                 throw new DomainException("Comment content cannot be empty.");
 
             var comment = new TaskComment(Id, authorUserId, content);
+
+            if (mentionedUserIds is not null)
+                foreach (var userId in mentionedUserIds.Distinct())
+                    comment.Mention(userId);
+
             _comments.Add(comment);
             Touch();
             return comment;
         }
 
-        public void EditComment(long commentId, string content)
+        public void EditComment(long commentId, string content, IReadOnlyCollection<Guid>? mentionedUserIds = null)
         {
             EnsureNotDeleted("cannot modify comments on deleted task");
             EnsureNotCancelled("cannot modify comments on cancelled task");
 
-            var comment = _comments.FirstOrDefault(x => x.Id == commentId && x.DeletedAtUtc == null);
+            var comment = _comments.FirstOrDefault(x => x.Id == commentId);
 
             if (comment is null)
                 throw new DomainException("Comment not found.");
+
+            if (mentionedUserIds is not null)
+                comment.UpdateMentions(mentionedUserIds);
 
             comment.Edit(content);
 
@@ -321,12 +329,12 @@ namespace TeamManager.Domain.Entities
             EnsureNotDeleted("cannot modify comments on deleted task");
             EnsureNotCancelled("cannot modify comments on cancelled task");
 
-            var comment = _comments.FirstOrDefault(x => x.Id == commentId && x.DeletedAtUtc == null);
+            var comment = _comments.FirstOrDefault(x => x.Id == commentId);
 
             if (comment is null)
                 throw new DomainException("Comment not found.");
 
-            comment.SoftDelete();
+            _comments.Remove(comment);
 
             Touch();
         }

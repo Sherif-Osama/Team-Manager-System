@@ -237,11 +237,11 @@ namespace TeamManager.Api.Controllers.Tasks
 
         [HttpPost("{taskId:long}/comments")]
         [Authorize]
-        public async Task<IActionResult> AddTaskComment(long taskId, [FromBody] AddTaskCommentRequest request, CancellationToken cancellationToken)
+        public async Task<ActionResult<long>> AddTaskComment(long taskId, [FromBody] AddTaskCommentRequest request, CancellationToken cancellationToken)
         {
-            await sender.Send(new AddTaskCommentCommand(taskId, request.Content), cancellationToken);
+            var commentId = await sender.Send(new AddTaskCommentCommand(taskId, request.Content, request.MentionedUserIds), cancellationToken);
 
-            return NoContent();
+            return Ok(commentId);
         }
 
         [HttpPut("{taskId:long}/comments/{commentId:long}")]
@@ -249,7 +249,7 @@ namespace TeamManager.Api.Controllers.Tasks
         public async Task<IActionResult> EditTaskComment(long taskId, long commentId, [FromBody] EditTaskCommentRequest request,
             CancellationToken cancellationToken)
         {
-            await sender.Send(new EditTaskCommentCommand(taskId, commentId, request.Content), cancellationToken);
+            await sender.Send(new EditTaskCommentCommand(taskId, commentId, request.Content, request.MentionedUserIds), cancellationToken);
 
             return NoContent();
         }
