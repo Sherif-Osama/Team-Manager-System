@@ -1,20 +1,6 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using TeamManager.Application.Features.Tasks.TaskChecklist.Commands.AddChecklistItem;
-using TeamManager.Application.Features.Tasks.TaskChecklist.Commands.CompleteChecklistItem;
-using TeamManager.Application.Features.Tasks.TaskChecklist.Commands.RemoveChecklistItem;
-using TeamManager.Application.Features.Tasks.TaskChecklist.Commands.ReopenChecklistItem;
-using TeamManager.Application.Features.Tasks.TaskChecklist.Queries.GetTaskChecklist;
-using TeamManager.Application.Features.Tasks.TaskComment.Commands.AddTaskComment;
-using TeamManager.Application.Features.Tasks.TaskComment.Commands.DeleteTaskComment;
-using TeamManager.Application.Features.Tasks.TaskComment.Commands.EditTaskComment;
-using TeamManager.Application.Features.Tasks.TaskComment.Queries.GetMyComments;
-using TeamManager.Application.Features.Tasks.TaskComment.Queries.GetMyMentions;
-using TeamManager.Application.Features.Tasks.TaskComment.Queries.GetTaskComments;
-using TeamManager.Application.Features.Tasks.TaskDependency.Commands.AddTaskDependency;
-using TeamManager.Application.Features.Tasks.TaskDependency.Commands.DeleteTaskDependency;
-using TeamManager.Application.Features.Tasks.TaskDependency.Queries.GetTaskDependencies;
 using TeamManager.Application.Features.Tasks.TaskItem.Commands.AssignTask;
 using TeamManager.Application.Features.Tasks.TaskItem.Commands.ChangeTaskPriority;
 using TeamManager.Application.Features.Tasks.TaskItem.Commands.ChangeTaskStatus;
@@ -84,25 +70,6 @@ namespace TeamManager.Api.Controllers.Tasks
             return NoContent();
         }
 
-        [HttpPost("{taskId:long}/dependencies")]
-        [Authorize]
-        public async Task<ActionResult<long>> AddTaskDependency(long taskId, [FromBody] AddTaskDependencyRequest request,
-            CancellationToken cancellationToken)
-        {
-            var dependencyId = await sender.Send(new AddTaskDependencyCommand(taskId, request.DependsOnTaskId), cancellationToken);
-
-            return Ok(dependencyId);
-        }
-
-        [HttpDelete("{taskId:long}/dependencies/{dependencyId:long}")]
-        [Authorize]
-        public async Task<IActionResult> DeleteTaskDependency(long taskId, long dependencyId, CancellationToken cancellationToken)
-        {
-            await sender.Send(new DeleteTaskDependencyCommand(taskId, dependencyId), cancellationToken);
-
-            return NoContent();
-        }
-
         [HttpPut("{taskId:long}/assignee")]
         [Authorize]
         public async Task<IActionResult> AssignTask(long taskId, [FromBody] AssignTaskRequest request, CancellationToken cancellationToken)
@@ -112,15 +79,6 @@ namespace TeamManager.Api.Controllers.Tasks
             return NoContent();
         }
 
-        [HttpGet("{taskId:long}/checklist")]
-        [Authorize]
-        public async Task<ActionResult<IReadOnlyCollection<GetTaskChecklistResponse>>> GetTaskChecklist(long taskId,
-            [FromQuery] string? search, [FromQuery] bool? isCompleted, CancellationToken cancellationToken)
-        {
-            var response = await sender.Send(new GetTaskChecklistQuery(taskId, search, isCompleted), cancellationToken);
-
-            return Ok(response);
-        }
 
         [HttpDelete("{taskId:long}")]
         [Authorize]
@@ -132,17 +90,6 @@ namespace TeamManager.Api.Controllers.Tasks
 
         }
 
-        [HttpGet("{taskId:long}/dependencies")]
-        [Authorize]
-        public async Task<ActionResult<GetTaskDependenciesResponse>> GetTaskDependencies(long taskId,
-            [FromQuery] GetTaskDependenciesRequest request, CancellationToken cancellationToken)
-        {
-            var response = await sender.Send(new GetTaskDependenciesQuery(taskId, request.Page, request.PageSize),
-                cancellationToken);
-
-            return Ok(response);
-        }
-
         [HttpDelete("{taskId:long}/assignee")]
         [Authorize]
         public async Task<IActionResult> UnassignTask(long taskId, CancellationToken cancellationToken)
@@ -151,45 +98,6 @@ namespace TeamManager.Api.Controllers.Tasks
 
             return NoContent();
         }
-
-        [HttpPost("{taskId:long}/checklist")]
-        [Authorize]
-        public async Task<ActionResult<long>> AddChecklistItem(long taskId, [FromBody] AddChecklistItemRequest request,
-            CancellationToken cancellationToken)
-        {
-            var itemId = await sender.Send(new AddChecklistItemCommand(taskId, request.Content), cancellationToken);
-
-            return Ok(itemId);
-        }
-
-        [HttpPut("{taskId:long}/checklist/{checklistItemId:long}/complete")]
-        [Authorize]
-        public async Task<IActionResult> CompleteChecklistItem(long taskId, long checklistItemId,
-            CancellationToken cancellationToken)
-        {
-            await sender.Send(new CompleteChecklistItemCommand(taskId, checklistItemId), cancellationToken);
-
-            return NoContent();
-        }
-
-        [HttpPut("{taskId:long}/checklist/{checklistItemId:long}/reopen")]
-        [Authorize]
-        public async Task<IActionResult> ReopenChecklistItem(long taskId, long checklistItemId, CancellationToken cancellationToken)
-        {
-            await sender.Send(new ReopenChecklistItemCommand(taskId, checklistItemId), cancellationToken);
-
-            return NoContent();
-        }
-
-        [HttpDelete("{taskId:long}/checklist/{checklistItemId:long}")]
-        [Authorize]
-        public async Task<IActionResult> RemoveChecklistItem(long taskId, long checklistItemId, CancellationToken cancellationToken)
-        {
-            await sender.Send(new RemoveChecklistItemCommand(taskId, checklistItemId), cancellationToken);
-
-            return NoContent();
-        }
-
 
         [HttpGet("{taskId:long}")]
         [Authorize]
@@ -234,64 +142,6 @@ namespace TeamManager.Api.Controllers.Tasks
 
             var response = await sender.Send(new GetTeamTasksQuery(teamId, request.Search,
                 request.ProjectId, request.Status, request.Priority, request.Page, request.PageSize), cancellationToken);
-
-            return Ok(response);
-        }
-
-        [HttpPost("{taskId:long}/comments")]
-        [Authorize]
-        public async Task<ActionResult<long>> AddTaskComment(long taskId, [FromBody] AddTaskCommentRequest request, CancellationToken cancellationToken)
-        {
-            var commentId = await sender.Send(new AddTaskCommentCommand(taskId, request.Content, request.MentionedUserIds), cancellationToken);
-
-            return Ok(commentId);
-        }
-
-        [HttpPut("{taskId:long}/comments/{commentId:long}")]
-        [Authorize]
-        public async Task<IActionResult> EditTaskComment(long taskId, long commentId, [FromBody] EditTaskCommentRequest request,
-            CancellationToken cancellationToken)
-        {
-            await sender.Send(new EditTaskCommentCommand(taskId, commentId, request.Content, request.MentionedUserIds), cancellationToken);
-
-            return NoContent();
-        }
-
-        [HttpDelete("{taskId:long}/comments/{commentId:long}")]
-        [Authorize]
-        public async Task<IActionResult> DeleteTaskComment(long taskId, long commentId, CancellationToken cancellationToken)
-        {
-            await sender.Send(new DeleteTaskCommentCommand(taskId, commentId), cancellationToken);
-
-            return NoContent();
-        }
-
-        [HttpGet("{taskId:long}/comments")]
-        [Authorize]
-        public async Task<ActionResult<GetTaskCommentsResponse>> GetTaskComments(long taskId, [FromQuery] GetTaskCommentsRequest request,
-            CancellationToken cancellationToken)
-        {
-            var response = await sender.Send(new GetTaskCommentsQuery(taskId, request.Page, request.PageSize), cancellationToken);
-
-            return Ok(response);
-        }
-
-        [HttpGet("my-comments")]
-        [Authorize]
-        public async Task<ActionResult<GetMyCommentsResponse>> GetMyComments([FromQuery] GetMyCommentsQuery query,
-            CancellationToken cancellationToken)
-        {
-            var response = await sender.Send(query, cancellationToken);
-
-            return Ok(response);
-        }
-
-        [HttpGet("my-mentions")]
-        [Authorize]
-        public async Task<ActionResult<GetMyMentionsResponse>> GetMyMentions([FromQuery] GetMyMentionsQuery query,
-            CancellationToken cancellationToken)
-        {
-            var response = await sender.Send(query, cancellationToken);
 
             return Ok(response);
         }
