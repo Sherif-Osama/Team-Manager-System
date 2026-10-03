@@ -9,6 +9,7 @@ using TeamManager.Application.Features.Tasks.TaskChecklist.Queries.GetTaskCheckl
 using TeamManager.Application.Features.Tasks.TaskComment.Commands.AddTaskComment;
 using TeamManager.Application.Features.Tasks.TaskComment.Commands.DeleteTaskComment;
 using TeamManager.Application.Features.Tasks.TaskComment.Commands.EditTaskComment;
+using TeamManager.Application.Features.Tasks.TaskComment.Queries.GetTaskComments;
 using TeamManager.Application.Features.Tasks.TaskDependency.Commands.AddTaskDependency;
 using TeamManager.Application.Features.Tasks.TaskDependency.Commands.DeleteTaskDependency;
 using TeamManager.Application.Features.Tasks.TaskDependency.Queries.GetTaskDependencies;
@@ -261,6 +262,16 @@ namespace TeamManager.Api.Controllers.Tasks
             await sender.Send(new DeleteTaskCommentCommand(taskId, commentId), cancellationToken);
 
             return NoContent();
+        }
+
+        [HttpGet("{taskId:long}/comments")]
+        [Authorize]
+        public async Task<ActionResult<GetTaskCommentsResponse>> GetTaskComments(long taskId, [FromQuery] GetTaskCommentsRequest request,
+            CancellationToken cancellationToken)
+        {
+            var response = await sender.Send(new GetTaskCommentsQuery(taskId, request.Page, request.PageSize), cancellationToken);
+
+            return Ok(response);
         }
     }
 }
