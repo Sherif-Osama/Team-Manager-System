@@ -92,6 +92,12 @@ namespace TeamManager.Infrastructure.Persistence.Repositories
                     .SetProperty(x => x.RemovedAtUtc, DateTime.UtcNow), cancellationToken);
         }
 
+        public Task<bool> HasActiveProjectsInTeamAsync(Guid teamId, CancellationToken cancellationToken)
+        {
+            return context.Projects.AnyAsync(p => p.TeamId == teamId &&
+            p.DeletedAtUtc == null && p.Status != ProjectStatus.Completed, cancellationToken);
+        }
+
         public async Task<ProjectAuthorizationInfo?> GetAuthorizationInfoAsync(Guid projectId, Guid userId, ProjectRole[] requiredRoles,
             CancellationToken cancellationToken)
         {

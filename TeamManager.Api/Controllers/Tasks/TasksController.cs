@@ -21,7 +21,7 @@ namespace TeamManager.Api.Controllers.Tasks
     [ApiController]
     public class TasksController(ISender sender) : ControllerBase
     {
-        [HttpPost("{projectId:guid}/tasks")]
+        [HttpPost("/api/projects/{projectId:guid}/tasks")]
         [Authorize]
         public async Task<IActionResult> CreateTask(Guid projectId, [FromBody] CreateTaskRequest request,
             CancellationToken cancellationToken)
@@ -135,7 +135,7 @@ namespace TeamManager.Api.Controllers.Tasks
             return NoContent();
         }
 
-        [HttpGet("{teamId:guid}/tasks")]
+        [HttpGet("/api/teams/{teamId:guid}/tasks")]
         [Authorize]
         public async Task<ActionResult<GetTeamTasksResponse>> GetTeamTasks(Guid teamId, [FromQuery] GetTeamTasksRequest request, CancellationToken cancellationToken)
         {

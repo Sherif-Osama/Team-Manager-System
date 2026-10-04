@@ -20,7 +20,7 @@ namespace TeamManager.Application.Features.Tasks.TaskItem.Commands.AssignTask
                 var isActiveMember = await projectRepository.IsActiveMemberAsync(task.ProjectId, request.UserId, ct);
 
                 if (!isActiveMember)
-                    throw new UserNotMemberOfProjectException(task.ProjectId, request.UserId);
+                    throw new UserNotMemberOfProjectException(request.UserId, task.ProjectId);
 
                 task.Assign(request.UserId);
 

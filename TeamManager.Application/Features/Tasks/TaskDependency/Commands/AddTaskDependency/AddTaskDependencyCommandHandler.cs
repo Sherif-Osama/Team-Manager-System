@@ -16,7 +16,7 @@ namespace TeamManager.Application.Features.Tasks.TaskDependency.Commands.AddTask
 
             var userId = currentUser.UserId.Value;
 
-            long dependencId = default;
+            Domain.Entities.TaskDependency? dependency = null;
 
             await unitOfWork.ExecuteInSerializableTransactionAsync(async ct =>
             {
@@ -39,13 +39,10 @@ namespace TeamManager.Application.Features.Tasks.TaskDependency.Commands.AddTask
                 if (wouldCreateCycle)
                     throw new DomainException("Adding this dependency would create a circular dependency.");
 
-                var dependency = task.AddDependency(request.DependsOnTaskId, userId);
-
-                dependencId = dependency.Id;
-
+                dependency = task.AddDependency(request.DependsOnTaskId, userId);
             }, cancellationToken);
 
-            return dependencId;
+            return dependency?.Id ?? default;
         }
     }
 }

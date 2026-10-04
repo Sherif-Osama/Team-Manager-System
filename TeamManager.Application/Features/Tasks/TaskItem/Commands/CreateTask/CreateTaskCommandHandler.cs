@@ -14,8 +14,7 @@ namespace TeamManager.Application.Features.Tasks.TaskItem.Commands.CreateTask
             if (!currentUser.UserId.HasValue || !currentUser.IsAuthenticated)
                 throw new UnauthorizedAccessException("User is not authenticated.");
 
-            long taskId = default;
-
+            Domain.Entities.TaskItem? task = null;
             await unitOfWork.ExecuteInSerializableTransactionAsync(async ct =>
             {
                 var project = await projectRepository.GetByIdAsync(request.ProjectId, ct);
@@ -34,15 +33,13 @@ namespace TeamManager.Application.Features.Tasks.TaskItem.Commands.CreateTask
                         throw new UserNotMemberOfProjectException(request.AssigneeUserId.Value, project.Id);
                 }
 
-                var task = new Domain.Entities.TaskItem(project.Id, request.Title, currentUser.UserId.Value, request.Priority,
+                task = new Domain.Entities.TaskItem(project.Id, request.Title, currentUser.UserId.Value, request.Priority,
                     request.Description, request.AssigneeUserId, request.StartDate, request.DueDate, project.StartDate, project.DueDate);
 
                 await taskRepository.AddAsync(task, ct);
-                taskId = task.Id;
-
             }, cancellationToken);
 
-            return taskId;
+            return task?.Id ?? default;
         }
     }
 }

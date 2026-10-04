@@ -11,7 +11,7 @@ namespace TeamManager.Application.Features.Tasks.TaskItem.Commands.DeleteTask
             await unitOfWork.ExecuteInSerializableTransactionAsync(async ct =>
             {
 
-                var task = await taskRepository.GetByIdAsync(request.TaskId, cancellationToken);
+                var task = await taskRepository.GetByIdAsync(request.TaskId, ct);
 
                 if (task is null)
                     throw new TaskNotFoundException(request.TaskId);

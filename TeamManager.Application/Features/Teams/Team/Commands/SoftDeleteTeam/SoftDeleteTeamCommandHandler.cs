@@ -4,7 +4,7 @@ using TeamManager.Application.Common.Exceptions.TeamExceptions;
 
 namespace TeamManager.Application.Features.Teams.Team.Commands.SoftDeleteTeam
 {
-    public sealed class SoftDeleteTeamCommandHandler(ITeamRepository teamRepository, IUnitOfWork unitOfWork)
+    public sealed class SoftDeleteTeamCommandHandler(ITeamRepository teamRepository, IUnitOfWork unitOfWork, IProjectRepository projectRepository)
         : IRequestHandler<SoftDeleteTeamCommand>
     {
 
@@ -14,6 +14,11 @@ namespace TeamManager.Application.Features.Teams.Team.Commands.SoftDeleteTeam
 
             if (team is null)
                 throw new TeamNotFoundException(request.TeamId);
+
+            var hasActiveProjects = await projectRepository.HasActiveProjectsInTeamAsync(request.TeamId, cancellationToken);
+
+            if (hasActiveProjects)
+                throw new TeamHasActiveProjectsException(request.TeamId);
 
             team.SoftDelete();
 
