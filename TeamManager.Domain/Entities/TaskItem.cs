@@ -275,7 +275,7 @@ namespace TeamManager.Domain.Entities
         }
 
         public TaskAttachment AddAttachment(string originalFileName, string storageKey, string contentType, long sizeBytes,
-            Guid uploadedBy, string? fileHash = null)
+            Guid uploadedBy, string fileHash)
         {
             EnsureNotDeleted("cannot add attchment to deleted task");
 
@@ -284,6 +284,24 @@ namespace TeamManager.Domain.Entities
             var attachment = new TaskAttachment(Id, originalFileName, storageKey, contentType, sizeBytes,
                 uploadedBy, fileHash);
             _attachments.Add(attachment);
+            Touch();
+            return attachment;
+        }
+
+        public TaskAttachment RemoveAttachment(long attachmentId)
+        {
+            EnsureNotDeleted("cannot modify deleted task");
+            EnsureNotCancelled("cannot remove attachment from cancelled task");
+
+            var attachment = _attachments.FirstOrDefault(x => x.Id == attachmentId);
+
+            if (attachment is null)
+                throw new DomainException("Attachment not found.");
+
+            _attachments.Remove(attachment);
+
+            Touch();
+
             return attachment;
         }
 

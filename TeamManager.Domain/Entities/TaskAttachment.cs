@@ -11,7 +11,7 @@ public class TaskAttachment : Entity<long>
     public string StorageKey { get; private set; } = null!;
     public string ContentType { get; private set; } = null!;
     public long SizeBytes { get; private set; }
-    public string? FileHash { get; private set; }
+    public string FileHash { get; private set; } = null!;
     public Guid UploadedBy { get; private set; }
     public User UploadedByUser { get; private set; } = null!;
     public DateTime UploadedAtUtc { get; private set; }
@@ -22,7 +22,7 @@ public class TaskAttachment : Entity<long>
     }
 
     internal TaskAttachment(long taskId, string originalFileName, string storageKey, string contentType,
-        long sizeBytes, Guid uploadedBy, string? fileHash = null)
+        long sizeBytes, Guid uploadedBy, string fileHash)
     {
         if (string.IsNullOrWhiteSpace(originalFileName))
             throw new DomainException("An attachment must have an original file name.");
@@ -30,8 +30,10 @@ public class TaskAttachment : Entity<long>
             throw new DomainException("An attachment must have a storage key.");
         if (string.IsNullOrWhiteSpace(contentType))
             throw new DomainException("An attachment must have a content type.");
-        if (sizeBytes < 0)
-            throw new DomainException("An attachment's size cannot be negative.");
+        if (sizeBytes <= 0)
+            throw new DomainException("An attachment's size must be greater than zero.");
+        if (!string.IsNullOrWhiteSpace(FileHash))
+            throw new DomainException("An attachment must have a file hash.");
 
         TaskId = taskId;
         OriginalFileName = originalFileName;

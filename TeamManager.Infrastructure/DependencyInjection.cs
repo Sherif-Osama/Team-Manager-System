@@ -1,11 +1,11 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using TeamManager.Application.Abstractions;
 using TeamManager.Application.Abstractions.Authentication;
 using TeamManager.Application.Abstractions.Configuration;
 using TeamManager.Application.Abstractions.Persistence;
 using TeamManager.Application.Abstractions.Security;
+using TeamManager.Application.Abstractions.Storage;
 using TeamManager.Infrastructure.BackgroundJobs.DeleteInactiveUsers;
 using TeamManager.Infrastructure.BackgroundJobs.InvitationExpiration;
 using TeamManager.Infrastructure.BackgroundJobs.ProcessOutboxMessages.MessageHandlers;
@@ -16,6 +16,7 @@ using TeamManager.Infrastructure.Persistence.Outbox;
 using TeamManager.Infrastructure.Persistence.Repositories;
 using TeamManager.Infrastructure.Services.AuthenticationServices;
 using TeamManager.Infrastructure.Services.SecurityService;
+using TeamManager.Infrastructure.Storage;
 
 namespace TeamManager.Infrastructure
 {
@@ -55,6 +56,8 @@ namespace TeamManager.Infrastructure
             services.AddScoped<IRoleRepository, RoleRepository>();
             services.AddScoped<IProjectRepository, ProjectRepository>();
             services.AddScoped<ITaskRepository, TaskRepository>();
+            services.Configure<FileStorageOptions>(configuration.GetSection(FileStorageOptions.SectionName));
+            services.AddScoped<IFileStorage, LocalFileStorage>();
             return services;
         }
     }

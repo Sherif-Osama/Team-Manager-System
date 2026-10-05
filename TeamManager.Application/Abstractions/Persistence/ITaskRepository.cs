@@ -22,5 +22,6 @@ namespace TeamManager.Application.Abstractions.Persistence
         Task<TaskItem?> GetByIdWithChecklistAsync(long taskId, CancellationToken cancellationToken);
         Task<TaskItem?> GetByIdWithLabelsAsync(long taskId, CancellationToken cancellationToken);
         Task<TaskItem?> GetByIdWithCommentsAndMentionsAsync(long taskId, CancellationToken cancellationToken);
+        Task<bool> AttachmentExistsByHashAsync(long taskId, string fileHash, CancellationToken cancellationToken);
     }
 }

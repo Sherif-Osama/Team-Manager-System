@@ -10,7 +10,7 @@ public class TaskAttachmentConfiguration : IEntityTypeConfiguration<TaskAttachme
     {
         builder.ToTable("TaskAttachments", tableBuilder =>
         {
-            tableBuilder.HasCheckConstraint("CK_TaskAttachments_SizeBytes", "[SizeBytes] >= 0");
+            tableBuilder.HasCheckConstraint("CK_TaskAttachments_SizeBytes", "[SizeBytes] > 0");
         });
 
         builder.HasKey(x => x.Id).HasName("PK_TaskAttachments").IsClustered();
@@ -23,7 +23,7 @@ public class TaskAttachmentConfiguration : IEntityTypeConfiguration<TaskAttachme
 
         builder.Property(x => x.ContentType).IsRequired().HasMaxLength(150);
 
-        builder.Property(x => x.FileHash).HasColumnType("char(64)");
+        builder.Property(x => x.FileHash).IsRequired().HasColumnType("char(64)");
 
         builder.Property(x => x.UploadedAtUtc).IsRequired().HasColumnType("datetime2(3)").HasDefaultValueSql("SYSUTCDATETIME()");
 
@@ -37,5 +37,8 @@ public class TaskAttachmentConfiguration : IEntityTypeConfiguration<TaskAttachme
 
         builder.HasIndex(x => x.TaskId).HasDatabaseName("IX_TaskAttachments_TaskId")
             .HasFilter("[DeletedAtUtc] IS NULL");
+
+        builder.HasIndex(x => new { x.TaskId, x.FileHash }).IsUnique()
+            .HasDatabaseName("UQ_TaskAttachments_TaskId_FileHash").HasFilter("[DeletedAtUtc] IS NULL");
     }
 }
