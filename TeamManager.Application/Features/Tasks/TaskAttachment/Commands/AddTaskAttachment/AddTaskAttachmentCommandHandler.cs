@@ -32,15 +32,28 @@ namespace TeamManager.Application.Features.Tasks.TaskAttachment.Commands.AddTask
             var extension = Path.GetExtension(request.FileName);
 
             var storageKey = $"{Guid.NewGuid()}{extension}";
+            var fileSaved = false;
 
-            await fileStorage.SaveAsync(request.Content, storageKey, cancellationToken);
+            try
+            {
+                await fileStorage.SaveAsync(request.Content, storageKey, cancellationToken);
 
-            var attachment = task.AddAttachment(request.FileName, storageKey, request.ContentType, request.SizeBytes,
-                currentUser.UserId.Value, fileHash);
+                fileSaved = true;
 
-            await unitOfWork.SaveChangesAsync(cancellationToken);
+                var attachment = task.AddAttachment(request.FileName, storageKey, request.ContentType, request.SizeBytes,
+                    currentUser.UserId.Value, fileHash);
 
-            return attachment.Id;
+                await unitOfWork.SaveChangesAsync(cancellationToken);
+
+                return attachment.Id;
+            }
+            catch
+            {
+                if (fileSaved)
+                    await fileStorage.DeleteAsync(storageKey, CancellationToken.None);
+
+                throw;
+            }
         }
     }
 }
