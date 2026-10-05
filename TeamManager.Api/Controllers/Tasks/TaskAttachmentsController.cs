@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using TeamManager.Application.Features.Tasks.TaskAttachment.Commands.AddTaskAttachment;
+using TeamManager.Application.Features.Tasks.TaskAttachment.Queries.DownloadTaskAttachment;
 using TeamManager.Application.Features.Tasks.TaskAttachment.Queries.GetTaskAttachments;
 
 namespace TeamManager.Api.Controllers.Tasks
@@ -32,6 +33,15 @@ namespace TeamManager.Api.Controllers.Tasks
                 , cancellationToken);
 
             return Ok(response);
+        }
+
+        [HttpGet("{taskId:long}/attachments/{attachmentId:long}/download")]
+        [Authorize]
+        public async Task<IActionResult> DownloadAttachment(long taskId, long attachmentId, CancellationToken cancellationToken)
+        {
+            var response = await sender.Send(new DownloadTaskAttachmentQuery(taskId, attachmentId), cancellationToken);
+
+            return File(response.Content, response.ContentType, response.FileName);
         }
     }
 }
