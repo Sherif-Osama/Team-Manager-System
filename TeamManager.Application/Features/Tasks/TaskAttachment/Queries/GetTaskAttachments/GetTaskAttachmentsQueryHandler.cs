@@ -15,6 +15,10 @@ namespace TeamManager.Application.Features.Tasks.TaskAttachment.Queries.GetTaskA
 
             var query = context.TaskAttachments.AsNoTracking().Where(x => x.TaskId == request.TaskId && x.DeletedAtUtc == null);
 
+            if (!string.IsNullOrWhiteSpace(request.Search))
+                query = query.Where(x => x.OriginalFileName.Contains(request.Search.Trim()));
+
+
             var totalCount = await query.CountAsync(cancellationToken);
 
             var attachments = await query.OrderByDescending(x => x.UploadedAtUtc).Skip((request.Page - 1) * request.PageSize)

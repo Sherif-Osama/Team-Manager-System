@@ -28,7 +28,8 @@ namespace TeamManager.Api.Controllers.Tasks
         public async Task<ActionResult<GetTaskAttachmentsResponse>> GetTaskAttachments(long taskId,
             [FromQuery] GetTaskAttachmentsRequest request, CancellationToken cancellationToken)
         {
-            var response = await sender.Send(new GetTaskAttachmentsQuery(taskId, request.Page, request.PageSize), cancellationToken);
+            var response = await sender.Send(new GetTaskAttachmentsQuery(taskId, request.Search, request.Page, request.PageSize)
+                , cancellationToken);
 
             return Ok(response);
         }
