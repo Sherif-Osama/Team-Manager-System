@@ -35,8 +35,8 @@ public class TaskAttachmentConfiguration : IEntityTypeConfiguration<TaskAttachme
         builder.HasOne(x => x.UploadedByUser).WithMany().HasForeignKey(x => x.UploadedBy)
             .HasConstraintName("FK_TaskAttachments_UploadedBy").OnDelete(DeleteBehavior.NoAction);
 
-        builder.HasIndex(x => x.TaskId).HasDatabaseName("IX_TaskAttachments_TaskId")
-            .HasFilter("[DeletedAtUtc] IS NULL");
+        builder.HasIndex(x => new { x.TaskId, x.UploadedAtUtc }).HasDatabaseName("IX_TaskAttachments_TaskId_UploadedAtUtc")
+           .HasFilter("[DeletedAtUtc] IS NULL");
 
         builder.HasIndex(x => new { x.TaskId, x.FileHash }).IsUnique()
             .HasDatabaseName("UQ_TaskAttachments_TaskId_FileHash").HasFilter("[DeletedAtUtc] IS NULL");
