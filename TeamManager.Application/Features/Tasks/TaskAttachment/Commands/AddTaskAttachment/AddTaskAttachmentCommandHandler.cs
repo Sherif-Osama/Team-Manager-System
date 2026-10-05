@@ -21,7 +21,7 @@ namespace TeamManager.Application.Features.Tasks.TaskAttachment.Commands.AddTask
                 throw new TaskNotFoundException(request.TaskId);
 
             var hashBytes = await SHA256.HashDataAsync(request.Content, cancellationToken);
-
+            request.Content.Position = 0; // Reset the stream position after hashing
             var fileHash = Convert.ToHexString(hashBytes);
 
             var exists = await taskRepository.AttachmentExistsByHashAsync(request.TaskId, fileHash, cancellationToken);
