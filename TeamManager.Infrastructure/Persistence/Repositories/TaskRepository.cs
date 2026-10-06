@@ -149,5 +149,11 @@ namespace TeamManager.Infrastructure.Persistence.Repositories
             return await context.TaskAttachments.AsNoTracking().AnyAsync(x => x.TaskId == taskId &&
             x.FileHash == fileHash && x.Task.DeletedAtUtc == null, cancellationToken);
         }
+
+        public async Task<TaskItem?> GetByIdWithAttachmentAsync(long taskId, long attachmentId, CancellationToken cancellationToken)
+        {
+            return await context.Tasks.Include(x => x.Attachments.Where(a => a.Id == attachmentId))
+                .FirstOrDefaultAsync(x => x.Id == taskId && x.DeletedAtUtc == null, cancellationToken);
+        }
     }
 }

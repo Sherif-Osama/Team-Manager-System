@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using TeamManager.Application.Features.Tasks.TaskAttachment.Commands.AddTaskAttachment;
+using TeamManager.Application.Features.Tasks.TaskAttachment.Commands.DeleteTaskAttachment;
 using TeamManager.Application.Features.Tasks.TaskAttachment.Queries.DownloadTaskAttachment;
 using TeamManager.Application.Features.Tasks.TaskAttachment.Queries.GetTaskAttachments;
 
@@ -42,6 +43,15 @@ namespace TeamManager.Api.Controllers.Tasks
             var response = await sender.Send(new DownloadTaskAttachmentQuery(taskId, attachmentId), cancellationToken);
 
             return File(response.Content, response.ContentType, response.FileName);
+        }
+
+        [HttpDelete("{taskId:long}/attachments/{attachmentId:long}")]
+        [Authorize]
+        public async Task<IActionResult> DeleteAttachment(long taskId, long attachmentId, CancellationToken cancellationToken)
+        {
+            await sender.Send(new DeleteTaskAttachmentCommand(taskId, attachmentId), cancellationToken);
+
+            return NoContent();
         }
     }
 }
