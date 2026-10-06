@@ -27,18 +27,15 @@ public class TaskAttachmentConfiguration : IEntityTypeConfiguration<TaskAttachme
 
         builder.Property(x => x.UploadedAtUtc).IsRequired().HasColumnType("datetime2(3)").HasDefaultValueSql("SYSUTCDATETIME()");
 
-        builder.Property(x => x.DeletedAtUtc).HasColumnType("datetime2(3)");
-
         builder.HasOne(x => x.Task).WithMany(x => x.Attachments).HasForeignKey(x => x.TaskId)
-            .HasConstraintName("FK_TaskAttachments_Tasks").OnDelete(DeleteBehavior.NoAction);
+            .HasConstraintName("FK_TaskAttachments_Tasks").OnDelete(DeleteBehavior.Cascade);
 
         builder.HasOne(x => x.UploadedByUser).WithMany().HasForeignKey(x => x.UploadedBy)
             .HasConstraintName("FK_TaskAttachments_UploadedBy").OnDelete(DeleteBehavior.NoAction);
 
-        builder.HasIndex(x => new { x.TaskId, x.UploadedAtUtc }).HasDatabaseName("IX_TaskAttachments_TaskId_UploadedAtUtc")
-           .HasFilter("[DeletedAtUtc] IS NULL");
+        builder.HasIndex(x => new { x.TaskId, x.UploadedAtUtc }).HasDatabaseName("IX_TaskAttachments_TaskId_UploadedAtUtc");
 
         builder.HasIndex(x => new { x.TaskId, x.FileHash }).IsUnique()
-            .HasDatabaseName("UQ_TaskAttachments_TaskId_FileHash").HasFilter("[DeletedAtUtc] IS NULL");
+            .HasDatabaseName("UQ_TaskAttachments_TaskId_FileHash");
     }
 }

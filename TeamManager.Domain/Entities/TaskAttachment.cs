@@ -15,8 +15,6 @@ public class TaskAttachment : Entity<long>
     public Guid UploadedBy { get; private set; }
     public User UploadedByUser { get; private set; } = null!;
     public DateTime UploadedAtUtc { get; private set; }
-    public DateTime? DeletedAtUtc { get; private set; }
-
     private TaskAttachment()
     {
     }
@@ -44,6 +42,4 @@ public class TaskAttachment : Entity<long>
         FileHash = fileHash;
         UploadedAtUtc = DateTime.UtcNow;
     }
-
-    public void SoftDelete() => DeletedAtUtc = DateTime.UtcNow;
 }

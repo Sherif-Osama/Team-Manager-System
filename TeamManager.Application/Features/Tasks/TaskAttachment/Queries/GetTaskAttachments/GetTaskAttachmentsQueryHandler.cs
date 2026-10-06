@@ -13,7 +13,7 @@ namespace TeamManager.Application.Features.Tasks.TaskAttachment.Queries.GetTaskA
             if (!currentUser.IsAuthenticated || !currentUser.UserId.HasValue)
                 throw new UnauthorizedAccessException("User is not authenticated.");
 
-            var query = context.TaskAttachments.AsNoTracking().Where(x => x.TaskId == request.TaskId && x.DeletedAtUtc == null);
+            var query = context.TaskAttachments.AsNoTracking().Where(x => x.TaskId == request.TaskId && x.Task.DeletedAtUtc == null);
 
             if (!string.IsNullOrWhiteSpace(request.Search))
                 query = query.Where(x => x.OriginalFileName.Contains(request.Search.Trim()));

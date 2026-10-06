@@ -147,7 +147,7 @@ namespace TeamManager.Infrastructure.Persistence.Repositories
         public async Task<bool> AttachmentExistsByHashAsync(long taskId, string fileHash, CancellationToken cancellationToken)
         {
             return await context.TaskAttachments.AsNoTracking().AnyAsync(x => x.TaskId == taskId &&
-            x.FileHash == fileHash && x.DeletedAtUtc == null, cancellationToken);
+            x.FileHash == fileHash && x.Task.DeletedAtUtc == null, cancellationToken);
         }
     }
 }

@@ -12,7 +12,7 @@ namespace TeamManager.Application.Features.Tasks.TaskAttachment.Queries.Download
         public async Task<DownloadTaskAttachmentResponse> Handle(DownloadTaskAttachmentQuery request, CancellationToken cancellationToken)
         {
             var attachment = await context.TaskAttachments.AsNoTracking().FirstOrDefaultAsync(x => x.Id == request.AttachmentId
-            && x.TaskId == request.TaskId && x.DeletedAtUtc == null, cancellationToken);
+            && x.TaskId == request.TaskId && x.Task.DeletedAtUtc == null, cancellationToken);
 
             if (attachment is null)
                 throw new TaskAttachmentNotFoundException(request.TaskId, request.AttachmentId);
