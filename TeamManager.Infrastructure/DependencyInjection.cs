@@ -43,6 +43,7 @@ namespace TeamManager.Infrastructure
             services.AddHostedService<ProcessOutboxMessagesJob>();
             services.AddScoped<OutboxProcessorService>();
             services.AddScoped<IEmailConfirmationTokenService, EmailConfirmationTokenService>();
+            services.AddScoped<INotificationRepository, NotificationRepository>();
             services.AddScoped<IOutboxMessageHandler, InvitationEmailOutboxMessageHandler>();
             services.AddScoped<IOutboxMessageHandler, EmailConfirmationOutboxMessageHandler>();
             services.AddScoped<IOutboxMessageHandler, PasswordChangedNotificationOutboxMessageHandler>();

@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Data;
 using TeamManager.Application.Common.Exceptions.AuthorizationExceptions;
+using TeamManager.Application.Common.Exceptions.NotificationExceptions;
 using TeamManager.Application.Common.Exceptions.ProjectExceptions;
 using TeamManager.Application.Common.Exceptions.TaskExceptions;
 using TeamManager.Application.Common.Exceptions.TeamExceptions;
@@ -79,6 +80,7 @@ namespace TeamManager.Api.Middleware
                 FileNotFoundException => StatusCodes.Status404NotFound,
                 TaskAttachmentAlreadyExistsException => StatusCodes.Status409Conflict,
                 TaskAttachmentNotFoundException => StatusCodes.Status404NotFound,
+                NotificationNotFoundException => StatusCodes.Status404NotFound,
                 _ => StatusCodes.Status500InternalServerError
             };
 
