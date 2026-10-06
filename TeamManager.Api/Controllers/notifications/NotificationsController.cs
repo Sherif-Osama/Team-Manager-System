@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using TeamManager.Application.Features.Notifications.Queries.GetMyNotifications;
+using TeamManager.Application.Features.Notifications.Queries.GetUnreadCount;
 
 namespace TeamManager.Api.Controllers.notifications
 {
@@ -17,6 +18,14 @@ namespace TeamManager.Api.Controllers.notifications
             var response = await sender.Send(query, cancellationToken);
 
             return Ok(response);
+        }
+
+        [HttpGet("unread-count")]
+        public async Task<ActionResult<int>> GetUnreadCount(CancellationToken cancellationToken)
+        {
+            var count = await sender.Send(new GetUnreadCountQuery(), cancellationToken);
+
+            return Ok(count);
         }
     }
 }
