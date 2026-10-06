@@ -5,5 +5,6 @@ namespace TeamManager.Application.Abstractions.Persistence
     public interface INotificationRepository
     {
         Task<Notification?> GetByIdAsync(long notificationId, CancellationToken cancellationToken);
+        Task<IReadOnlyCollection<Notification>> GetUnreadByRecipientIdAsync(Guid recipientUserId, CancellationToken cancellationToken);
     }
 }

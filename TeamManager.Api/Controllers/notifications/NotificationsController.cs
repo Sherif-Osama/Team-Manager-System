@@ -1,11 +1,12 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using TeamManager.Application.Features.Notifications.Commands.MarkAllAsRead;
 using TeamManager.Application.Features.Notifications.Commands.MarkAsRead;
 using TeamManager.Application.Features.Notifications.Queries.GetMyNotifications;
 using TeamManager.Application.Features.Notifications.Queries.GetUnreadCount;
 
-namespace TeamManager.Api.Controllers.notifications
+namespace TeamManager.Api.Controllers.Notifications
 {
     [Route("api/[controller]")]
     [ApiController]
@@ -34,6 +35,15 @@ namespace TeamManager.Api.Controllers.notifications
         public async Task<IActionResult> MarkAsRead(long notificationId, CancellationToken cancellationToken)
         {
             await sender.Send(new MarkAsReadCommand(notificationId), cancellationToken);
+
+            return NoContent();
+        }
+
+        [HttpPut("read-all")]
+        [Authorize]
+        public async Task<IActionResult> MarkAllAsRead(CancellationToken cancellationToken)
+        {
+            await sender.Send(new MarkAllAsReadCommand(), cancellationToken);
 
             return NoContent();
         }
