@@ -16,5 +16,16 @@ namespace TeamManager.Infrastructure.Persistence.Repositories
             return await context.Notifications.Where(x => x.RecipientUserId == recipientUserId && !x.IsRead)
                 .ToListAsync(cancellationToken);
         }
+
+        public async Task<IReadOnlyCollection<NotificationPreference>> GetPreferencesByUserIdAsync(Guid userId,
+            CancellationToken cancellationToken)
+        {
+            return await context.NotificationPreferences.Where(x => x.UserId == userId).ToListAsync(cancellationToken);
+        }
+
+        public async Task AddPreferenceAsync(NotificationPreference preference, CancellationToken cancellationToken)
+        {
+            await context.NotificationPreferences.AddAsync(preference, cancellationToken);
+        }
     }
 }
