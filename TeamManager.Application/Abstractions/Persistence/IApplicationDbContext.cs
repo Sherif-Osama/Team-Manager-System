@@ -18,6 +18,6 @@ namespace TeamManager.Application.Abstractions.Persistence
         DbSet<TaskChecklistItem> TaskChecklistItems { get; }
         DbSet<Label> Labels { get; }
         DbSet<TaskAttachment> TaskAttachments { get; }
-
+        DbSet<Notification> Notifications { get; }
     }
 }

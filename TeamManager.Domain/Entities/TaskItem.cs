@@ -4,7 +4,7 @@ using TeamManager.Domain.Exceptions;
 namespace TeamManager.Domain.Entities
 {
 
-    public class TaskItem : Entity<long>
+    public class TaskItem : AggregateRoot<long>
     {
         private readonly List<TaskDependency> _dependencies = new();
         private readonly List<TaskLabel> _labels = new();
