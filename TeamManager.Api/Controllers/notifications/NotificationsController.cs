@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using TeamManager.Application.Features.Notifications.Commands.MarkAllAsRead;
 using TeamManager.Application.Features.Notifications.Commands.MarkAsRead;
+using TeamManager.Application.Features.Notifications.Queries.GetMyNotificationPreferences;
 using TeamManager.Application.Features.Notifications.Queries.GetMyNotifications;
 using TeamManager.Application.Features.Notifications.Queries.GetUnreadCount;
 
@@ -46,6 +47,16 @@ namespace TeamManager.Api.Controllers.Notifications
             await sender.Send(new MarkAllAsReadCommand(), cancellationToken);
 
             return NoContent();
+        }
+
+        [HttpGet("preferences")]
+        [Authorize]
+        public async Task<ActionResult<GetMyNotificationPreferencesResponse>> GetMyNotificationPreferences(
+            CancellationToken cancellationToken)
+        {
+            var response = await sender.Send(new GetMyNotificationPreferencesQuery(), cancellationToken);
+
+            return Ok(response);
         }
     }
 }

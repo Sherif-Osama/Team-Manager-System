@@ -19,5 +19,6 @@ namespace TeamManager.Application.Abstractions.Persistence
         DbSet<Label> Labels { get; }
         DbSet<TaskAttachment> TaskAttachments { get; }
         DbSet<Notification> Notifications { get; }
+        DbSet<NotificationPreference> NotificationPreferences { get; }
     }
 }
