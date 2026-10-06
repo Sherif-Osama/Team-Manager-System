@@ -32,7 +32,7 @@ public class TaskAttachment : Entity<long>
             throw new DomainException("An attachment must have a content type.");
         if (sizeBytes <= 0)
             throw new DomainException("An attachment's size must be greater than zero.");
-        if (!string.IsNullOrWhiteSpace(FileHash))
+        if (string.IsNullOrWhiteSpace(fileHash))
             throw new DomainException("An attachment must have a file hash.");
 
         TaskId = taskId;
