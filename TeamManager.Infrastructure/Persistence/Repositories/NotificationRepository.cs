@@ -6,6 +6,11 @@ namespace TeamManager.Infrastructure.Persistence.Repositories
 {
     public sealed class NotificationRepository(TeamManagerDbContext context) : INotificationRepository
     {
+        public async Task AddNotificationAsync(Notification notification, CancellationToken cancellationToken)
+        {
+            await context.Notifications.AddAsync(notification, cancellationToken);
+        }
+
         public async Task<Notification?> GetByIdAsync(long notificationId, CancellationToken cancellationToken)
         {
             return await context.Notifications.FindAsync(notificationId, cancellationToken);

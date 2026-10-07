@@ -1,4 +1,5 @@
 using TeamManager.Domain.Common;
+using TeamManager.Domain.Common.Events;
 using TeamManager.Domain.Enums;
 using TeamManager.Domain.Exceptions;
 namespace TeamManager.Domain.Entities
@@ -86,6 +87,7 @@ namespace TeamManager.Domain.Entities
                 throw new DomainException("Task already assigned to this user");
 
             AssigneeUserId = userId;
+            AddDomainEvent(new TaskAssignedDomainEvent(Id, userId));
             Touch();
         }
 

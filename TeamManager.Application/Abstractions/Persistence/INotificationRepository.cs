@@ -8,5 +8,6 @@ namespace TeamManager.Application.Abstractions.Persistence
         Task<IReadOnlyCollection<Notification>> GetUnreadByRecipientIdAsync(Guid recipientUserId, CancellationToken cancellationToken);
         Task<IReadOnlyCollection<NotificationPreference>> GetPreferencesByUserIdAsync(Guid userId, CancellationToken cancellationToken);
         Task AddPreferenceAsync(NotificationPreference preference, CancellationToken cancellationToken);
+        Task AddNotificationAsync(Notification notification, CancellationToken cancellationToken);
     }
 }
