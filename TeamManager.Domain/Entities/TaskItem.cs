@@ -327,6 +327,11 @@ namespace TeamManager.Domain.Entities
             }
 
             _comments.Add(comment);
+
+            if (AssigneeUserId is not null && authorUserId != AssigneeUserId)
+                AddDomainEvent(new CommentAddedDomainEvent(comment, AssigneeUserId.Value, authorUserId));
+
+
             Touch();
             return comment;
         }
