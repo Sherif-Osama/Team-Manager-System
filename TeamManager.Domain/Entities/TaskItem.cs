@@ -318,8 +318,13 @@ namespace TeamManager.Domain.Entities
             var comment = new TaskComment(Id, authorUserId, content);
 
             if (mentionedUserIds is not null)
+            {
                 foreach (var userId in mentionedUserIds.Distinct())
+                {
                     comment.Mention(userId);
+                    AddDomainEvent(new CommentMentionedDomainEvent(comment, authorUserId, userId));
+                }
+            }
 
             _comments.Add(comment);
             Touch();
