@@ -1037,8 +1037,10 @@ namespace TeamManager.Infrastructure.Migrations
             modelBuilder.Entity("TeamManager.Domain.Entities.TeamInvitation", b =>
                 {
                     b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier")
-                        .HasColumnName("TeamInvitationId");
+                        .HasColumnName("TeamInvitationId")
+                        .HasDefaultValueSql("NEWSEQUENTIALID()");
 
                     b.Property<DateTime?>("AcceptedAtUtc")
                         .HasColumnType("datetime2(3)");

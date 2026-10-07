@@ -22,7 +22,7 @@ namespace TeamManager.Application.Common.Events.EventHandlers
 
             var newNotification = new Notification(domainEvent.InvitedUserId, NotificationType.TeamInvitation,
                 "New Team Invitation", "You have received a new team invitation.",
-                "TeamInvitation", domainEvent.InvitationId.ToString());
+                "TeamInvitation", domainEvent.Invitation.Id.ToString());
 
             await notificationRepository.AddNotificationAsync(newNotification, cancellationToken);
         }

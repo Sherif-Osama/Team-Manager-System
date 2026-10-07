@@ -24,7 +24,7 @@ public class TeamInvitation : Entity<Guid>
 
     private TeamInvitation() { }
 
-    internal TeamInvitation(Guid id, Guid teamId, string invitedEmail, Guid? invitedUserId, Guid invitedBy, TeamRole teamRole,
+    internal TeamInvitation(Guid teamId, string invitedEmail, Guid? invitedUserId, Guid invitedBy, TeamRole teamRole,
         string tokenHash, DateTime expiresAtUtc)
     {
         if (string.IsNullOrWhiteSpace(invitedEmail))
@@ -36,7 +36,6 @@ public class TeamInvitation : Entity<Guid>
         if (teamRole == TeamRole.Owner)
             throw new DomainException("A team invitation cannot assign the owner role.");
 
-        Id = id;
         TeamId = teamId;
         InvitedEmail = invitedEmail;
         InvitedUserId = invitedUserId;
