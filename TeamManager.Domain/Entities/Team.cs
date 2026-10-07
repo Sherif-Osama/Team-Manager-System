@@ -249,9 +249,12 @@ namespace TeamManager.Domain.Entities
             && i.Status == TeamInvitationStatus.Pending))
                 throw new DomainException("There is already a pending invitation for this email in the team.");
 
-            var invitation = new TeamInvitation(Id, invitedEmail, invitedUserId, invitedBy, role, tokenHash, expiresAtUtc);
+            var invitation = new TeamInvitation(Guid.NewGuid(), Id, invitedEmail, invitedUserId, invitedBy, role, tokenHash, expiresAtUtc);
 
             _invitations.Add(invitation);
+
+            if (invitedUserId.HasValue && invitedUserId != Guid.Empty)
+                AddDomainEvent(new TeamInvitationCreatedDomainEvent(invitation.Id, Id, invitedUserId.Value));
 
             return invitation;
         }
