@@ -7,6 +7,6 @@ namespace TeamManager.Application.Features.Tasks.TaskAttachment.Commands.AddTask
     public sealed record AddTaskAttachmentCommand(long TaskId, string FileName, string ContentType, long SizeBytes, Stream Content)
         : IRequest<long>, ITaskScopedRequest
     {
-        public ProjectRole[] RequiredProjectRoles => [ProjectRole.Owner, ProjectRole.Member];
+        public ProjectRole[] RequiredProjectRoles => [ProjectRole.Owner, ProjectRole.Member, ProjectRole.Admin];
     }
 }

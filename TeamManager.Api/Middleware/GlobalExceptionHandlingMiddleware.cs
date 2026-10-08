@@ -81,6 +81,7 @@ namespace TeamManager.Api.Middleware
                 TaskAttachmentAlreadyExistsException => StatusCodes.Status409Conflict,
                 TaskAttachmentNotFoundException => StatusCodes.Status404NotFound,
                 NotificationNotFoundException => StatusCodes.Status404NotFound,
+                CommentNotFoundException => StatusCodes.Status404NotFound,
                 _ => StatusCodes.Status500InternalServerError
             };
 

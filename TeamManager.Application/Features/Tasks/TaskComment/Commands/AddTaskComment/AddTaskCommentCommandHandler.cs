@@ -1,12 +1,13 @@
 ﻿using MediatR;
 using TeamManager.Application.Abstractions.Authentication;
 using TeamManager.Application.Abstractions.Persistence;
+using TeamManager.Application.Common.Exceptions.ProjectExceptions;
 using TeamManager.Application.Common.Exceptions.TaskExceptions;
 
 namespace TeamManager.Application.Features.Tasks.TaskComment.Commands.AddTaskComment
 {
-    public sealed class AddTaskCommentCommandHandler(ITaskRepository taskRepository, ICurrentUser currentUser,
-        IUnitOfWork unitOfWork) : IRequestHandler<AddTaskCommentCommand, long>
+    public sealed class AddTaskCommentCommandHandler(ITaskRepository taskRepository, ICurrentUser currentUser, IUnitOfWork unitOfWork,
+        IProjectRepository projectRepository) : IRequestHandler<AddTaskCommentCommand, long>
     {
         public async Task<long> Handle(AddTaskCommentCommand request, CancellationToken cancellationToken)
         {
@@ -17,6 +18,19 @@ namespace TeamManager.Application.Features.Tasks.TaskComment.Commands.AddTaskCom
 
             if (task is null)
                 throw new TaskNotFoundException(request.TaskId);
+
+            var mentionedUserIds = request.MentionedUserIds?.Distinct().Where(id => id != currentUser.UserId.Value).ToArray();
+
+            if (mentionedUserIds is not null)
+            {
+                foreach (var userId in mentionedUserIds)
+                {
+                    var isActiveMember = await projectRepository.IsActiveMemberAsync(task.ProjectId, userId, cancellationToken);
+
+                    if (!isActiveMember)
+                        throw new UserNotMemberOfProjectException(userId, task.ProjectId);
+                }
+            }
 
             var comment = task.AddComment(currentUser.UserId.Value, request.Content, request.MentionedUserIds);
 

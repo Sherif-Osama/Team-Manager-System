@@ -1,4 +1,5 @@
 ﻿using MediatR;
+using TeamManager.Application.Abstractions.Authentication;
 using TeamManager.Application.Abstractions.Persistence;
 using TeamManager.Application.Common.Exceptions.ProjectExceptions;
 using TeamManager.Application.Common.Exceptions.TaskExceptions;
@@ -6,10 +7,13 @@ using TeamManager.Application.Common.Exceptions.TaskExceptions;
 namespace TeamManager.Application.Features.Tasks.TaskItem.Commands.AssignTask
 {
     public sealed class AssignTaskCommandHandler(ITaskRepository taskRepository, IProjectRepository projectRepository,
-        IUnitOfWork unitOfWork) : IRequestHandler<AssignTaskCommand>
+        ICurrentUser currentUser, IUnitOfWork unitOfWork) : IRequestHandler<AssignTaskCommand>
     {
         public async Task Handle(AssignTaskCommand request, CancellationToken cancellationToken)
         {
+            if (!currentUser.IsAuthenticated || !currentUser.UserId.HasValue)
+                throw new UnauthorizedAccessException("User is not authenticated.");
+
             await unitOfWork.ExecuteInSerializableTransactionAsync(async ct =>
             {
                 var task = await taskRepository.GetByIdAsync(request.TaskId, ct);
@@ -22,7 +26,7 @@ namespace TeamManager.Application.Features.Tasks.TaskItem.Commands.AssignTask
                 if (!isActiveMember)
                     throw new UserNotMemberOfProjectException(request.UserId, task.ProjectId);
 
-                task.Assign(request.UserId);
+                task.Assign(request.UserId, currentUser.UserId.Value);
 
             }, cancellationToken);
         }

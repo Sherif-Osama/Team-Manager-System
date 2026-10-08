@@ -47,20 +47,25 @@ public class TaskComment : Entity<long>
         if (mentionedUserId == Guid.Empty)
             throw new DomainException("Mentioned user ID cannot be empty.");
 
-        if (_mentions.Any(m => m.MentionedUserId == mentionedUserId))
+        if (_mentions.Any(x => x.MentionedUserId == mentionedUserId))
             return;
 
         _mentions.Add(new CommentMention(Id, mentionedUserId));
     }
 
-    public void UpdateMentions(IReadOnlyCollection<Guid> mentionedUserIds)
+    public IReadOnlyCollection<Guid> UpdateMentions(IReadOnlyCollection<Guid> mentionedUserIds)
     {
+        var requestedMentionIds = mentionedUserIds.Distinct().ToHashSet();
 
-        var newMentionIds = mentionedUserIds.Distinct().ToHashSet();
+        var existingMentionIds = _mentions.Select(x => x.MentionedUserId).ToHashSet();
 
-        _mentions.RemoveAll(m => !newMentionIds.Contains(m.MentionedUserId));
+        var addedMentionIds = requestedMentionIds.Except(existingMentionIds).ToList();
 
-        foreach (var userId in newMentionIds)
+        _mentions.RemoveAll(x => !requestedMentionIds.Contains(x.MentionedUserId));
+
+        foreach (var userId in addedMentionIds)
             Mention(userId);
+
+        return addedMentionIds;
     }
 };

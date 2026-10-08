@@ -18,10 +18,9 @@ namespace TeamManager.Application.Features.Projects.ProjectMembers.Commands.Remo
             if (project is null)
                 throw new ProjectNotFoundException(request.ProjectId);
 
-            await unitOfWork.ExecuteInTransactionAsync(async ct =>
-            {
-                project.RemoveMember(request.MemberId, currentUser.UserId.Value);
-            }, cancellationToken);
+            project.RemoveMember(request.MemberId, currentUser.UserId.Value);
+
+            await unitOfWork.SaveChangesAsync(cancellationToken);
         }
     }
 }

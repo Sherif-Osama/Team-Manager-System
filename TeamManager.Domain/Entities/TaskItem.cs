@@ -47,7 +47,6 @@ namespace TeamManager.Domain.Entities
 
             ProjectId = projectId;
             Title = title;
-            AssigneeUserId = userId;
             Description = description;
             CreatedBy = createdBy;
             Status = TaskItemStatus.Todo;
@@ -56,6 +55,9 @@ namespace TeamManager.Domain.Entities
 
             if (startDate.HasValue || dueDate.HasValue)
                 Reschedule(startDate, dueDate, projectStartDate, projectDueDate);
+
+            if (userId.HasValue && userId.Value != Guid.Empty)
+                Assign(userId.Value, createdBy);
         }
 
         public void Rename(string title)
@@ -77,7 +79,7 @@ namespace TeamManager.Domain.Entities
             Touch();
         }
 
-        public void Assign(Guid userId)
+        public void Assign(Guid userId, Guid ActorUserId)
         {
             EnsureNotDeleted("cannot assigned deleted task");
 
@@ -87,7 +89,10 @@ namespace TeamManager.Domain.Entities
                 throw new DomainException("Task already assigned to this user");
 
             AssigneeUserId = userId;
-            AddDomainEvent(new TaskAssignedDomainEvent(Id, userId));
+
+            if (ActorUserId != userId)
+                AddDomainEvent(new TaskAssignedDomainEvent(this, userId));
+
             Touch();
         }
 
@@ -321,9 +326,12 @@ namespace TeamManager.Domain.Entities
 
             if (mentionedUserIds is not null)
             {
-                foreach (var userId in mentionedUserIds.Distinct())
+                var mentionedUserIdsList = mentionedUserIds.Distinct().Where(id => id != authorUserId);
+
+                foreach (var userId in mentionedUserIdsList)
                 {
                     comment.Mention(userId);
+
                     AddDomainEvent(new CommentMentionedDomainEvent(comment, authorUserId, userId));
                 }
             }
@@ -332,7 +340,6 @@ namespace TeamManager.Domain.Entities
 
             if (AssigneeUserId is not null && authorUserId != AssigneeUserId)
                 AddDomainEvent(new CommentAddedDomainEvent(comment, AssigneeUserId.Value, authorUserId));
-
 
             Touch();
             return comment;
@@ -349,7 +356,15 @@ namespace TeamManager.Domain.Entities
                 throw new DomainException("Comment not found.");
 
             if (mentionedUserIds is not null)
-                comment.UpdateMentions(mentionedUserIds);
+            {
+                var requestedMentionIds = mentionedUserIds.Distinct().Where(id => id != comment.AuthorUserId).ToList();
+
+                var addedMentionIds = comment.UpdateMentions(requestedMentionIds);
+
+                foreach (var userId in addedMentionIds)
+                    AddDomainEvent(new CommentMentionedDomainEvent(comment, comment.AuthorUserId, userId));
+
+            }
 
             comment.Edit(content);
 

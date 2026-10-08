@@ -22,7 +22,7 @@ namespace TeamManager.Application.Common.Events.EventHandlers
 
             var newNotification = new Notification(domainEvent.AssignedUserId,
                 NotificationType.TaskAssigned, "Task Assigned", "You have been assigned to a task.",
-                "Task", domainEvent.TaskId.ToString());
+                "Task", domainEvent.Task.Id.ToString());
 
             await notificationRepository.AddNotificationAsync(newNotification, cancellationToken);
         }

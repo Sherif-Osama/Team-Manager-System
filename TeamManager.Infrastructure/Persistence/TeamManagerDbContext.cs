@@ -84,21 +84,51 @@ namespace TeamManager.Infrastructure.Persistence
             }
         }
 
-        public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+        public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken)
         {
+            if (Database.CurrentTransaction is not null)
+                return await SaveChangesCoreAsync(cancellationToken);
 
+            var hasDomainEvents = ChangeTracker.Entries<IHasDomainEvents>().Select(e => e.Entity).Any(e => e.DomainEvents.Count > 0);
+
+            if (!hasDomainEvents)
+                return await base.SaveChangesAsync(cancellationToken);
+
+            await using var transaction = await Database.BeginTransactionAsync(cancellationToken);
+
+            try
+            {
+                var result = await SaveChangesCoreAsync(cancellationToken);
+
+                await transaction.CommitAsync(cancellationToken);
+
+                return result;
+            }
+            catch
+            {
+                await transaction.RollbackAsync(cancellationToken);
+
+                throw;
+            }
+        }
+
+        private async Task<int> SaveChangesCoreAsync(CancellationToken cancellationToken)
+        {
             var result = await base.SaveChangesAsync(cancellationToken);
 
-            var aggregatesWithEvents = ChangeTracker.Entries<IHasDomainEvents>()
-                .Select(e => e.Entity).Where(e => e.DomainEvents.Count > 0).ToList();
+            var aggregatesWithEvents = ChangeTracker.Entries<IHasDomainEvents>().Select(e => e.Entity)
+                .Where(e => e.DomainEvents.Count > 0).ToList();
 
             var events = aggregatesWithEvents.SelectMany(e => e.DomainEvents).ToList();
+
             aggregatesWithEvents.ForEach(e => e.ClearDomainEvents());
 
             foreach (var domainEvent in events)
             {
                 var wrapperType = typeof(DomainEventNotification<>).MakeGenericType(domainEvent.GetType());
+
                 var notification = (INotification)Activator.CreateInstance(wrapperType, domainEvent)!;
+
                 await publisher.Publish(notification, cancellationToken);
             }
 

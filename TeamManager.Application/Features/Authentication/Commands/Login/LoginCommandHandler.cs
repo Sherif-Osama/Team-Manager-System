@@ -36,15 +36,14 @@ public sealed class LoginCommandHandler(IUserRepository userRepository, IPasswor
         var refreshTokenHash = refreshTokenService.HashToken(refreshToken);
 
 
-        await unitOfWork.ExecuteInTransactionAsync(async ct =>
-        {
-            user.RecordSuccessfulLogin();
+        user.RecordSuccessfulLogin();
 
-            var refreshTokenEntity = new Domain.Entities.RefreshToken(Guid.NewGuid(), user.Id, refreshTokenHash,
-                refreshTokenService.GetExpiration(), currentUser.DeviceInfo, currentUser.IpAddress);
+        var refreshTokenEntity = new Domain.Entities.RefreshToken(Guid.NewGuid(), user.Id, refreshTokenHash,
+            refreshTokenService.GetExpiration(), currentUser.DeviceInfo, currentUser.IpAddress);
 
-            await userRepository.AddRefreshTokenAsync(refreshTokenEntity, ct);
-        }, cancellationToken);
+        await userRepository.AddRefreshTokenAsync(refreshTokenEntity, cancellationToken);
+
+        await unitOfWork.SaveChangesAsync(cancellationToken);
 
         return new LoginResponse(accessToken, refreshToken);
     }

@@ -17,10 +17,10 @@ namespace TeamManager.Application.Features.Teams.TeamMembers.Commands.RemoveMemb
             if (team is null)
                 throw new TeamNotFoundException(request.TeamId);
 
-            await unitOfWork.ExecuteInTransactionAsync(async ct =>
-            {
-                team.RemoveMember(request.MemberId, currentUser.UserId!.Value);
-            }, cancellationToken);
+
+            team.RemoveMember(request.MemberId, currentUser.UserId!.Value);
+
+            await unitOfWork.SaveChangesAsync(cancellationToken);
         }
     }
 }

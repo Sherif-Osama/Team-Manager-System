@@ -13,7 +13,7 @@ namespace TeamManager.Infrastructure.Persistence.Repositories
 
         public async Task<Notification?> GetByIdAsync(long notificationId, CancellationToken cancellationToken)
         {
-            return await context.Notifications.FindAsync(notificationId, cancellationToken);
+            return await context.Notifications.FindAsync([notificationId], cancellationToken);
         }
 
         public async Task<IReadOnlyCollection<Notification>> GetUnreadByRecipientIdAsync(Guid recipientUserId, CancellationToken cancellationToken)

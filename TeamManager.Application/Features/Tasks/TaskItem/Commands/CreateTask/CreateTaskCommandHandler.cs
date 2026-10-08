@@ -15,6 +15,7 @@ namespace TeamManager.Application.Features.Tasks.TaskItem.Commands.CreateTask
                 throw new UnauthorizedAccessException("User is not authenticated.");
 
             Domain.Entities.TaskItem? task = null;
+
             await unitOfWork.ExecuteInSerializableTransactionAsync(async ct =>
             {
                 var project = await projectRepository.GetByIdAsync(request.ProjectId, ct);
