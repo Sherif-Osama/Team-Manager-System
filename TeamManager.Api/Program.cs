@@ -1,8 +1,10 @@
 using TeamManager.Api.Authentication;
 using TeamManager.Api.Extensions;
+using TeamManager.Api.Hubs;
 using TeamManager.Api.Middleware;
 using TeamManager.Application;
 using TeamManager.Application.Abstractions.Authentication;
+using TeamManager.Application.Abstractions.Realtime;
 using TeamManager.Infrastructure;
 
 namespace TeamManager.Api
@@ -19,7 +21,8 @@ namespace TeamManager.Api
             builder.Services.AddHttpContextAccessor();
 
             builder.Services.AddScoped<ICurrentUser, CurrentUser>();
-
+            builder.Services.AddSignalR();
+            builder.Services.AddScoped<IRealtimeNotifier, SignalRRealtimeNotifier>();
             builder.Services.AddControllers();
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
@@ -37,6 +40,7 @@ namespace TeamManager.Api
             app.UseAuthentication();
             app.UseAuthorization();
             app.MapControllers();
+            app.MapHub<NotificationsHub>("/hubs/notifications");
             app.Run();
         }
     }
