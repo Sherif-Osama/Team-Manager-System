@@ -2,5 +2,5 @@
 
 namespace TeamManager.Domain.Common.Events
 {
-    public sealed record TaskAssignedDomainEvent(TaskItem Task, Guid AssignedUserId) : IDomainEvent;
+    public sealed record TaskAssignedDomainEvent(TaskItem Task, Guid AssignedUserId, Guid ActorUserId) : IDomainEvent;
 }

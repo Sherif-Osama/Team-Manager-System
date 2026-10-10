@@ -13,6 +13,9 @@ namespace TeamManager.Application.Common.Events.EventHandlers
         {
             var domainEvent = notification.DomainEvent;
 
+            if (domainEvent.ActorUserId == domainEvent.AssignedUserId)
+                return;
+
             var preferences = await notificationRepository.GetPreferencesByUserIdAsync(domainEvent.AssignedUserId, cancellationToken);
 
             var preference = preferences.FirstOrDefault(x => x.NotificationType == NotificationType.TaskAssigned);

@@ -7,20 +7,23 @@ using TeamManager.Domain.Enums;
 namespace TeamManager.Application.Common.Events.EventHandlers
 {
     public sealed class CreateNotificationOnTaskCompletedHandler(INotificationRepository notificationRepository)
-        : INotificationHandler<DomainEventNotification<TaskCompletedDomainEvent>>
+        : INotificationHandler<DomainEventNotification<TaskStatusChangedDomainEvent>>
     {
-        public async Task Handle(DomainEventNotification<TaskCompletedDomainEvent> notification, CancellationToken cancellationToken)
+        public async Task Handle(DomainEventNotification<TaskStatusChangedDomainEvent> notification, CancellationToken cancellationToken)
         {
             var domainEvent = notification.DomainEvent;
 
-            var preferences = await notificationRepository.GetPreferencesByUserIdAsync(domainEvent.AssigneeUserId, cancellationToken);
+            if (domainEvent.ToStatus != TaskItemStatus.Done || domainEvent.AssigneeUserId == null)
+                return;
+
+            var preferences = await notificationRepository.GetPreferencesByUserIdAsync(domainEvent.AssigneeUserId.Value, cancellationToken);
 
             var preference = preferences.FirstOrDefault(x => x.NotificationType == NotificationType.TaskCompleted);
 
             if (preference is not null && !preference.IsEnabled)
                 return;
 
-            var newNotification = new Notification(domainEvent.AssigneeUserId, NotificationType.TaskCompleted, "Task Completed",
+            var newNotification = new Notification(domainEvent.AssigneeUserId.Value, NotificationType.TaskCompleted, "Task Completed",
                 "A task assigned to you has been completed.", "Task", domainEvent.TaskId.ToString());
 
             await notificationRepository.AddNotificationAsync(newNotification, cancellationToken);

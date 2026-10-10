@@ -45,7 +45,7 @@ namespace TeamManager.Application.Features.Tasks.TaskItem.Commands.ChangeTaskSta
                         throw new TaskHasIncompleteDependenciesException(task.Id, incomplete);
                 }
 
-                task.ChangeStatus(request.Status);
+                task.ChangeStatus(request.Status, userId);
             }, cancellationToken);
         }
 

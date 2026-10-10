@@ -90,8 +90,7 @@ namespace TeamManager.Domain.Entities
 
             AssigneeUserId = userId;
 
-            if (ActorUserId != userId)
-                AddDomainEvent(new TaskAssignedDomainEvent(this, userId));
+            AddDomainEvent(new TaskAssignedDomainEvent(this, AssigneeUserId.Value, ActorUserId));
 
             Touch();
         }
@@ -120,7 +119,7 @@ namespace TeamManager.Domain.Entities
             Touch();
         }
 
-        public void ChangeStatus(TaskItemStatus status)
+        public void ChangeStatus(TaskItemStatus status, Guid actorUserId)
         {
             EnsureNotDeleted("cannot modify deleted task");
 
@@ -134,11 +133,12 @@ namespace TeamManager.Domain.Entities
                 throw new DomainException("Task cannot be completed while checklist items are incomplete.");
 
 
+            var fromStatus = Status;
+
             Status = status;
             CompletedAtUtc = status == TaskItemStatus.Done ? DateTime.UtcNow : null;
 
-            if (status == TaskItemStatus.Done && AssigneeUserId.HasValue)
-                AddDomainEvent(new TaskCompletedDomainEvent(Id, AssigneeUserId.Value));
+            AddDomainEvent(new TaskStatusChangedDomainEvent(Id, AssigneeUserId, fromStatus, status, actorUserId));
 
             Touch();
         }
@@ -338,8 +338,7 @@ namespace TeamManager.Domain.Entities
 
             _comments.Add(comment);
 
-            if (AssigneeUserId is not null && authorUserId != AssigneeUserId)
-                AddDomainEvent(new CommentAddedDomainEvent(comment, AssigneeUserId.Value, authorUserId));
+            AddDomainEvent(new CommentAddedDomainEvent(comment, AssigneeUserId, authorUserId));
 
             Touch();
             return comment;
