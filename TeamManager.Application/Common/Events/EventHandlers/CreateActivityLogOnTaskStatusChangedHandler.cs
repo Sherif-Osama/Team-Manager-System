@@ -2,6 +2,7 @@
 using System.Text.Json;
 using TeamManager.Application.Abstractions.Persistence;
 using TeamManager.Application.Common.ActivityLog;
+using TeamManager.Application.Common.Exceptions.ProjectExceptions;
 using TeamManager.Domain.Common.Events;
 
 namespace TeamManager.Application.Common.Events.EventHandlers
@@ -17,7 +18,7 @@ namespace TeamManager.Application.Common.Events.EventHandlers
             var project = await projectRepository.GetByIdAsync(task.ProjectId, cancellationToken);
 
             if (project is null)
-                throw new InvalidOperationException($"Project {task.ProjectId} was not found while creating the activity log.");
+                throw new ProjectNotFoundException(task.ProjectId);
 
             var metadata = JsonSerializer.Serialize(new
             {

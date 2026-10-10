@@ -56,6 +56,8 @@ namespace TeamManager.Domain.Entities
             if (startDate.HasValue || dueDate.HasValue)
                 Reschedule(startDate, dueDate, projectStartDate, projectDueDate);
 
+            AddDomainEvent(new TaskCreatedDomainEvent(this));
+
             if (userId.HasValue && userId.Value != Guid.Empty)
                 Assign(userId.Value, createdBy);
         }
