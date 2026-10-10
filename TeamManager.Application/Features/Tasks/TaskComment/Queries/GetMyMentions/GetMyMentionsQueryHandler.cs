@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using TeamManager.Application.Abstractions.Authentication;
 using TeamManager.Application.Abstractions.Persistence;
+using TeamManager.Domain.Enums;
 
 namespace TeamManager.Application.Features.Tasks.TaskComment.Queries.GetMyMentions
 {
@@ -15,7 +16,8 @@ namespace TeamManager.Application.Features.Tasks.TaskComment.Queries.GetMyMentio
 
             var userId = currentUser.UserId.Value;
 
-            var query = context.Tasks.AsNoTracking().Where(x => x.DeletedAtUtc == null && x.Project.DeletedAtUtc == null)
+            var query = context.Tasks.AsNoTracking().Where(x => x.DeletedAtUtc == null && x.Project.DeletedAtUtc == null
+            && x.Project.Members.Any(m => m.UserId == userId && m.Status == ProjectMemberStatus.Active && m.User.IsActive))
                 .SelectMany(x => x.Comments).SelectMany(comment => comment.Mentions.Where(m => m.MentionedUserId == userId)
                         .Select(m => new
                         {
