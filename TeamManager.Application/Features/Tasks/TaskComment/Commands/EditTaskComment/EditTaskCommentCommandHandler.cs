@@ -1,12 +1,14 @@
 ﻿using MediatR;
+using TeamManager.Application.Abstractions.Authentication;
 using TeamManager.Application.Abstractions.Persistence;
+using TeamManager.Application.Common.Exceptions.AuthorizationExceptions;
 using TeamManager.Application.Common.Exceptions.ProjectExceptions;
 using TeamManager.Application.Common.Exceptions.TaskExceptions;
 
 namespace TeamManager.Application.Features.Tasks.TaskComment.Commands.EditTaskComment
 {
     public sealed class EditTaskCommentCommandHandler(ITaskRepository taskRepository, IProjectRepository projectRepository,
-        IUnitOfWork unitOfWork) : IRequestHandler<EditTaskCommentCommand>
+       ICurrentUser currentUser, IUnitOfWork unitOfWork) : IRequestHandler<EditTaskCommentCommand>
     {
         public async Task Handle(EditTaskCommentCommand request, CancellationToken cancellationToken)
         {
@@ -19,6 +21,9 @@ namespace TeamManager.Application.Features.Tasks.TaskComment.Commands.EditTaskCo
 
             if (comment is null)
                 throw new CommentNotFoundException();
+
+            if (comment.AuthorUserId != currentUser.UserId!.Value)
+                throw new ForbiddenException("Only the author can edit this comment.");
 
             var mentionedUserIds = request.MentionedUserIds?.Distinct().Where(id => id != comment.AuthorUserId).ToArray();
 
