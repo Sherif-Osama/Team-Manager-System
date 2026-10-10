@@ -1,0 +1,7 @@
+﻿namespace TeamManager.Application.Common.ActivityLog
+{
+    public static class ActivityTypes
+    {
+        public const string TaskStatusChanged = "task.status_changed";
+    }
+}

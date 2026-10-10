@@ -13,18 +13,18 @@ namespace TeamManager.Application.Common.Events.EventHandlers
         {
             var domainEvent = notification.DomainEvent;
 
-            if (domainEvent.ToStatus != TaskItemStatus.Done || domainEvent.AssigneeUserId == null)
+            if (domainEvent.ToStatus != TaskItemStatus.Done || domainEvent.Task.AssigneeUserId == null)
                 return;
 
-            var preferences = await notificationRepository.GetPreferencesByUserIdAsync(domainEvent.AssigneeUserId.Value, cancellationToken);
+            var preferences = await notificationRepository.GetPreferencesByUserIdAsync(domainEvent.Task.AssigneeUserId.Value, cancellationToken);
 
             var preference = preferences.FirstOrDefault(x => x.NotificationType == NotificationType.TaskCompleted);
 
             if (preference is not null && !preference.IsEnabled)
                 return;
 
-            var newNotification = new Notification(domainEvent.AssigneeUserId.Value, NotificationType.TaskCompleted, "Task Completed",
-                "A task assigned to you has been completed.", "Task", domainEvent.TaskId.ToString());
+            var newNotification = new Notification(domainEvent.Task.AssigneeUserId.Value, NotificationType.TaskCompleted, "Task Completed",
+                "A task assigned to you has been completed.", "Task", domainEvent.Task.Id.ToString());
 
             await notificationRepository.AddNotificationAsync(newNotification, cancellationToken);
         }

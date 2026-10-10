@@ -138,7 +138,7 @@ namespace TeamManager.Domain.Entities
             Status = status;
             CompletedAtUtc = status == TaskItemStatus.Done ? DateTime.UtcNow : null;
 
-            AddDomainEvent(new TaskStatusChangedDomainEvent(Id, AssigneeUserId, fromStatus, status, actorUserId));
+            AddDomainEvent(new TaskStatusChangedDomainEvent(this, fromStatus, status, actorUserId));
 
             Touch();
         }

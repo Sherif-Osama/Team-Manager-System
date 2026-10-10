@@ -59,6 +59,7 @@ namespace TeamManager.Infrastructure
             services.AddScoped<ITaskRepository, TaskRepository>();
             services.Configure<FileStorageOptions>(configuration.GetSection(FileStorageOptions.SectionName));
             services.AddScoped<IFileStorage, LocalFileStorage>();
+            services.AddScoped<IActivityLogRepository, ActivityLogRepository>();
             return services;
         }
     }
