@@ -1,6 +1,8 @@
 ﻿using FluentValidation;
 using Microsoft.Extensions.DependencyInjection;
+using TeamManager.Application.Abstractions.ActivityLog;
 using TeamManager.Application.Abstractions.Realtime;
+using TeamManager.Application.Common.ActivityLog;
 using TeamManager.Application.Common.Behaviors;
 using TeamManager.Application.Common.Realtime;
 
@@ -25,6 +27,7 @@ namespace TeamManager.Application
 
             services.AddValidatorsFromAssembly(typeof(DependencyInjection).Assembly);
             services.AddScoped<IPostCommitNotificationDispatcher, PostCommitNotificationDispatcher>();
+            services.AddScoped<IActivityLogWriter, ActivityLogWriter>();
             return services;
         }
     }

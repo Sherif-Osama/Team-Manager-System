@@ -20,6 +20,6 @@ namespace TeamManager.Application.Abstractions.Persistence
         DbSet<TaskAttachment> TaskAttachments { get; }
         DbSet<Notification> Notifications { get; }
         DbSet<NotificationPreference> NotificationPreferences { get; }
-        DbSet<ActivityLog> ActivityLogs { get; }
+        DbSet<TeamManager.Domain.Entities.ActivityLog> ActivityLogs { get; }
     }
 }
