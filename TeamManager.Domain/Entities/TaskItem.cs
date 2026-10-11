@@ -340,7 +340,7 @@ namespace TeamManager.Domain.Entities
 
             _comments.Add(comment);
 
-            AddDomainEvent(new CommentAddedDomainEvent(comment, AssigneeUserId, authorUserId));
+            AddDomainEvent(new CommentAddedDomainEvent(this, comment, AssigneeUserId, authorUserId));
 
             Touch();
             return comment;
