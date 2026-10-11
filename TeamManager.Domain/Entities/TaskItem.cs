@@ -90,9 +90,11 @@ namespace TeamManager.Domain.Entities
             if (AssigneeUserId == userId)
                 throw new DomainException("Task already assigned to this user");
 
+            var previousAssigneeUserId = AssigneeUserId;
+
             AssigneeUserId = userId;
 
-            AddDomainEvent(new TaskAssignedDomainEvent(this, AssigneeUserId.Value, ActorUserId));
+            AddDomainEvent(new TaskAssignedDomainEvent(this, previousAssigneeUserId, AssigneeUserId.Value, ActorUserId));
 
             Touch();
         }
