@@ -1,6 +1,7 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using TeamManager.Application.Features.ActivityLog.Queries.GetProjectActivity;
 using TeamManager.Application.Features.Projects.Project.Commands.ChangeProjectStatus;
 using TeamManager.Application.Features.Projects.Project.Commands.CreateProject;
 using TeamManager.Application.Features.Projects.Project.Commands.ScheduleProject;
@@ -92,6 +93,16 @@ namespace TeamManager.Api.Controllers.Projects
             var result = await sender.Send(query, cancellationToken);
 
             return Ok(result);
+        }
+
+        [HttpGet("{projectId:guid}/activity")]
+        [Authorize]
+        public async Task<ActionResult<GetProjectActivityResponse>> GetProjectActivity(Guid projectId, [FromQuery] GetProjectActivityRequest request
+        , CancellationToken cancellationToken)
+        {
+            var response = await sender.Send(new GetProjectActivityQuery(projectId, request.Page, request.PageSize), cancellationToken);
+
+            return Ok(response);
         }
     }
 }
