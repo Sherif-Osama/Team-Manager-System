@@ -1,6 +1,7 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using TeamManager.Application.Features.ActivityLog.Queries.GetTeamActivity;
 using TeamManager.Application.Features.Teams.Labels.Commands.CreateLabel;
 using TeamManager.Application.Features.Teams.Labels.Commands.DeleteLabel;
 using TeamManager.Application.Features.Teams.Labels.Commands.UpdateLabel;
@@ -148,6 +149,16 @@ namespace TeamManager.Api.Controllers.Teams
         {
             var result = await sender.Send(new GetLabelsQuery(teamId, request.Search, request.Page, request.PageSize),
                 cancellationToken);
+
+            return Ok(result);
+        }
+
+        [HttpGet("{teamId:guid}/activity")]
+        [Authorize]
+        public async Task<IActionResult> GetTeamActivity(Guid teamId, [FromQuery] GetTeamActivityRequest request,
+            CancellationToken cancellationToken)
+        {
+            var result = await sender.Send(new GetTeamActivityQuery(teamId, request.Page, request.PageSize), cancellationToken);
 
             return Ok(result);
         }
