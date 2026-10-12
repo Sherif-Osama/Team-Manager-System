@@ -82,6 +82,7 @@ namespace TeamManager.Infrastructure
             });
 
             services.AddScoped<IActivityLogRepository, ActivityLogRepository>();
+            services.AddScoped<IAuditLogRepository, AuditLogRepository>();
             return services;
         }
     }

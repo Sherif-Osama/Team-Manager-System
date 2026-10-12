@@ -17,9 +17,9 @@ namespace TeamManager.Application.Features.Tasks.TaskAttachment.Commands.DeleteT
 
             var attachment = task.RemoveAttachment(request.AttachmentId);
 
-            await fileStorage.DeleteAsync(attachment.StorageKey, cancellationToken);
-
             await unitOfWork.SaveChangesAsync(cancellationToken);
+
+            await fileStorage.DeleteAsync(attachment.StorageKey, cancellationToken);
         }
     }
 }

@@ -52,7 +52,7 @@ public class User : AggregateRoot<Guid>
         IsActive = true;
         FailedLoginAttempts = 0;
         CreatedAtUtc = DateTime.UtcNow;
-        AssignRole(roleId);
+        _userRoles.Add(new UserRole(Id, roleId));
     }
 
     public void ChangeDisplayName(string displayName)
@@ -215,6 +215,8 @@ public class User : AggregateRoot<Guid>
             throw new DomainException("User already has this role.");
 
         _userRoles.Add(new UserRole(Id, roleId));
+
+        AddDomainEvent(new UserRoleAssignedDomainEvent(Id, roleId));
     }
 
     public void RemoveRole(int roleId)
@@ -231,6 +233,8 @@ public class User : AggregateRoot<Guid>
             throw new DomainException("User must have at least one role.");
 
         _userRoles.RemoveAll(x => x.RoleId == roleId);
+
+        AddDomainEvent(new UserRoleRevokedDomainEvent(Id, roleId));
     }
 
     private void Touch() => UpdatedAtUtc = DateTime.UtcNow;
