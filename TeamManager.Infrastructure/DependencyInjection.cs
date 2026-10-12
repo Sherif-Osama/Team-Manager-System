@@ -1,6 +1,10 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Amazon;
+using Amazon.Runtime.CredentialManagement;
+using Amazon.S3;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using TeamManager.Application.Abstractions.Authentication;
 using TeamManager.Application.Abstractions.Configuration;
 using TeamManager.Application.Abstractions.Persistence;
@@ -58,7 +62,25 @@ namespace TeamManager.Infrastructure
             services.AddScoped<IProjectRepository, ProjectRepository>();
             services.AddScoped<ITaskRepository, TaskRepository>();
             services.Configure<FileStorageOptions>(configuration.GetSection(FileStorageOptions.SectionName));
-            services.AddScoped<IFileStorage, LocalFileStorage>();
+
+            services.AddScoped<IFileStorage, S3FileStorage>();
+
+            services.AddSingleton<IAmazonS3>(sp =>
+            {
+                var options = sp.GetRequiredService<IOptions<FileStorageOptions>>().Value;
+
+                var region = RegionEndpoint.GetBySystemName(options.Region);
+
+                var chain = new CredentialProfileStoreChain();
+
+                if (!chain.TryGetAWSCredentials(options.ProfileName, out var credentials))
+                {
+                    throw new InvalidOperationException($"AWS profile '{options.ProfileName}' was not found.");
+                }
+
+                return new AmazonS3Client(credentials, region);
+            });
+
             services.AddScoped<IActivityLogRepository, ActivityLogRepository>();
             return services;
         }

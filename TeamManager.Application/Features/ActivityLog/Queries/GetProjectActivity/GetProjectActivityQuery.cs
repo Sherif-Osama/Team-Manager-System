@@ -6,6 +6,6 @@ namespace TeamManager.Application.Features.ActivityLog.Queries.GetProjectActivit
 {
     public sealed record GetProjectActivityQuery(Guid ProjectId, int Page = 1, int PageSize = 20) : IRequest<GetProjectActivityResponse>, IProjectScopedRequest
     {
-        public ProjectRole[] RequiredRoles => [ProjectRole.Owner, ProjectRole.Admin, ProjectRole.Viewer];
+        public ProjectRole[] RequiredRoles => [ProjectRole.Owner, ProjectRole.Admin, ProjectRole.Viewer, ProjectRole.Member];
     }
 }
