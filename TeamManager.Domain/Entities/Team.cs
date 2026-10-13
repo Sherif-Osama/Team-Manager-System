@@ -300,6 +300,9 @@ namespace TeamManager.Domain.Entities
 
             invitation.Accept(userId);
 
+            AddDomainEvent(new TeamInvitationAcceptedDomainEvent(Id, invitation.Id, userId, invitation.InvitedEmail,
+                invitation.TeamRole));
+
             return newMember;
         }
 
@@ -316,17 +319,32 @@ namespace TeamManager.Domain.Entities
             if (invitation.InvitedUserId.HasValue && invitation.InvitedUserId.Value != userId)
                 throw new DomainException("This invitation belongs to another user.");
 
+            if (invitation.Status == TeamInvitationStatus.Rejected)
+                throw new DomainException("This invitation has already been rejected.");
+
             invitation.Reject();
+
+            AddDomainEvent(new TeamInvitationRejectedDomainEvent(Id, invitation.Id, userId, invitation.InvitedEmail,
+                invitation.TeamRole));
         }
 
-        public void CancelInvitation(Guid invitationId)
+        public void CancelInvitation(Guid invitationId, Guid actorUserId)
         {
             var invitation = _invitations.FirstOrDefault(i => i.Id == invitationId);
 
             if (invitation is null)
                 throw new DomainException("Invitation not found.");
 
+            if (invitation.Status == TeamInvitationStatus.Cancelled)
+                throw new DomainException("This invitation is already cancelled.");
+
+            if (actorUserId != OwnerUserId && invitation.InvitedBy != actorUserId)
+                throw new DomainException("Only the user who sent the invitation can cancel it.");
+
             invitation.Cancel();
+
+            AddDomainEvent(new TeamInvitationCancelledDomainEvent(Id, invitation.Id, actorUserId, invitation.InvitedEmail,
+             invitation.TeamRole));
         }
 
         private void EnsureNotDeleted(string Message)
