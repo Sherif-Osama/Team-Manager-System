@@ -1,4 +1,5 @@
 ﻿using MediatR;
+using TeamManager.Application.Abstractions.Authentication;
 using TeamManager.Application.Abstractions.Persistence;
 using TeamManager.Application.Common.Exceptions.TeamExceptions;
 using TeamManager.Application.Common.Exceptions.UserExceptions;
@@ -6,24 +7,26 @@ using TeamManager.Application.Common.Exceptions.UserExceptions;
 namespace TeamManager.Application.Features.Teams.Team.Commands.TransferOwnership
 {
     public sealed class TransferOwnershipCommandHandler(ITeamRepository teamRepository, IUserRepository userRepository,
-            IUnitOfWork unitOfWork) : IRequestHandler<TransferOwnershipCommand>
+            ICurrentUser currentUser, IUnitOfWork unitOfWork) : IRequestHandler<TransferOwnershipCommand>
     {
         public async Task Handle(TransferOwnershipCommand request, CancellationToken cancellationToken)
         {
+            if (!currentUser.IsAuthenticated || !currentUser.UserId.HasValue)
+                throw new UnauthorizedAccessException("User is not authenticated.");
+
+            await unitOfWork.ExecuteInSerializableTransactionAsync(async ct =>
             {
-                await unitOfWork.ExecuteInSerializableTransactionAsync(async ct =>
-                {
-                    var newOwner = await userRepository.GetByIdAsync(request.NewOwnerUserId, ct);
-                    if (newOwner is null || !newOwner.IsActive)
-                        throw new UserNotFoundException(request.NewOwnerUserId);
+                var newOwner = await userRepository.GetByIdAsync(request.NewOwnerUserId, ct);
+                if (newOwner is null || !newOwner.IsActive)
+                    throw new UserNotFoundException(request.NewOwnerUserId);
 
-                    var team = await teamRepository.GetByIdWithMembersAsync(request.TeamId, ct);
-                    if (team is null)
-                        throw new TeamNotFoundException(request.TeamId);
+                var team = await teamRepository.GetByIdWithMembersAsync(request.TeamId, ct);
+                if (team is null)
+                    throw new TeamNotFoundException(request.TeamId);
 
-                    team.TransferOwnership(request.NewOwnerUserId);
-                }, cancellationToken);
-            }
+                team.TransferOwnership(request.NewOwnerUserId, currentUser.UserId.Value);
+            }, cancellationToken);
+
         }
     }
 }

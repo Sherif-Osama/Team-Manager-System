@@ -14,5 +14,6 @@
         public const string ProjectMemberRemoved = "project.member.removed";
         public const string TeamMemberRoleChanged = "team.member.role_changed";
         public const string ProjectMemberRoleChanged = "project.member.role_changed";
+        public const string TeamOwnershipTransferred = "team.ownership.transferred";
     }
 }

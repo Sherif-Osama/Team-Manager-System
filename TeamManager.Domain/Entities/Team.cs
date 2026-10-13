@@ -70,7 +70,7 @@ namespace TeamManager.Domain.Entities
             Touch();
         }
 
-        public void TransferOwnership(Guid newOwnerUserId)
+        public void TransferOwnership(Guid newOwnerUserId, Guid transferredByUserId)
         {
             EnsureNotDeleted("cannot modify deleted team");
 
@@ -89,7 +89,12 @@ namespace TeamManager.Domain.Entities
 
             currentOwner.ChangeRole(TeamRole.Admin);
             newOwner.PromoteToOwner();
+
+            var previousOwnerUserId = OwnerUserId;
             OwnerUserId = newOwnerUserId;
+
+            AddDomainEvent(new TeamOwnershipTransferredDomainEvent(Id, previousOwnerUserId, newOwnerUserId, transferredByUserId));
+
             Touch();
         }
 
