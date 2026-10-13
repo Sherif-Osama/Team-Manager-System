@@ -2,6 +2,7 @@
 using System.Text.Json;
 using TeamManager.Application.Abstractions.AuditLog;
 using TeamManager.Application.Common.AuditLog;
+using TeamManager.Application.Common.Logging;
 using TeamManager.Domain.Common.Events;
 
 namespace TeamManager.Application.Common.Events.EventHandlers
@@ -17,7 +18,7 @@ namespace TeamManager.Application.Common.Events.EventHandlers
                 roleId = domainEvent.RoleId
             });
 
-            return auditLogWriter.WriteAsync(AuditLogActions.UserRoleRevoked, AuditLogEntityTypes.User, domainEvent.UserId.ToString(),
+            return auditLogWriter.WriteAsync(AuditLogActions.UserRoleRevoked, LogEntityTypes.User, domainEvent.UserId.ToString(),
                 details, cancellationToken);
         }
     }

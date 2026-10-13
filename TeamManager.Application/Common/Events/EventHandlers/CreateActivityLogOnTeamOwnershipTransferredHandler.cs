@@ -2,6 +2,7 @@
 using System.Text.Json;
 using TeamManager.Application.Abstractions.ActivityLog;
 using TeamManager.Application.Common.ActivityLog;
+using TeamManager.Application.Common.Logging;
 using TeamManager.Domain.Common.Events;
 
 namespace TeamManager.Application.Common.Events.EventHandlers
@@ -20,7 +21,7 @@ namespace TeamManager.Application.Common.Events.EventHandlers
             });
 
             return activityLogWriter.WriteTeamActivityAsync(domainEvent.TeamId, domainEvent.ActorUserId,
-                ActivityTypes.TeamOwnershipTransferred, "Team", domainEvent.TeamId.ToString(), metadata, cancellationToken);
+                ActivityTypes.TeamOwnershipTransferred, LogEntityTypes.Team, domainEvent.TeamId.ToString(), metadata, cancellationToken);
         }
     }
 }

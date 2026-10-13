@@ -2,6 +2,7 @@
 using System.Text.Json;
 using TeamManager.Application.Abstractions.AuditLog;
 using TeamManager.Application.Common.AuditLog;
+using TeamManager.Application.Common.Logging;
 using TeamManager.Domain.Common.Events;
 
 namespace TeamManager.Application.Common.Events.EventHandlers
@@ -18,7 +19,7 @@ namespace TeamManager.Application.Common.Events.EventHandlers
                 reason = "Reactivate User"
             });
 
-            return auditLogWriter.WriteAsync(AuditLogActions.UserReactivated, AuditLogEntityTypes.User, domainEvent.UserId.ToString(),
+            return auditLogWriter.WriteAsync(AuditLogActions.UserReactivated, LogEntityTypes.User, domainEvent.UserId.ToString(),
                 details, cancellationToken);
         }
     }

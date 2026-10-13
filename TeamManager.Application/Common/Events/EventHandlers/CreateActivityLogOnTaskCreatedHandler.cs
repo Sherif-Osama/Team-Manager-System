@@ -2,6 +2,7 @@
 using System.Text.Json;
 using TeamManager.Application.Abstractions.ActivityLog;
 using TeamManager.Application.Common.ActivityLog;
+using TeamManager.Application.Common.Logging;
 using TeamManager.Domain.Common.Events;
 
 namespace TeamManager.Application.Common.Events.EventHandlers
@@ -18,8 +19,8 @@ namespace TeamManager.Application.Common.Events.EventHandlers
                 taskTitle = task.Title
             });
 
-            await activityLogWriter.WriteProjectActivityAsync(task.ProjectId, task.CreatedBy, ActivityTypes.TaskCreated, "Task",
-                task.Id.ToString(), metadata, cancellationToken);
+            await activityLogWriter.WriteProjectActivityAsync(task.ProjectId, task.CreatedBy, ActivityTypes.TaskCreated,
+                LogEntityTypes.Task, task.Id.ToString(), metadata, cancellationToken);
         }
     }
 }

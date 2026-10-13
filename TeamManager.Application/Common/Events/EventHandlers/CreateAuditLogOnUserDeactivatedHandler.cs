@@ -1,6 +1,7 @@
 ﻿using MediatR;
 using TeamManager.Application.Abstractions.AuditLog;
 using TeamManager.Application.Common.AuditLog;
+using TeamManager.Application.Common.Logging;
 using TeamManager.Domain.Common.Events;
 
 namespace TeamManager.Application.Common.Events.EventHandlers
@@ -13,7 +14,7 @@ namespace TeamManager.Application.Common.Events.EventHandlers
         {
             var domainEvent = notification.DomainEvent;
 
-            return auditLogWriter.WriteAsync(AuditLogActions.UserDeactivated, AuditLogEntityTypes.User, domainEvent.UserId.ToString(),
+            return auditLogWriter.WriteAsync(AuditLogActions.UserDeactivated, LogEntityTypes.User, domainEvent.UserId.ToString(),
                 null, cancellationToken);
         }
     }
