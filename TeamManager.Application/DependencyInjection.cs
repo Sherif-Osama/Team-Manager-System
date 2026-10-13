@@ -2,10 +2,12 @@
 using Microsoft.Extensions.DependencyInjection;
 using TeamManager.Application.Abstractions.ActivityLog;
 using TeamManager.Application.Abstractions.AuditLog;
+using TeamManager.Application.Abstractions.Notifications;
 using TeamManager.Application.Abstractions.Realtime;
 using TeamManager.Application.Common.ActivityLog;
 using TeamManager.Application.Common.AuditLog;
 using TeamManager.Application.Common.Behaviors;
+using TeamManager.Application.Common.Notifications;
 using TeamManager.Application.Common.Realtime;
 
 namespace TeamManager.Application
@@ -31,6 +33,7 @@ namespace TeamManager.Application
             services.AddScoped<IPostCommitNotificationDispatcher, PostCommitNotificationDispatcher>();
             services.AddScoped<IActivityLogWriter, ActivityLogWriter>();
             services.AddScoped<IAuditLogWriter, AuditLogWriter>();
+            services.AddScoped<INotificationWriter, NotificationWriter>();
             return services;
         }
     }

@@ -1,6 +1,6 @@
-﻿namespace TeamManager.Application.Common.Logging
+﻿namespace TeamManager.Application.Common.EntityTypes
 {
-    public static class LogEntityTypes
+    public static class EntityType
     {
         public const string User = "User";
         public const string Team = "Team";

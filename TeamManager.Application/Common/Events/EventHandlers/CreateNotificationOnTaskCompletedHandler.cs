@@ -1,32 +1,24 @@
 ﻿using MediatR;
-using TeamManager.Application.Abstractions.Persistence;
+using TeamManager.Application.Abstractions.Notifications;
+using TeamManager.Application.Common.EntityTypes;
 using TeamManager.Domain.Common.Events;
-using TeamManager.Domain.Entities;
 using TeamManager.Domain.Enums;
 
 namespace TeamManager.Application.Common.Events.EventHandlers
 {
-    public sealed class CreateNotificationOnTaskCompletedHandler(INotificationRepository notificationRepository)
+    public sealed class CreateNotificationOnTaskCompletedHandler(INotificationWriter notificationWriter)
         : INotificationHandler<DomainEventNotification<TaskStatusChangedDomainEvent>>
     {
-        public async Task Handle(DomainEventNotification<TaskStatusChangedDomainEvent> notification, CancellationToken cancellationToken)
+        public async Task Handle(DomainEventNotification<TaskStatusChangedDomainEvent> notification,
+            CancellationToken cancellationToken)
         {
             var domainEvent = notification.DomainEvent;
 
-            if (domainEvent.ToStatus != TaskItemStatus.Done || domainEvent.Task.AssigneeUserId == null)
+            if (domainEvent.ToStatus != TaskItemStatus.Done || domainEvent.Task.AssigneeUserId is not Guid assigneeUserId)
                 return;
 
-            var preferences = await notificationRepository.GetPreferencesByUserIdAsync(domainEvent.Task.AssigneeUserId.Value, cancellationToken);
-
-            var preference = preferences.FirstOrDefault(x => x.NotificationType == NotificationType.TaskCompleted);
-
-            if (preference is not null && !preference.IsEnabled)
-                return;
-
-            var newNotification = new Notification(domainEvent.Task.AssigneeUserId.Value, NotificationType.TaskCompleted, "Task Completed",
-                "A task assigned to you has been completed.", "Task", domainEvent.Task.Id.ToString());
-
-            await notificationRepository.AddNotificationAsync(newNotification, cancellationToken);
+            await notificationWriter.CreateIfEnabledAsync(assigneeUserId, NotificationType.TaskCompleted, "Task Completed",
+                "A task assigned to you has been completed.", EntityType.Task, domainEvent.Task.Id.ToString(), cancellationToken);
         }
     }
 }

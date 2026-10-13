@@ -1,5 +1,5 @@
 ﻿using MediatR;
-using TeamManager.Application.Common.Authorization.Scopes;
+using TeamManager.Application.Abstractions.Scopes;
 using TeamManager.Domain.Enums;
 
 namespace TeamManager.Application.Features.Teams.Labels.Commands.CreateLabel

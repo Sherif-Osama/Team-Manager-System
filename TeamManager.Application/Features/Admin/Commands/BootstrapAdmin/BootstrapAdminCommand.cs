@@ -1,5 +1,5 @@
 using MediatR;
-using TeamManager.Application.Common.Authorization.Scopes;
+using TeamManager.Application.Abstractions.Scopes;
 
 namespace TeamManager.Application.Features.Admin.Commands.BootstrapAdmin
 {

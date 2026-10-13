@@ -1,4 +1,4 @@
-﻿namespace TeamManager.Application.Common.Authorization.Scopes
+﻿namespace TeamManager.Application.Abstractions.Scopes
 {
     public interface IRequiresPermission
     {

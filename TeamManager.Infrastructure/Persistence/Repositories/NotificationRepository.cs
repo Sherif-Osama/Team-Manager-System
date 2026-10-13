@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using TeamManager.Application.Abstractions.Persistence;
 using TeamManager.Domain.Entities;
+using TeamManager.Domain.Enums;
 
 namespace TeamManager.Infrastructure.Persistence.Repositories
 {
@@ -14,6 +15,13 @@ namespace TeamManager.Infrastructure.Persistence.Repositories
         public async Task<Notification?> GetByIdAsync(long notificationId, CancellationToken cancellationToken)
         {
             return await context.Notifications.FindAsync([notificationId], cancellationToken);
+        }
+
+        public async Task<NotificationPreference?> GetPreferenceAsync(Guid userId, NotificationType notificationType,
+            CancellationToken cancellationToken)
+        {
+            return await context.NotificationPreferences.FirstOrDefaultAsync(x => x.UserId == userId && x.User.DeletedAtUtc == null
+            && x.NotificationType == notificationType, cancellationToken);
         }
 
         public async Task<IReadOnlyCollection<Notification>> GetUnreadByRecipientIdAsync(Guid recipientUserId, CancellationToken cancellationToken)

@@ -2,7 +2,7 @@
 using System.Text.Json;
 using TeamManager.Application.Abstractions.ActivityLog;
 using TeamManager.Application.Common.ActivityLog;
-using TeamManager.Application.Common.Logging;
+using TeamManager.Application.Common.EntityTypes;
 using TeamManager.Domain.Common.Events;
 
 namespace TeamManager.Application.Common.Events.EventHandlers
@@ -22,7 +22,7 @@ namespace TeamManager.Application.Common.Events.EventHandlers
             });
 
             return activityLogWriter.WriteTeamActivityAsync(invitation.TeamId, invitation.InvitedBy,
-                ActivityTypes.TeamInvitationCreated, LogEntityTypes.TeamInvitation, invitation.Id.ToString(),
+                ActivityTypes.TeamInvitationCreated, EntityType.TeamInvitation, invitation.Id.ToString(),
                 metadata, cancellationToken);
         }
     }

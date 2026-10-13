@@ -2,7 +2,7 @@
 using System.Text.Json;
 using TeamManager.Application.Abstractions.ActivityLog;
 using TeamManager.Application.Common.ActivityLog;
-using TeamManager.Application.Common.Logging;
+using TeamManager.Application.Common.EntityTypes;
 using TeamManager.Domain.Common.Events;
 
 namespace TeamManager.Application.Common.Events.EventHandlers
@@ -20,7 +20,7 @@ namespace TeamManager.Application.Common.Events.EventHandlers
             });
 
             return activityLogWriter.WriteTeamActivityAsync(domainEvent.TeamId, domainEvent.ActorUserId,
-                ActivityTypes.TeamMemberRemoved, LogEntityTypes.TeamMember, domainEvent.MemberId.ToString(), metadata, cancellationToken);
+                ActivityTypes.TeamMemberRemoved, EntityType.TeamMember, domainEvent.MemberId.ToString(), metadata, cancellationToken);
         }
     }
 }

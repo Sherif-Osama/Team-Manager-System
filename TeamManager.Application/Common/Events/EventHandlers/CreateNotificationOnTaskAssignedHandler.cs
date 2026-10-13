@@ -1,12 +1,11 @@
 ﻿using MediatR;
-using TeamManager.Application.Abstractions.Persistence;
+using TeamManager.Application.Abstractions.Notifications;
+using TeamManager.Application.Common.EntityTypes;
 using TeamManager.Domain.Common.Events;
-using TeamManager.Domain.Entities;
 using TeamManager.Domain.Enums;
-
 namespace TeamManager.Application.Common.Events.EventHandlers
 {
-    public sealed class CreateNotificationOnTaskAssignedHandler(INotificationRepository notificationRepository)
+    public sealed class CreateNotificationOnTaskAssignedHandler(INotificationWriter notificationWriter)
         : INotificationHandler<DomainEventNotification<TaskAssignedDomainEvent>>
     {
         public async Task Handle(DomainEventNotification<TaskAssignedDomainEvent> notification, CancellationToken cancellationToken)
@@ -16,18 +15,9 @@ namespace TeamManager.Application.Common.Events.EventHandlers
             if (domainEvent.ActorUserId == domainEvent.AssignedUserId)
                 return;
 
-            var preferences = await notificationRepository.GetPreferencesByUserIdAsync(domainEvent.AssignedUserId, cancellationToken);
-
-            var preference = preferences.FirstOrDefault(x => x.NotificationType == NotificationType.TaskAssigned);
-
-            if (preference is not null && !preference.IsEnabled)
-                return;
-
-            var newNotification = new Notification(domainEvent.AssignedUserId,
-                NotificationType.TaskAssigned, "Task Assigned", "You have been assigned to a task.",
-                "Task", domainEvent.Task.Id.ToString());
-
-            await notificationRepository.AddNotificationAsync(newNotification, cancellationToken);
+            await notificationWriter.CreateIfEnabledAsync(domainEvent.AssignedUserId, NotificationType.TaskAssigned,
+                "Task Assigned", "You have been assigned to a task.",
+                EntityType.Task, domainEvent.Task.Id.ToString(), cancellationToken);
         }
     }
 }

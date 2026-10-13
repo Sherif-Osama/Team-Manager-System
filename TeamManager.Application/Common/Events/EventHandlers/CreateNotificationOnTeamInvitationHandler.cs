@@ -1,12 +1,12 @@
 ﻿using MediatR;
-using TeamManager.Application.Abstractions.Persistence;
+using TeamManager.Application.Abstractions.Notifications;
+using TeamManager.Application.Common.EntityTypes;
 using TeamManager.Domain.Common.Events;
-using TeamManager.Domain.Entities;
 using TeamManager.Domain.Enums;
 
 namespace TeamManager.Application.Common.Events.EventHandlers
 {
-    public sealed class CreateNotificationOnTeamInvitationHandler(INotificationRepository notificationRepository)
+    public sealed class CreateNotificationOnTeamInvitationHandler(INotificationWriter notificationWriter)
         : INotificationHandler<DomainEventNotification<TeamInvitationCreatedDomainEvent>>
     {
         public async Task Handle(DomainEventNotification<TeamInvitationCreatedDomainEvent> notification, CancellationToken cancellationToken)
@@ -14,19 +14,11 @@ namespace TeamManager.Application.Common.Events.EventHandlers
             var invitation = notification.DomainEvent.Invitation;
 
             if (invitation.InvitedUserId is not Guid invitedUserId || invitedUserId == Guid.Empty)
+
                 return;
 
-            var preferences = await notificationRepository.GetPreferencesByUserIdAsync(invitedUserId, cancellationToken);
-
-            var preference = preferences.FirstOrDefault(x => x.NotificationType == NotificationType.TeamInvitation);
-
-            if (preference is not null && !preference.IsEnabled)
-                return;
-
-            var newNotification = new Notification(invitedUserId, NotificationType.TeamInvitation,
-                "New Team Invitation", "You have received a new team invitation.", "TeamInvitation", invitation.Id.ToString());
-
-            await notificationRepository.AddNotificationAsync(newNotification, cancellationToken);
+            await notificationWriter.CreateIfEnabledAsync(invitedUserId, NotificationType.TeamInvitation, "New Team Invitation",
+                "You have received a new team invitation.", EntityType.TeamInvitation, invitation.Id.ToString(), cancellationToken);
         }
     }
 }
