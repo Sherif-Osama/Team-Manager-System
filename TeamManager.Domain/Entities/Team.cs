@@ -47,6 +47,8 @@ namespace TeamManager.Domain.Entities
             var ownerMembership = new TeamMember(Id, ownerUserId, TeamRole.Owner);
 
             _members.Add(ownerMembership);
+
+            AddDomainEvent(new TeamCreatedDomainEvent(Id, CreatedBy, Name));
         }
 
         public void Rename(string name)

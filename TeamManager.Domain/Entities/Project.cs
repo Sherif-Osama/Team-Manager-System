@@ -51,6 +51,8 @@ namespace TeamManager.Domain.Entities
 
             var ownership = new ProjectMember(id, ownerUserId, ProjectRole.Owner);
             _members.Add(ownership);
+
+            AddDomainEvent(new ProjectCreatedDomainEvent(Id, CreatedBy, Name));
         }
 
         public void Rename(string name)
