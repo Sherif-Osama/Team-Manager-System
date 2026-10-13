@@ -215,7 +215,7 @@ namespace TeamManager.Domain.Entities
             AddDomainEvent(new TeamMemberRemovedDomainEvent(Id, member.Id, member.UserId, removedBy));
         }
 
-        public void ChangeMemberRole(long memberId, TeamRole role)
+        public void ChangeMemberRole(long memberId, TeamRole role, Guid changedBy)
         {
             EnsureNotDeleted("cannot modify member in a deleted team");
 
@@ -227,7 +227,11 @@ namespace TeamManager.Domain.Entities
             if (member.TeamRole == TeamRole.Owner)
                 throw new DomainException("Ownership cannot be changed");
 
+            var oldRole = member.TeamRole;
+
             member.ChangeRole(role);
+
+            AddDomainEvent(new TeamMemberRoleChangedDomainEvent(Id, member.Id, member.UserId, changedBy, oldRole, member.TeamRole));
         }
 
         public TeamInvitation Invite(string invitedEmail, Guid? invitedUserId, Guid invitedBy, TeamRole role,

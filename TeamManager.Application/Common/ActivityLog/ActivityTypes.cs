@@ -12,5 +12,6 @@
         public const string TeamInvitationCancelled = "team.invitation.cancelled";
         public const string TeamMemberRemoved = "team.member.removed";
         public const string ProjectMemberRemoved = "project.member.removed";
+        public const string TeamMemberRoleChanged = "team.member.role_changed";
     }
 }
