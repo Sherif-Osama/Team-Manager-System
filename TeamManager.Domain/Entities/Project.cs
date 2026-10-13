@@ -202,7 +202,7 @@ namespace TeamManager.Domain.Entities
                 throw new DomainException("cannot remove project owner from project");
 
             member.Remove(removedBy);
-            AddDomainEvent(new ProjectMemberRemovedDomainEvent(Id, member.UserId));
+            AddDomainEvent(new ProjectMemberRemovedDomainEvent(Id, member.Id, member.UserId, removedBy));
         }
 
         private void Touch() => UpdatedAtUtc = DateTime.UtcNow;

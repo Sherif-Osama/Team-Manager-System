@@ -211,7 +211,8 @@ namespace TeamManager.Domain.Entities
                 throw new DomainException("The team owner cannot be removed from the team.");
 
             member.Remove(removedBy);
-            AddDomainEvent(new TeamMemberRemovedDomainEvent(Id, member.UserId));
+
+            AddDomainEvent(new TeamMemberRemovedDomainEvent(Id, member.Id, member.UserId, removedBy));
         }
 
         public void ChangeMemberRole(long memberId, TeamRole role)

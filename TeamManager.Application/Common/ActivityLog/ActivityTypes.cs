@@ -10,5 +10,7 @@
         public const string TeamInvitationAccepted = "team.invitation.accepted";
         public const string TeamInvitationRejected = "team.invitation.rejected";
         public const string TeamInvitationCancelled = "team.invitation.cancelled";
+        public const string TeamMemberRemoved = "team.member.removed";
+        public const string ProjectMemberRemoved = "project.member.removed";
     }
 }
