@@ -34,7 +34,7 @@ namespace TeamManager.Application.Features.Projects.Project.Commands.TransferPro
                 if (!isCurrentOwner)
                     throw new ForbiddenException("Only the current project owner can transfer ownership.");
 
-                project.TransferOwnership(request.NewOwnerUserId);
+                project.TransferOwnership(request.NewOwnerUserId, currentUser.UserId.Value);
 
             }, cancellationToken);
         }

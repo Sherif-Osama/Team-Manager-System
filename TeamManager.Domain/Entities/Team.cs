@@ -74,6 +74,9 @@ namespace TeamManager.Domain.Entities
         {
             EnsureNotDeleted("cannot modify deleted team");
 
+            if (transferredByUserId != OwnerUserId)
+                throw new DomainException("Only the team owner can transfer ownership.");
+
             if (OwnerUserId == newOwnerUserId)
                 throw new DomainException("The specified user is already the team owner.");
 

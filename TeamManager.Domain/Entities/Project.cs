@@ -150,9 +150,12 @@ namespace TeamManager.Domain.Entities
                 member.ProjectRole));
         }
 
-        public void TransferOwnership(Guid newOwnerUserId)
+        public void TransferOwnership(Guid newOwnerUserId, Guid transferredByUserId)
         {
             EnsureNotDeleted("Cannot modify a deleted project.");
+
+            if (transferredByUserId != OwnerUserId)
+                throw new DomainException("Only the project owner can transfer ownership.");
 
             var currentOwner = _members.FirstOrDefault(m => m.UserId == OwnerUserId && m.Status == ProjectMemberStatus.Active);
 
@@ -168,7 +171,11 @@ namespace TeamManager.Domain.Entities
 
             newOwner.PromoteToOwner();
 
+            var previousOwnerUserId = OwnerUserId;
+
             OwnerUserId = newOwnerUserId;
+
+            AddDomainEvent(new ProjectOwnershipTransferredDomainEvent(Id, previousOwnerUserId, newOwnerUserId, transferredByUserId));
 
             Touch();
         }
