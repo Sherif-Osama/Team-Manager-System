@@ -253,8 +253,7 @@ namespace TeamManager.Domain.Entities
 
             _invitations.Add(invitation);
 
-            if (invitedUserId.HasValue && invitedUserId != Guid.Empty)
-                AddDomainEvent(new TeamInvitationCreatedDomainEvent(invitation, invitedUserId.Value));
+            AddDomainEvent(new TeamInvitationCreatedDomainEvent(invitation));
 
             return invitation;
         }

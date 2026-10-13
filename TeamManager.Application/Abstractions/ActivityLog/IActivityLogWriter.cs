@@ -4,5 +4,8 @@
     {
         Task WriteProjectActivityAsync(Guid projectId, Guid actorUserId, string activityType, string entityType, string entityId,
             string? metadata, CancellationToken cancellationToken);
+
+        Task WriteTeamActivityAsync(Guid teamId, Guid actorUserId, string activityType, string entityType, string entityId,
+            string? metadata, CancellationToken cancellationToken);
     }
 }

@@ -6,5 +6,6 @@
         public const string TaskCreated = "task.created";
         public const string CommentAdded = "comment.added";
         public const string TaskAssigned = "task.assigned";
+        public const string TeamInvitationCreated = "team.invitation.created";
     }
 }

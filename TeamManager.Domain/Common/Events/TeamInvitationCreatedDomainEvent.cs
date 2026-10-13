@@ -3,5 +3,5 @@
 namespace TeamManager.Domain.Common.Events
 {
 
-    public sealed record TeamInvitationCreatedDomainEvent(TeamInvitation Invitation, Guid InvitedUserId) : IDomainEvent;
+    public sealed record TeamInvitationCreatedDomainEvent(TeamInvitation Invitation) : IDomainEvent;
 }

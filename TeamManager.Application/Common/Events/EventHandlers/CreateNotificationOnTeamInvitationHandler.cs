@@ -11,18 +11,20 @@ namespace TeamManager.Application.Common.Events.EventHandlers
     {
         public async Task Handle(DomainEventNotification<TeamInvitationCreatedDomainEvent> notification, CancellationToken cancellationToken)
         {
-            var domainEvent = notification.DomainEvent;
+            var invitation = notification.DomainEvent.Invitation;
 
-            var preferences = await notificationRepository.GetPreferencesByUserIdAsync(domainEvent.InvitedUserId, cancellationToken);
+            if (invitation.InvitedUserId is not Guid invitedUserId || invitedUserId == Guid.Empty)
+                return;
+
+            var preferences = await notificationRepository.GetPreferencesByUserIdAsync(invitedUserId, cancellationToken);
 
             var preference = preferences.FirstOrDefault(x => x.NotificationType == NotificationType.TeamInvitation);
 
             if (preference is not null && !preference.IsEnabled)
                 return;
 
-            var newNotification = new Notification(domainEvent.InvitedUserId, NotificationType.TeamInvitation,
-                "New Team Invitation", "You have received a new team invitation.",
-                "TeamInvitation", domainEvent.Invitation.Id.ToString());
+            var newNotification = new Notification(invitedUserId, NotificationType.TeamInvitation,
+                "New Team Invitation", "You have received a new team invitation.", "TeamInvitation", invitation.Id.ToString());
 
             await notificationRepository.AddNotificationAsync(newNotification, cancellationToken);
         }

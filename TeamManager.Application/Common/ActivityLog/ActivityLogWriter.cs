@@ -20,5 +20,14 @@ namespace TeamManager.Application.Common.ActivityLog
 
             await activityLogRepository.AddAsync(activityLog, cancellationToken);
         }
+
+        public async Task WriteTeamActivityAsync(Guid teamId, Guid actorUserId, string activityType, string entityType,
+            string entityId, string? metadata, CancellationToken cancellationToken)
+        {
+            var activityLog = new Domain.Entities.ActivityLog(teamId, actorUserId, activityType, entityType, entityId,
+                metadata: metadata);
+
+            await activityLogRepository.AddAsync(activityLog, cancellationToken);
+        }
     }
 }
