@@ -6,5 +6,6 @@
         public const string UserRoleRevoked = "user.role.revoked";
         public const string UserDeactivated = "user.account.deactivated";
         public const string UserDeleted = "user.account.deleted";
+        public const string UserReactivated = "user.account.reactivated";
     }
 }
