@@ -124,7 +124,7 @@ namespace TeamManager.Domain.Entities
             };
         }
 
-        public void ChangeMemberRole(long memberId, ProjectRole role)
+        public void ChangeMemberRole(long memberId, ProjectRole role, Guid changedBy)
         {
             EnsureNotDeleted("Cannot modify a deleted project.");
 
@@ -142,8 +142,12 @@ namespace TeamManager.Domain.Entities
             if (member.ProjectRole == role)
                 throw new DomainException("The member already has this role.");
 
+            var oldRole = member.ProjectRole;
 
             member.ChangeRole(role);
+
+            AddDomainEvent(new ProjectMemberRoleChangedDomainEvent(Id, member.Id, member.UserId, changedBy, oldRole,
+                member.ProjectRole));
         }
 
         public void TransferOwnership(Guid newOwnerUserId)
