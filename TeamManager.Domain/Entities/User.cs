@@ -1,5 +1,5 @@
 using TeamManager.Domain.Common;
-using TeamManager.Domain.Common.Events;
+using TeamManager.Domain.Common.Events.Users;
 using TeamManager.Domain.Exceptions;
 
 namespace TeamManager.Domain.Entities;

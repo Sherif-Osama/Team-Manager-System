@@ -1,0 +1,20 @@
+﻿using MediatR;
+using TeamManager.Application.Abstractions.AuditLog;
+using TeamManager.Application.Common.AuditLog;
+using TeamManager.Application.Common.EntityTypes;
+using TeamManager.Domain.Common.Events.Users;
+
+namespace TeamManager.Application.Common.Events.EventHandlers.AuditLog
+{
+    public sealed class CreateAuditLogOnUserDeletedHandler(IAuditLogWriter auditLogWriter)
+        : INotificationHandler<DomainEventNotification<UserDeletedDomainEvent>>
+    {
+        public Task Handle(DomainEventNotification<UserDeletedDomainEvent> notification, CancellationToken cancellationToken)
+        {
+            var domainEvent = notification.DomainEvent;
+
+            return auditLogWriter.WriteAsync(AuditLogActions.UserDeleted, EntityType.User, domainEvent.UserId.ToString(),
+                null, cancellationToken);
+        }
+    }
+}

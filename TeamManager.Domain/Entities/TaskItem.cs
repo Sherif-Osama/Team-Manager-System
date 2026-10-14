@@ -1,5 +1,6 @@
 using TeamManager.Domain.Common;
-using TeamManager.Domain.Common.Events;
+using TeamManager.Domain.Common.Events.Comments;
+using TeamManager.Domain.Common.Events.Tasks;
 using TeamManager.Domain.Enums;
 using TeamManager.Domain.Exceptions;
 namespace TeamManager.Domain.Entities

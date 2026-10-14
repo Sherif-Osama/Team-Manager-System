@@ -1,5 +1,5 @@
 using TeamManager.Domain.Common;
-using TeamManager.Domain.Common.Events;
+using TeamManager.Domain.Common.Events.Projects;
 using TeamManager.Domain.Enums;
 using TeamManager.Domain.Exceptions;
 

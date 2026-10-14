@@ -1,5 +1,6 @@
 using TeamManager.Domain.Common;
-using TeamManager.Domain.Common.Events;
+using TeamManager.Domain.Common.Events.Invitations;
+using TeamManager.Domain.Common.Events.Teams;
 using TeamManager.Domain.Enums;
 using TeamManager.Domain.Exceptions;
 
