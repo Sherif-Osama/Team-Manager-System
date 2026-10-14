@@ -12,7 +12,7 @@ using TeamManager.Domain.Exceptions;
 
 namespace TeamManager.Api.Middleware
 {
-    public class GlobalExceptionHandlingMiddleware(ILogger<GlobalExceptionHandlingMiddleware> logger, RequestDelegate next)
+    public class GlobalExceptionHandlingMiddleware(RequestDelegate next)
     {
         public async Task InvokeAsync(HttpContext context)
         {
@@ -89,8 +89,19 @@ namespace TeamManager.Api.Middleware
             //we can log the exception details and return a generic error message to the client for unhandled exceptions.
             var isUnhandled = statusCode == StatusCodes.Status500InternalServerError;
 
-            if (isUnhandled)
-                logger.LogError(exception, "An unhandled error occurred.");
+            if (statusCode is StatusCodes.Status401Unauthorized or StatusCodes.Status403Forbidden)
+            {
+                context.Items["SecurityEventReason"] = exception switch
+                {
+                    ForbiddenException => "permission_denied",
+
+                    UnauthorizedAccessException => "unauthorized_access",
+
+                    _ => "request_rejected"
+                };
+
+                context.Items["SecurityEventExceptionType"] = exception.GetType().Name;
+            }
 
             var problemDetails = new ProblemDetails
             {

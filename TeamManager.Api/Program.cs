@@ -36,6 +36,7 @@ namespace TeamManager.Api
             }
 
             app.UseHttpsRedirection();
+            app.UseMiddleware<SecurityEventLoggingMiddleware>();
             app.UseMiddleware<GlobalExceptionHandlingMiddleware>();
             app.UseAuthentication();
             app.UseAuthorization();
