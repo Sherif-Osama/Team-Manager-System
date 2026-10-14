@@ -14,6 +14,7 @@ using TeamManager.Infrastructure.BackgroundJobs.DeleteInactiveUsers;
 using TeamManager.Infrastructure.BackgroundJobs.InvitationExpiration;
 using TeamManager.Infrastructure.BackgroundJobs.ProcessOutboxMessages.MessageHandlers;
 using TeamManager.Infrastructure.BackgroundJobs.ProcessOutboxMessages.OutboxMessages;
+using TeamManager.Infrastructure.BackgroundJobs.RefreshTokenCleanup;
 using TeamManager.Infrastructure.Communication;
 using TeamManager.Infrastructure.Persistence;
 using TeamManager.Infrastructure.Persistence.Outbox;
@@ -61,6 +62,8 @@ namespace TeamManager.Infrastructure
             services.AddScoped<IRoleRepository, RoleRepository>();
             services.AddScoped<IProjectRepository, ProjectRepository>();
             services.AddScoped<ITaskRepository, TaskRepository>();
+            services.AddScoped<ExpiredRefreshTokenCleanupService>();
+            services.AddHostedService<RefreshTokenCleanupJob>();
             services.Configure<FileStorageOptions>(configuration.GetSection(FileStorageOptions.SectionName));
 
             services.AddScoped<IFileStorage, S3FileStorage>();
