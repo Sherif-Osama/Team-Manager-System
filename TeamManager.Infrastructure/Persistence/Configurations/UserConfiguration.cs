@@ -49,10 +49,14 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
 
         builder.Navigation(x => x.UserRoles).HasField("_userRoles").UsePropertyAccessMode(PropertyAccessMode.Field);
 
-        builder.Property(x => x.EmailConfirmationTokenHash).HasMaxLength(256);
+        builder.Property(x => x.EmailConfirmationTokenHash).HasMaxLength(64);
 
         builder.Property(x => x.EmailConfirmationTokenExpiresAtUtc).HasColumnType("datetime2(3)");
 
         builder.Property(x => x.PendingEmail).HasMaxLength(256);
+
+        builder.Property(x => x.PasswordResetTokenHash).HasMaxLength(64);
+
+        builder.Property(x => x.PasswordResetTokenExpiresAtUtc).HasColumnType("datetime2(3)");
     }
 }

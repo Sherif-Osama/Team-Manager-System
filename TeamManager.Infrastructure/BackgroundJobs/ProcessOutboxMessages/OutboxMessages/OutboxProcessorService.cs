@@ -36,6 +36,7 @@ namespace TeamManager.Infrastructure.BackgroundJobs.ProcessOutboxMessages.Outbox
             {
                 await handler.HandleAsync(message.Payload, cancellationToken);
                 message.ProcessedOnUtc = DateTime.UtcNow;
+                message.Payload = "{}";
             }
             catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
             {

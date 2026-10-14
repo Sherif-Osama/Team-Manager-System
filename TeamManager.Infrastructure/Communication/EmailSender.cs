@@ -109,5 +109,21 @@ namespace TeamManager.Infrastructure.Communication
 
             await SendAsync(to, subject, body, cancellationToken);
         }
+
+        public async Task SendPasswordResetEmailAsync(string to, string resetToken, CancellationToken cancellationToken)
+        {
+            var link = $"{_options.BaseUrl}/account/reset-password" + $"?email={Uri.EscapeDataString(to)}"
+                + $"&token={Uri.EscapeDataString(resetToken)}";
+
+            var body = $"""
+                        <h2>Reset Your Password</h2>
+                        <p>We received a request to reset your password.</p>
+                        <p><a href="{link}">Reset your password</a></p>
+                        <p>This link expires in 30 minutes.</p>
+                        <p>If you did not request this, you can ignore this email.</p>
+                        """;
+
+            await SendAsync(to, "Reset Your Password", body, cancellationToken);
+        }
     }
 }

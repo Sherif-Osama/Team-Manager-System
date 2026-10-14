@@ -1,3 +1,5 @@
+using System.Security.Cryptography;
+using System.Text;
 using TeamManager.Domain.Common;
 using TeamManager.Domain.Common.Events.Users;
 using TeamManager.Domain.Exceptions;
@@ -24,10 +26,10 @@ public class User : AggregateRoot<Guid>
     public DateTime? UpdatedAtUtc { get; private set; }
     public DateTime? DeletedAtUtc { get; private set; }
     public string? PendingEmail { get; private set; }
-
     public string? EmailConfirmationTokenHash { get; private set; }
     public DateTime? EmailConfirmationTokenExpiresAtUtc { get; private set; }
-
+    public string? PasswordResetTokenHash { get; private set; }
+    public DateTime? PasswordResetTokenExpiresAtUtc { get; private set; }
     public IReadOnlyCollection<RefreshToken> RefreshTokens => _refreshTokens.AsReadOnly();
     public IReadOnlyCollection<UserRole> UserRoles => _userRoles.AsReadOnly();
 
@@ -135,6 +137,59 @@ public class User : AggregateRoot<Guid>
         Touch();
     }
 
+    public bool RequestPasswordReset(string tokenHash, DateTime tokenExpiresAtUtc)
+    {
+        if (DeletedAtUtc.HasValue)
+            return false;
+
+        if (!IsActive)
+            return false;
+
+        if (!IsEmailConfirmed)
+            return false;
+
+        if (string.IsNullOrWhiteSpace(tokenHash))
+            return false;
+
+        if (tokenExpiresAtUtc <= DateTime.UtcNow)
+            return false;
+
+        PasswordResetTokenHash = tokenHash;
+        PasswordResetTokenExpiresAtUtc = tokenExpiresAtUtc;
+
+        Touch();
+        return true;
+    }
+
+    public void ResetPassword(string tokenHash, string newPasswordHash)
+    {
+        if (string.IsNullOrWhiteSpace(tokenHash))
+            throw new DomainException("A password reset token is required.");
+
+        if (PasswordResetTokenHash is null || PasswordResetTokenExpiresAtUtc is null || PasswordResetTokenExpiresAtUtc
+            <= DateTime.UtcNow || !string.Equals(PasswordResetTokenHash, tokenHash, StringComparison.Ordinal))
+        {
+            throw new DomainException("A password reset token is required.");
+        }
+
+        if (DeletedAtUtc.HasValue)
+            throw new DomainException("Cannot reset password for a deleted user.");
+
+        if (!IsEmailConfirmed)
+            throw new DomainException("Cannot reset password for an unconfirmed email.");
+
+
+
+        if (string.IsNullOrWhiteSpace(newPasswordHash))
+            throw new DomainException("A password hash cannot be empty.");
+
+        PasswordHash = newPasswordHash;
+        PasswordResetTokenHash = null;
+        PasswordResetTokenExpiresAtUtc = null;
+
+        Touch();
+    }
+
     public void ChangePasswordHash(string newPasswordHash)
     {
         if (DeletedAtUtc.HasValue)
@@ -145,7 +200,22 @@ public class User : AggregateRoot<Guid>
             throw new DomainException("A password hash cannot be empty.");
 
         PasswordHash = newPasswordHash;
+
+        PasswordResetTokenHash = null;
+        PasswordResetTokenExpiresAtUtc = null;
+
         Touch();
+    }
+
+    public bool HasValidPasswordResetToken(string tokenHash)
+    {
+        if (string.IsNullOrWhiteSpace(tokenHash) || PasswordResetTokenHash is null
+            || PasswordResetTokenExpiresAtUtc is not DateTime expiresAtUtc || expiresAtUtc <= DateTime.UtcNow)
+        {
+            return false;
+        }
+
+        return CryptographicOperations.FixedTimeEquals(Encoding.ASCII.GetBytes(PasswordResetTokenHash), Encoding.ASCII.GetBytes(tokenHash));
     }
 
     public void RecordSuccessfulLogin()

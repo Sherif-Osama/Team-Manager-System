@@ -1,6 +1,8 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using TeamManager.Application.Features.Authentication.Commands.ForgotPassword;
+using TeamManager.Application.Features.Authentication.Commands.ResetPassword;
 using TeamManager.Application.Features.Users.SelfManagement.Commands.ChangeEmail;
 using TeamManager.Application.Features.Users.SelfManagement.Commands.ChangePassword;
 using TeamManager.Application.Features.Users.SelfManagement.Commands.ConfirmEmail;
@@ -71,6 +73,27 @@ namespace TeamManager.Api.Controllers.Users
         public async Task<IActionResult> DeactivateMyAccount(DeactivateMyAccountCommand command, CancellationToken cancellationToken)
         {
             await sender.Send(command, cancellationToken);
+            return NoContent();
+        }
+
+        [AllowAnonymous]
+        [HttpPost("forgot-password")]
+        public async Task<IActionResult> ForgotPassword(ForgotPasswordCommand command, CancellationToken cancellationToken)
+        {
+            await sender.Send(command, cancellationToken);
+
+            return Ok(new
+            {
+                message = "If an account with this email exists, password reset instructions will be sent."
+            });
+        }
+
+        [AllowAnonymous]
+        [HttpPost("reset-password")]
+        public async Task<IActionResult> ResetPassword(ResetPasswordCommand command, CancellationToken cancellationToken)
+        {
+            await sender.Send(command, cancellationToken);
+
             return NoContent();
         }
     }

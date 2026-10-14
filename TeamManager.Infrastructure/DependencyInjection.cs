@@ -49,6 +49,7 @@ namespace TeamManager.Infrastructure
             services.AddScoped<OutboxProcessorService>();
             services.AddScoped<IEmailConfirmationTokenService, EmailConfirmationTokenService>();
             services.AddScoped<INotificationRepository, NotificationRepository>();
+            services.AddScoped<IOutboxMessageHandler, PasswordResetEmailOutboxMessageHandler>();
             services.AddScoped<IOutboxMessageHandler, InvitationEmailOutboxMessageHandler>();
             services.AddScoped<IOutboxMessageHandler, EmailConfirmationOutboxMessageHandler>();
             services.AddScoped<IOutboxMessageHandler, PasswordChangedNotificationOutboxMessageHandler>();

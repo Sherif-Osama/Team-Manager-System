@@ -8,5 +8,6 @@
         AccountDeactivatedEmail = 4,
         AccountDeletedEmail = 5,
         AccountActivationEmail = 6,
+        PasswordResetEmail = 7
     }
 }
