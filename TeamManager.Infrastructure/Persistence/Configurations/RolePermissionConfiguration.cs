@@ -29,7 +29,8 @@ public class RolePermissionConfiguration : IEntityTypeConfiguration<RolePermissi
             new { RoleId = 1, PermissionId = 2 },
             new { RoleId = 1, PermissionId = 3 },
             new { RoleId = 1, PermissionId = 4 },
-            new { RoleId = 1, PermissionId = 5 }
+            new { RoleId = 1, PermissionId = 5 },
+            new { RoleId = 3, PermissionId = 2 }
         );
     }
 }

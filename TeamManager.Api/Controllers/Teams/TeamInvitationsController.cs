@@ -13,10 +13,10 @@ namespace TeamManager.Api.Controllers.Teams
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class TeamInvitationsController(ISender sender) : ControllerBase
     {
         [HttpPost("{teamId:guid}")]
-        [Authorize]
         public async Task<IActionResult> InviteMember(Guid teamId, InviteMemberRequest request, CancellationToken cancellationToken)
         {
             var invitationId = await sender.Send(new InviteMemberCommand(teamId, request.Email, request.TeamRole), cancellationToken);
@@ -25,7 +25,6 @@ namespace TeamManager.Api.Controllers.Teams
         }
 
         [HttpPost("accept")]
-        [Authorize]
         public async Task<IActionResult> AcceptInvitation(AcceptInvitationCommand command, CancellationToken cancellationToken)
         {
             await sender.Send(command, cancellationToken);
@@ -34,7 +33,6 @@ namespace TeamManager.Api.Controllers.Teams
         }
 
         [HttpPost("reject")]
-        [Authorize]
         public async Task<IActionResult> RejectInvitation(RejectInvitationCommand command, CancellationToken cancellationToken)
         {
             await sender.Send(command, cancellationToken);
@@ -43,7 +41,6 @@ namespace TeamManager.Api.Controllers.Teams
         }
 
         [HttpDelete("{teamId:guid}/{invitationId:guid}")]
-        [Authorize]
         public async Task<IActionResult> CancelInvitation(Guid teamId, Guid invitationId, CancellationToken cancellationToken)
         {
             await sender.Send(new CancelInvitationCommand(teamId, invitationId), cancellationToken);
@@ -52,7 +49,6 @@ namespace TeamManager.Api.Controllers.Teams
         }
 
         [HttpGet("{teamId:guid}")]
-        [Authorize]
         public async Task<IActionResult> GetInvitations(Guid teamId, [FromQuery] GetInvitationsRequest request, CancellationToken cancellationToken)
         {
             var query = new GetInvitationsQuery(teamId, request.Search, request.Status,
@@ -64,7 +60,6 @@ namespace TeamManager.Api.Controllers.Teams
         }
 
         [HttpGet("by-email")]
-        [Authorize]
         public async Task<IActionResult> GetInvitationsByEmail([FromQuery] GetInvitationsByEmailRequest request, CancellationToken cancellationToken)
         {
             var query = new GetInvitationsByEmailQuery(request.TeamId, request.Email, request.Status,
@@ -76,7 +71,6 @@ namespace TeamManager.Api.Controllers.Teams
         }
 
         [HttpGet("my")]
-        [Authorize]
         public async Task<IActionResult> GetMyInvitations([FromQuery] GetMyInvitationsQuery query, CancellationToken cancellationToken)
         {
             var result = await sender.Send(query, cancellationToken);

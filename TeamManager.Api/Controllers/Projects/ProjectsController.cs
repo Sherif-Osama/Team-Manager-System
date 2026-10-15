@@ -15,10 +15,10 @@ namespace TeamManager.Api.Controllers.Projects
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class ProjectsController(ISender sender) : ControllerBase
     {
         [HttpPost("/api/teams/{teamId:guid}/projects")]
-        [Authorize]
         public async Task<IActionResult> CreateProject(Guid teamId, CreateProjectRequest request, CancellationToken cancellationToken)
         {
             var projectId = await sender.Send(new CreateProjectCommand(teamId, request.Name, request.Description, request.startDate, request.dueDate),
@@ -28,7 +28,6 @@ namespace TeamManager.Api.Controllers.Projects
         }
 
         [HttpPut("{projectId:guid}/schedule")]
-        [Authorize]
         public async Task<IActionResult> ScheduleProject(Guid projectId, [FromBody] ScheduleProjectRequest request,
             CancellationToken cancellationToken)
         {
@@ -40,7 +39,6 @@ namespace TeamManager.Api.Controllers.Projects
         }
 
         [HttpPut("{projectId:guid}")]
-        [Authorize]
         public async Task<IActionResult> UpdateProject(Guid projectId, [FromBody] UpdateProjectRequest request,
             CancellationToken cancellationToken)
         {
@@ -50,7 +48,6 @@ namespace TeamManager.Api.Controllers.Projects
         }
 
         [HttpPut("{projectId:guid}/status")]
-        [Authorize]
         public async Task<IActionResult> ChangeProjectStatus(Guid projectId, [FromBody] ChangeProjectStatusRequest request,
         CancellationToken cancellationToken)
         {
@@ -60,7 +57,6 @@ namespace TeamManager.Api.Controllers.Projects
         }
 
         [HttpPut("{projectId:guid}/owner")]
-        [Authorize]
         public async Task<IActionResult> TransferOwnership(Guid projectId, TransferProjectOwnershipRequest request, CancellationToken cancellationToken)
         {
             await sender.Send(new TransferProjectOwnershipCommand(projectId, request.NewOwnerUserId), cancellationToken);
@@ -69,7 +65,6 @@ namespace TeamManager.Api.Controllers.Projects
         }
 
         [HttpGet("{projectId:guid}")]
-        [Authorize]
         public async Task<IActionResult> GetById(Guid projectId, CancellationToken cancellationToken)
         {
             var result = await sender.Send(new GetProjectQuery(projectId), cancellationToken);
@@ -78,7 +73,6 @@ namespace TeamManager.Api.Controllers.Projects
         }
 
         [HttpGet("by-name")]
-        [Authorize]
         public async Task<IActionResult> GetByName([FromQuery] string name, CancellationToken cancellationToken)
         {
             var result = await sender.Send(new GetProjectByNameQuery(name), cancellationToken);
@@ -87,7 +81,6 @@ namespace TeamManager.Api.Controllers.Projects
         }
 
         [HttpGet]
-        [Authorize]
         public async Task<IActionResult> GetProjects([FromQuery] GetProjectsQuery query, CancellationToken cancellationToken)
         {
             var result = await sender.Send(query, cancellationToken);
@@ -96,7 +89,6 @@ namespace TeamManager.Api.Controllers.Projects
         }
 
         [HttpGet("{projectId:guid}/activity")]
-        [Authorize]
         public async Task<ActionResult<GetProjectActivityResponse>> GetProjectActivity(Guid projectId, [FromQuery] GetProjectActivityRequest request
         , CancellationToken cancellationToken)
         {

@@ -15,10 +15,12 @@ namespace TeamManager.Api.Controllers.Authentication
 
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize]
     public sealed class AuthenticationController(ISender sender) : ControllerBase
     {
         [HttpPost("register")]
         [EnableRateLimiting("AuthRegister")]
+        [AllowAnonymous]
         public async Task<IActionResult> Register(RegisterCommand command, CancellationToken cancellationToken)
         {
             var userId = await sender.Send(command, cancellationToken);
@@ -27,6 +29,7 @@ namespace TeamManager.Api.Controllers.Authentication
 
         [HttpPost("login")]
         [EnableRateLimiting("AuthLogin")]
+        [AllowAnonymous]
         public async Task<IActionResult> Login(LoginCommand command, CancellationToken cancellationToken)
         {
             var result = await sender.Send(command, cancellationToken);
@@ -36,6 +39,7 @@ namespace TeamManager.Api.Controllers.Authentication
 
         [HttpPost("refresh")]
         [EnableRateLimiting("AuthRefresh")]
+        [AllowAnonymous]
         public async Task<IActionResult> Refresh(RefreshTokenCommand command, CancellationToken cancellationToken)
         {
             var result = await sender.Send(command, cancellationToken);

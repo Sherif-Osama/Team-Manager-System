@@ -10,10 +10,10 @@ namespace TeamManager.Api.Controllers.Tasks
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class TaskAttachmentsController(ISender sender) : ControllerBase
     {
         [HttpPost("{taskId:long}/attachments")]
-        [Authorize]
         [RequestSizeLimit(10 * 1024 * 1024)]
         public async Task<ActionResult<long>> AddAttachment(long taskId, IFormFile file, CancellationToken cancellationToken)
         {
@@ -26,7 +26,6 @@ namespace TeamManager.Api.Controllers.Tasks
         }
 
         [HttpGet("{taskId:long}/attachments")]
-        [Authorize]
         public async Task<ActionResult<GetTaskAttachmentsResponse>> GetTaskAttachments(long taskId,
             [FromQuery] GetTaskAttachmentsRequest request, CancellationToken cancellationToken)
         {
@@ -37,7 +36,6 @@ namespace TeamManager.Api.Controllers.Tasks
         }
 
         [HttpGet("{taskId:long}/attachments/{attachmentId:long}/download")]
-        [Authorize]
         public async Task<IActionResult> DownloadAttachment(long taskId, long attachmentId, CancellationToken cancellationToken)
         {
             var response = await sender.Send(new DownloadTaskAttachmentQuery(taskId, attachmentId), cancellationToken);
@@ -46,7 +44,6 @@ namespace TeamManager.Api.Controllers.Tasks
         }
 
         [HttpDelete("{taskId:long}/attachments/{attachmentId:long}")]
-        [Authorize]
         public async Task<IActionResult> DeleteAttachment(long taskId, long attachmentId, CancellationToken cancellationToken)
         {
             await sender.Send(new DeleteTaskAttachmentCommand(taskId, attachmentId), cancellationToken);

@@ -11,10 +11,10 @@ namespace TeamManager.Api.Controllers.Teams
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class TeamMembersController(ISender sender) : ControllerBase
     {
         [HttpPost("{teamId:guid}/members")]
-        [Authorize]
         public async Task<IActionResult> AddMember(Guid teamId, AddMemberRequest request, CancellationToken cancellationToken)
         {
             var memberId = await sender.Send(new AddMemberCommand(teamId, request.UserId, request.TeamRole), cancellationToken);
@@ -23,7 +23,6 @@ namespace TeamManager.Api.Controllers.Teams
         }
 
         [HttpGet("{teamId:guid}/members")]
-        [Authorize]
         public async Task<IActionResult> GetMembers(Guid teamId, [FromQuery] GetMembersRequest request, CancellationToken cancellationToken)
         {
             var result = await sender.Send(new GetMembersQuery(teamId, request.Status, request.Page, request.PageSize)
@@ -32,7 +31,6 @@ namespace TeamManager.Api.Controllers.Teams
         }
 
         [HttpGet("{teamId:guid}/members/{memberId:long}")]
-        [Authorize]
         public async Task<IActionResult> GetMember(Guid teamId, long memberId, CancellationToken cancellationToken)
         {
             var result = await sender.Send(new GetMemberQuery(teamId, memberId), cancellationToken);
@@ -41,7 +39,6 @@ namespace TeamManager.Api.Controllers.Teams
         }
 
         [HttpDelete("{teamId:guid}/members/{memberId:long}")]
-        [Authorize]
         public async Task<IActionResult> RemoveMember(Guid teamId, long memberId, CancellationToken cancellationToken)
         {
             await sender.Send(new RemoveMemberCommand(teamId, memberId), cancellationToken);
@@ -51,7 +48,6 @@ namespace TeamManager.Api.Controllers.Teams
 
 
         [HttpPut("{teamId:guid}/members/{memberId:long}/role")]
-        [Authorize]
         public async Task<IActionResult> ChangeMemberRole(Guid teamId, long memberId, ChangeMemberRoleRequest request, CancellationToken cancellationToken)
         {
             await sender.Send(new ChangeMemberRoleCommand(teamId, memberId, request.Role), cancellationToken);

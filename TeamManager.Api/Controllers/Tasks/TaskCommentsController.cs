@@ -12,10 +12,10 @@ namespace TeamManager.Api.Controllers.Tasks
 {
     [Route("api/tasks")]
     [ApiController]
+    [Authorize]
     public class TaskCommentsController(ISender sender) : ControllerBase
     {
         [HttpPost("{taskId:long}/comments")]
-        [Authorize]
         public async Task<ActionResult<long>> AddTaskComment(long taskId, [FromBody] AddTaskCommentRequest request, CancellationToken cancellationToken)
         {
             var commentId = await sender.Send(new AddTaskCommentCommand(taskId, request.Content, request.MentionedUserIds), cancellationToken);
@@ -24,7 +24,6 @@ namespace TeamManager.Api.Controllers.Tasks
         }
 
         [HttpPut("{taskId:long}/comments/{commentId:long}")]
-        [Authorize]
         public async Task<IActionResult> EditTaskComment(long taskId, long commentId, [FromBody] EditTaskCommentRequest request,
             CancellationToken cancellationToken)
         {
@@ -34,7 +33,6 @@ namespace TeamManager.Api.Controllers.Tasks
         }
 
         [HttpDelete("{taskId:long}/comments/{commentId:long}")]
-        [Authorize]
         public async Task<IActionResult> DeleteTaskComment(long taskId, long commentId, CancellationToken cancellationToken)
         {
             await sender.Send(new DeleteTaskCommentCommand(taskId, commentId), cancellationToken);
@@ -43,7 +41,6 @@ namespace TeamManager.Api.Controllers.Tasks
         }
 
         [HttpGet("{taskId:long}/comments")]
-        [Authorize]
         public async Task<ActionResult<GetTaskCommentsResponse>> GetTaskComments(long taskId, [FromQuery] GetTaskCommentsRequest request,
             CancellationToken cancellationToken)
         {
@@ -53,7 +50,6 @@ namespace TeamManager.Api.Controllers.Tasks
         }
 
         [HttpGet("my-comments")]
-        [Authorize]
         public async Task<ActionResult<GetMyCommentsResponse>> GetMyComments([FromQuery] GetMyCommentsQuery query,
         CancellationToken cancellationToken)
         {
@@ -63,7 +59,6 @@ namespace TeamManager.Api.Controllers.Tasks
         }
 
         [HttpGet("my-mentions")]
-        [Authorize]
         public async Task<ActionResult<GetMyMentionsResponse>> GetMyMentions([FromQuery] GetMyMentionsQuery query,
             CancellationToken cancellationToken)
         {

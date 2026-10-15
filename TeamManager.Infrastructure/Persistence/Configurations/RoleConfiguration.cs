@@ -26,7 +26,8 @@ public class RoleConfiguration : IEntityTypeConfiguration<Role>
 
         builder.HasData(
             new { Id = 1, Name = "SystemAdmin", Description = "Full administrative access to the platform" },
-            new { Id = 2, Name = "User", Description = "Standard authenticated user" }
+            new { Id = 2, Name = "User", Description = "Standard authenticated user" },
+            new { Id = 3, Name = "Viewer", Description = "View-only access,(Audit),(Logs)" }
         );
     }
 }

@@ -19,10 +19,10 @@ namespace TeamManager.Api.Controllers.Tasks
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class TasksController(ISender sender) : ControllerBase
     {
         [HttpPost("/api/projects/{projectId:guid}/tasks")]
-        [Authorize]
         public async Task<IActionResult> CreateTask(Guid projectId, [FromBody] CreateTaskRequest request,
             CancellationToken cancellationToken)
         {
@@ -33,7 +33,6 @@ namespace TeamManager.Api.Controllers.Tasks
         }
 
         [HttpPut("{taskId:long}")]
-        [Authorize]
         public async Task<IActionResult> UpdateTask(long taskId, [FromBody] UpdateTaskRequest request, CancellationToken cancellationToken)
         {
             await sender.Send(new UpdateTaskCommand(taskId, request.Title, request.Description), cancellationToken);
@@ -42,7 +41,6 @@ namespace TeamManager.Api.Controllers.Tasks
         }
 
         [HttpPut("{taskId:long}/status")]
-        [Authorize]
         public async Task<IActionResult> ChangeTaskStatus(long taskId, [FromBody] ChangeTaskStatusRequest request, CancellationToken cancellationToken)
         {
             await sender.Send(new ChangeTaskStatusCommand(taskId, request.Status), cancellationToken);
@@ -51,7 +49,6 @@ namespace TeamManager.Api.Controllers.Tasks
         }
 
         [HttpPut("{taskId:long}/schedule")]
-        [Authorize]
         public async Task<IActionResult> RescheduleTask(long taskId, [FromBody] RescheduleTaskRequest request,
             CancellationToken cancellationToken)
         {
@@ -61,7 +58,6 @@ namespace TeamManager.Api.Controllers.Tasks
         }
 
         [HttpPut("{taskId:long}/priority")]
-        [Authorize]
         public async Task<IActionResult> ChangeTaskPriority(long taskId, [FromBody] ChangeTaskPriorityRequest request,
             CancellationToken cancellationToken)
         {
@@ -71,7 +67,6 @@ namespace TeamManager.Api.Controllers.Tasks
         }
 
         [HttpPut("{taskId:long}/assignee")]
-        [Authorize]
         public async Task<IActionResult> AssignTask(long taskId, [FromBody] AssignTaskRequest request, CancellationToken cancellationToken)
         {
             await sender.Send(new AssignTaskCommand(taskId, request.UserId), cancellationToken);
@@ -81,7 +76,6 @@ namespace TeamManager.Api.Controllers.Tasks
 
 
         [HttpDelete("{taskId:long}")]
-        [Authorize]
         public async Task<IActionResult> DeleteTask(long taskId, CancellationToken cancellationToken)
         {
             await sender.Send(new DeleteTaskCommand(taskId), cancellationToken);
@@ -91,7 +85,6 @@ namespace TeamManager.Api.Controllers.Tasks
         }
 
         [HttpDelete("{taskId:long}/assignee")]
-        [Authorize]
         public async Task<IActionResult> UnassignTask(long taskId, CancellationToken cancellationToken)
         {
             await sender.Send(new UnassignTaskCommand(taskId), cancellationToken);
@@ -100,7 +93,6 @@ namespace TeamManager.Api.Controllers.Tasks
         }
 
         [HttpGet("{taskId:long}")]
-        [Authorize]
         public async Task<ActionResult<GetTaskResponse>> GetById(long taskId, CancellationToken cancellationToken)
         {
             var response = await sender.Send(new GetTaskQuery(taskId), cancellationToken);
@@ -109,7 +101,6 @@ namespace TeamManager.Api.Controllers.Tasks
         }
 
         [HttpGet("my")]
-        [Authorize]
         public async Task<ActionResult<GetMyTasksResponse>> GetMyTasks([FromQuery] GetMyTasksQuery query, CancellationToken cancellationToken)
         {
             var response = await sender.Send(query, cancellationToken);
@@ -118,7 +109,6 @@ namespace TeamManager.Api.Controllers.Tasks
         }
 
         [HttpPost("{taskId:long}/labels/{labelId:long}")]
-        [Authorize]
         public async Task<IActionResult> AddTaskLabel(long taskId, long labelId, CancellationToken cancellationToken)
         {
             await sender.Send(new AddTaskLabelCommand(taskId, labelId), cancellationToken);
@@ -127,7 +117,6 @@ namespace TeamManager.Api.Controllers.Tasks
         }
 
         [HttpDelete("{taskId:long}/labels/{labelId:long}")]
-        [Authorize]
         public async Task<IActionResult> RemoveTaskLabel(long taskId, long labelId, CancellationToken cancellationToken)
         {
             await sender.Send(new RemoveTaskLabelCommand(taskId, labelId), cancellationToken);
@@ -136,7 +125,6 @@ namespace TeamManager.Api.Controllers.Tasks
         }
 
         [HttpGet("/api/teams/{teamId:guid}/tasks")]
-        [Authorize]
         public async Task<ActionResult<GetTeamTasksResponse>> GetTeamTasks(Guid teamId, [FromQuery] GetTeamTasksRequest request, CancellationToken cancellationToken)
         {
 

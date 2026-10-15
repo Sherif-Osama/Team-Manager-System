@@ -21,10 +21,10 @@ namespace TeamManager.Api.Controllers.Teams
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class TeamsController(ISender sender) : ControllerBase
     {
         [HttpPost]
-        [Authorize]
         public async Task<IActionResult> Create(CreateTeamCommand command, CancellationToken cancellationToken)
         {
             var teamId = await sender.Send(command, cancellationToken);
@@ -33,7 +33,6 @@ namespace TeamManager.Api.Controllers.Teams
         }
 
         [HttpGet("{teamId:guid}")]
-        [Authorize]
         public async Task<IActionResult> GetById(Guid teamId, CancellationToken cancellationToken)
         {
             var result = await sender.Send(new GetTeamQuery(teamId), cancellationToken);
@@ -42,7 +41,6 @@ namespace TeamManager.Api.Controllers.Teams
         }
 
         [HttpPut("{teamId:guid}")]
-        [Authorize]
         public async Task<IActionResult> Update(Guid teamId, UpdateTeamRequest request, CancellationToken cancellationToken)
         {
             await sender.Send(new UpdateTeamCommand(teamId, request.Name, request.Description), cancellationToken);
@@ -51,7 +49,6 @@ namespace TeamManager.Api.Controllers.Teams
         }
 
         [HttpPut("{teamId:guid}/owner")]
-        [Authorize]
         public async Task<IActionResult> TransferOwnership(Guid teamId, TransferOwnershipRequest request, CancellationToken cancellationToken)
         {
             await sender.Send(new TransferOwnershipCommand(teamId, request.NewOwnerUserId), cancellationToken);
@@ -60,7 +57,6 @@ namespace TeamManager.Api.Controllers.Teams
         }
 
         [HttpPut("{teamId:guid}/deactivate")]
-        [Authorize]
         public async Task<IActionResult> Deactivate(Guid teamId, CancellationToken cancellationToken)
         {
             await sender.Send(new DeactivateTeamCommand(teamId), cancellationToken);
@@ -69,7 +65,6 @@ namespace TeamManager.Api.Controllers.Teams
         }
 
         [HttpPut("{teamId:guid}/activate")]
-        [Authorize]
         public async Task<IActionResult> Activate(Guid teamId, CancellationToken cancellationToken)
         {
             await sender.Send(new ActivateTeamCommand(teamId), cancellationToken);
@@ -78,7 +73,6 @@ namespace TeamManager.Api.Controllers.Teams
         }
 
         [HttpDelete("{teamId:guid}")]
-        [Authorize]
         public async Task<IActionResult> Delete(Guid teamId, CancellationToken cancellationToken)
         {
             await sender.Send(new SoftDeleteTeamCommand(teamId), cancellationToken);
@@ -87,7 +81,6 @@ namespace TeamManager.Api.Controllers.Teams
         }
 
         [HttpGet]
-        [Authorize]
         public async Task<IActionResult> GetTeams([FromQuery] GetTeamsQuery request, CancellationToken cancellationToken)
         {
 
@@ -98,7 +91,6 @@ namespace TeamManager.Api.Controllers.Teams
         }
 
         [HttpGet("by-name")]
-        [Authorize]
         public async Task<IActionResult> GetByName([FromQuery] GetTeamByNameQuery query, CancellationToken cancellationToken)
         {
             var result = await sender.Send(query, cancellationToken);
@@ -107,7 +99,6 @@ namespace TeamManager.Api.Controllers.Teams
         }
 
         [HttpPost("{teamId:guid}/labels")]
-        [Authorize]
         public async Task<IActionResult> CreateLabel(Guid teamId, CreateLabelRequest request, CancellationToken cancellationToken)
         {
             var labelId = await sender.Send(new CreateLabelCommand(teamId, request.Name, request.ColorHex), cancellationToken);
@@ -116,7 +107,6 @@ namespace TeamManager.Api.Controllers.Teams
         }
 
         [HttpGet("{teamId:guid}/labels/{labelId:long}")]
-        [Authorize]
         public async Task<IActionResult> GetLabelById(Guid teamId, long labelId, CancellationToken cancellationToken)
         {
             var result = await sender.Send(new GetLabelByIdQuery(teamId, labelId), cancellationToken);
@@ -125,7 +115,6 @@ namespace TeamManager.Api.Controllers.Teams
         }
 
         [HttpPut("{teamId:guid}/labels/{labelId:long}")]
-        [Authorize]
         public async Task<IActionResult> UpdateLabel(Guid teamId, long labelId, UpdateLabelRequest request,
             CancellationToken cancellationToken)
         {
@@ -135,7 +124,6 @@ namespace TeamManager.Api.Controllers.Teams
         }
 
         [HttpDelete("{teamId:guid}/labels/{labelId:long}")]
-        [Authorize]
         public async Task<IActionResult> DeleteLabel(Guid teamId, long labelId, CancellationToken cancellationToken)
         {
             await sender.Send(new DeleteLabelCommand(teamId, labelId), cancellationToken);
@@ -144,7 +132,6 @@ namespace TeamManager.Api.Controllers.Teams
         }
 
         [HttpGet("{teamId:guid}/labels")]
-        [Authorize]
         public async Task<IActionResult> GetLabels(Guid teamId, [FromQuery] GetLabelsRequest request, CancellationToken cancellationToken)
         {
             var result = await sender.Send(new GetLabelsQuery(teamId, request.Search, request.Page, request.PageSize),
@@ -154,7 +141,6 @@ namespace TeamManager.Api.Controllers.Teams
         }
 
         [HttpGet("{teamId:guid}/activity")]
-        [Authorize]
         public async Task<IActionResult> GetTeamActivity(Guid teamId, [FromQuery] GetTeamActivityRequest request,
             CancellationToken cancellationToken)
         {

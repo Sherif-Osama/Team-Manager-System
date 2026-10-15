@@ -11,10 +11,10 @@ namespace TeamManager.Api.Controllers.Tasks
 {
     [Route("api/tasks")]
     [ApiController]
+    [Authorize]
     public class TaskChecklistController(ISender sender) : ControllerBase
     {
         [HttpPost("{taskId:long}/checklist")]
-        [Authorize]
         public async Task<ActionResult<long>> AddChecklistItem(long taskId, [FromBody] AddChecklistItemRequest request,
         CancellationToken cancellationToken)
         {
@@ -24,7 +24,6 @@ namespace TeamManager.Api.Controllers.Tasks
         }
 
         [HttpPut("{taskId:long}/checklist/{checklistItemId:long}/complete")]
-        [Authorize]
         public async Task<IActionResult> CompleteChecklistItem(long taskId, long checklistItemId,
             CancellationToken cancellationToken)
         {
@@ -34,7 +33,6 @@ namespace TeamManager.Api.Controllers.Tasks
         }
 
         [HttpPut("{taskId:long}/checklist/{checklistItemId:long}/reopen")]
-        [Authorize]
         public async Task<IActionResult> ReopenChecklistItem(long taskId, long checklistItemId, CancellationToken cancellationToken)
         {
             await sender.Send(new ReopenChecklistItemCommand(taskId, checklistItemId), cancellationToken);
@@ -43,7 +41,6 @@ namespace TeamManager.Api.Controllers.Tasks
         }
 
         [HttpDelete("{taskId:long}/checklist/{checklistItemId:long}")]
-        [Authorize]
         public async Task<IActionResult> RemoveChecklistItem(long taskId, long checklistItemId, CancellationToken cancellationToken)
         {
             await sender.Send(new RemoveChecklistItemCommand(taskId, checklistItemId), cancellationToken);
@@ -52,7 +49,6 @@ namespace TeamManager.Api.Controllers.Tasks
         }
 
         [HttpGet("{taskId:long}/checklist")]
-        [Authorize]
         public async Task<ActionResult<IReadOnlyCollection<GetTaskChecklistResponse>>> GetTaskChecklist(long taskId,
         [FromQuery] string? search, [FromQuery] bool? isCompleted, CancellationToken cancellationToken)
         {

@@ -12,10 +12,10 @@ namespace TeamManager.Api.Controllers.Projects
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class ProjectMembersController(ISender sender) : ControllerBase
     {
         [HttpPost("{projectId:guid}/members")]
-        [Authorize]
         public async Task<IActionResult> AddProjectMember(Guid projectId, [FromBody] AddProjectMemberRequest request,
             CancellationToken cancellationToken)
         {
@@ -25,7 +25,6 @@ namespace TeamManager.Api.Controllers.Projects
         }
 
         [HttpDelete("{projectId:guid}/members/{memberId:long}")]
-        [Authorize]
         public async Task<IActionResult> RemoveProjectMember(Guid projectId, long memberId, CancellationToken cancellationToken)
         {
             await sender.Send(new RemoveMemberCommand(projectId, memberId), cancellationToken);
@@ -34,7 +33,6 @@ namespace TeamManager.Api.Controllers.Projects
         }
 
         [HttpGet("my")]
-        [Authorize]
         public async Task<IActionResult> GetMyProjects([FromQuery] GetMyProjectsQuery query, CancellationToken cancellationToken)
         {
             var result = await sender.Send(query, cancellationToken);
@@ -43,7 +41,6 @@ namespace TeamManager.Api.Controllers.Projects
         }
 
         [HttpGet("{projectId:guid}/members")]
-        [Authorize]
         public async Task<IActionResult> GetProjectMembers(Guid projectId, [FromQuery] GetProjectMembersQuery query, CancellationToken cancellationToken)
         {
             var request = query with { ProjectId = projectId };
@@ -54,7 +51,6 @@ namespace TeamManager.Api.Controllers.Projects
         }
 
         [HttpPut("{projectId:guid}/members/{projectMemberId:long}/role")]
-        [Authorize]
         public async Task<IActionResult> ChangeMemberRole(Guid projectId, long projectMemberId, [FromBody] ProjectRole role, CancellationToken cancellationToken)
         {
             await sender.Send(new ChangeMemberRoleCommand(projectId, projectMemberId, role), cancellationToken);
