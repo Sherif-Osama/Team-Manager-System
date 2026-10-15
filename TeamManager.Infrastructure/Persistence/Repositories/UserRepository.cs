@@ -62,7 +62,7 @@ namespace TeamManager.Infrastructure.Persistence.Repositories
 
         public Task<User?> GetByIdWithRolesAsync(Guid userId, CancellationToken cancellationToken)
         {
-            return context.Users.Include(x => x.UserRoles)
+            return context.Users.Include(x => x.UserRoles).ThenInclude(ur => ur.Role)
                 .FirstOrDefaultAsync(x => x.Id == userId && x.DeletedAtUtc == null, cancellationToken);
         }
 

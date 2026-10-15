@@ -18,7 +18,7 @@ public sealed class RefreshTokenCommandHandler(IUserRepository userRepository, I
         if (refreshToken is null || !refreshToken.IsActive)
             throw new UnauthorizedAccessException("Invalid refresh token.");
 
-        var user = await userRepository.GetByIdAsync(refreshToken.UserId, cancellationToken);
+        var user = await userRepository.GetByIdWithRolesAsync(refreshToken.UserId, cancellationToken);
 
         if (user is null || !user.IsActive)
             throw new UnauthorizedAccessException("Invalid refresh token.");
