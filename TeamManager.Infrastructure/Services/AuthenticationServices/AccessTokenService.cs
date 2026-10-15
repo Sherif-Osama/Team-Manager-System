@@ -22,6 +22,11 @@ namespace TeamManager.Infrastructure.Services.AuthenticationServices
             new(ClaimTypes.Name, user.DisplayName)
         };
 
+            foreach (var userRole in user.UserRoles)
+            {
+                claims.Add(new Claim(ClaimTypes.Role, userRole.Role.Name));
+            }
+
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_options.Key));
 
             var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);

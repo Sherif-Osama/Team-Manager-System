@@ -11,7 +11,7 @@ public sealed class LoginCommandHandler(IUserRepository userRepository, IPasswor
 {
     public async Task<LoginResponse> Handle(LoginCommand request, CancellationToken cancellationToken)
     {
-        var user = await userRepository.GetByEmailAsync(request.Email, cancellationToken);
+        var user = await userRepository.GetByEmailWithRolesAsync(request.Email, cancellationToken);
 
         if (user is null)
             throw new UnauthorizedAccessException("Invalid email or password.");

@@ -1,6 +1,7 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using TeamManager.Application.Common.DefaultValues;
 using TeamManager.Application.Features.Admin.Commands.BootstrapAdmin;
 using TeamManager.Application.Features.AuditLogs.Queries;
 using TeamManager.Application.Features.Users.AdminUserManagement.Commands.AssignRole;
@@ -24,6 +25,7 @@ namespace TeamManager.Api.Controllers.Admin
         }
 
         [HttpPost("users/{userId:guid}/roles")]
+        [Authorize(Roles = DefaultRoles.Admin)]
         public async Task<IActionResult> AssignRole(Guid userId, AssignRoleRequest request, CancellationToken cancellationToken)
         {
             await sender.Send(new AssignRoleCommand(userId, request.RoleId), cancellationToken);
@@ -32,6 +34,7 @@ namespace TeamManager.Api.Controllers.Admin
         }
 
         [HttpGet("users")]
+        [Authorize(Roles = DefaultRoles.Admin)]
         public async Task<IActionResult> GetUsers([FromQuery] GetUsersQuery query, CancellationToken cancellationToken)
         {
             var result = await sender.Send(query, cancellationToken);
@@ -39,6 +42,7 @@ namespace TeamManager.Api.Controllers.Admin
         }
 
         [HttpGet("users/{userId:guid}")]
+        [Authorize(Roles = DefaultRoles.Admin)]
         public async Task<IActionResult> GetUserById(Guid userId, CancellationToken cancellationToken)
         {
             var result = await sender.Send(new GetUserByIdQuery(userId), cancellationToken);
@@ -46,6 +50,7 @@ namespace TeamManager.Api.Controllers.Admin
         }
 
         [HttpGet("users/by-email/{email}")]
+        [Authorize(Roles = DefaultRoles.Admin)]
         public async Task<IActionResult> GetUserByEmail(string email, CancellationToken cancellationToken)
         {
             var result = await sender.Send(new GetUserByEmailQuery(email), cancellationToken);
@@ -53,6 +58,7 @@ namespace TeamManager.Api.Controllers.Admin
         }
 
         [HttpDelete("users/{userId:guid}/roles/{roleId:int}")]
+        [Authorize(Roles = DefaultRoles.Admin)]
         public async Task<IActionResult> RevokeRole(Guid userId, int roleId, CancellationToken cancellationToken)
         {
             await sender.Send(new RevokeRoleCommand(userId, roleId), cancellationToken);
