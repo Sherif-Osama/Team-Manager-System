@@ -14,6 +14,7 @@ namespace TeamManager.Api
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
+            builder.Services.AddApiRateLimiting(builder.Configuration);
             builder.Services.AddApplication();
             builder.Services.AddInfrastructure(builder.Configuration);
             builder.Services.AddJwtAuthentication(builder.Configuration);
@@ -36,12 +37,20 @@ namespace TeamManager.Api
             }
 
             app.UseHttpsRedirection();
+
             app.UseMiddleware<SecurityEventLoggingMiddleware>();
             app.UseMiddleware<GlobalExceptionHandlingMiddleware>();
+
             app.UseAuthentication();
+
+            app.UseRateLimiter();
+
             app.UseAuthorization();
+
             app.MapControllers();
+
             app.MapHub<NotificationsHub>("/hubs/notifications");
+
             app.Run();
         }
     }

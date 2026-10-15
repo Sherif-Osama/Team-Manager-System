@@ -3,6 +3,7 @@ using System.Text.Json;
 using TeamManager.Application.Abstractions.Authentication;
 using TeamManager.Application.Abstractions.Persistence;
 using TeamManager.Application.Abstractions.Security;
+using TeamManager.Application.Common.Exceptions.AuthorizationExceptions;
 using TeamManager.Application.Common.Outbox;
 using TeamManager.Domain.Exceptions;
 
@@ -23,7 +24,7 @@ namespace TeamManager.Application.Features.Authentication.Commands.ResetPassword
             var tokenHash = tokenService.HashToken(request.Token);
 
             if (!user.HasValidPasswordResetToken(tokenHash))
-                throw new DomainException(InvalidTokenMessage);
+                throw new InvalidTokenException(InvalidTokenMessage);
 
             var newPasswordHash = passwordHasher.Hash(request.NewPassword);
 

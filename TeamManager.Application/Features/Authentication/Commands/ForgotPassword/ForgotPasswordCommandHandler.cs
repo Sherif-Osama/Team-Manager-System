@@ -9,7 +9,7 @@ namespace TeamManager.Application.Features.Authentication.Commands.ForgotPasswor
     public sealed class ForgotPasswordCommandHandler(IUserRepository userRepository, IEmailConfirmationTokenService tokenService,
         IOutbox outbox, IUnitOfWork unitOfWork) : IRequestHandler<ForgotPasswordCommand>
     {
-        private static readonly TimeSpan TokenLifetime = TimeSpan.FromMinutes(10);
+        private static readonly TimeSpan TokenLifetime = TimeSpan.FromMinutes(30);
 
         public async Task Handle(ForgotPasswordCommand request, CancellationToken cancellationToken)
         {

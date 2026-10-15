@@ -1,11 +1,14 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using System.Security.Claims;
+using TeamManager.Application.Features.Authentication.Commands.ForgotPassword;
 using TeamManager.Application.Features.Authentication.Commands.Login;
 using TeamManager.Application.Features.Authentication.Commands.Logout;
 using TeamManager.Application.Features.Authentication.Commands.RefreshToken;
 using TeamManager.Application.Features.Authentication.Commands.Register;
+using TeamManager.Application.Features.Authentication.Commands.ResetPassword;
 
 namespace TeamManager.Api.Controllers.Authentication
 {
@@ -15,6 +18,7 @@ namespace TeamManager.Api.Controllers.Authentication
     public sealed class AuthenticationController(ISender sender) : ControllerBase
     {
         [HttpPost("register")]
+        [EnableRateLimiting("AuthRegister")]
         public async Task<IActionResult> Register(RegisterCommand command, CancellationToken cancellationToken)
         {
             var userId = await sender.Send(command, cancellationToken);
@@ -22,6 +26,7 @@ namespace TeamManager.Api.Controllers.Authentication
         }
 
         [HttpPost("login")]
+        [EnableRateLimiting("AuthLogin")]
         public async Task<IActionResult> Login(LoginCommand command, CancellationToken cancellationToken)
         {
             var result = await sender.Send(command, cancellationToken);
@@ -30,6 +35,7 @@ namespace TeamManager.Api.Controllers.Authentication
         }
 
         [HttpPost("refresh")]
+        [EnableRateLimiting("AuthRefresh")]
         public async Task<IActionResult> Refresh(RefreshTokenCommand command, CancellationToken cancellationToken)
         {
             var result = await sender.Send(command, cancellationToken);
@@ -56,6 +62,29 @@ namespace TeamManager.Api.Controllers.Authentication
                 Email = User.FindFirst(ClaimTypes.Email)?.Value,
                 Name = User.FindFirst(ClaimTypes.Name)?.Value
             });
+        }
+
+        [AllowAnonymous]
+        [HttpPost("forgot-password")]
+        [EnableRateLimiting("AuthForgotPassword")]
+        public async Task<IActionResult> ForgotPassword(ForgotPasswordCommand command, CancellationToken cancellationToken)
+        {
+            await sender.Send(command, cancellationToken);
+
+            return Ok(new
+            {
+                message = "If an account with this email exists, password reset instructions will be sent."
+            });
+        }
+
+        [AllowAnonymous]
+        [HttpPost("reset-password")]
+        [EnableRateLimiting("AuthResetPassword")]
+        public async Task<IActionResult> ResetPassword(ResetPasswordCommand command, CancellationToken cancellationToken)
+        {
+            await sender.Send(command, cancellationToken);
+
+            return NoContent();
         }
     }
 }
