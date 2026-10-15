@@ -4,6 +4,5 @@
     {
         public const string Admin = "SystemAdmin";
         public const string User = "User";
-        public const string Viewer = "Viewer";
     }
 }

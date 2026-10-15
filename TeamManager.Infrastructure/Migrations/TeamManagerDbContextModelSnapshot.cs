@@ -608,12 +608,6 @@ namespace TeamManager.Infrastructure.Migrations
                             Id = 2,
                             Description = "Standard authenticated user",
                             Name = "User"
-                        },
-                        new
-                        {
-                            Id = 3,
-                            Description = "View-only access,(Audit),(Logs)",
-                            Name = "Viewer"
                         });
                 });
 
@@ -661,11 +655,6 @@ namespace TeamManager.Infrastructure.Migrations
                         {
                             RoleId = 1,
                             PermissionId = 5
-                        },
-                        new
-                        {
-                            RoleId = 3,
-                            PermissionId = 2
                         });
                 });
 
