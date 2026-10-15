@@ -18,6 +18,7 @@ namespace TeamManager.Api
             builder.Services.AddApplication();
             builder.Services.AddInfrastructure(builder.Configuration);
             builder.Services.AddJwtAuthentication(builder.Configuration);
+            builder.Services.AddApiCors(builder.Configuration);
             // Add services to the container.
             builder.Services.AddHttpContextAccessor();
 
@@ -37,6 +38,10 @@ namespace TeamManager.Api
             }
 
             app.UseHttpsRedirection();
+
+            app.UseRouting();
+
+            app.UseCors(CorsExtensions.FrontendPolicy);
 
             app.UseMiddleware<SecurityEventLoggingMiddleware>();
             app.UseMiddleware<GlobalExceptionHandlingMiddleware>();
