@@ -71,5 +71,11 @@ namespace TeamManager.Infrastructure.Persistence.Repositories
             return await context.Users.Include(x => x.UserRoles).ThenInclude(ur => ur.Role)
                 .FirstOrDefaultAsync(x => x.Email == email && x.DeletedAtUtc == null, cancellationToken);
         }
+
+        public async Task<IReadOnlyCollection<string>> GetPermissionCodesAsync(Guid userId, CancellationToken cancellationToken)
+        {
+            return await context.UserRoles.Where(ur => ur.UserId == userId && ur.User.IsActive && ur.User.DeletedAtUtc == null)
+                .SelectMany(ur => ur.Role.RolePermissions.Select(rp => rp.Permission.Code)).Distinct().ToListAsync(cancellationToken);
+        }
     }
 }
