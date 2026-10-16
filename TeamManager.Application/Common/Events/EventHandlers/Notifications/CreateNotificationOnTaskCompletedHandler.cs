@@ -14,11 +14,11 @@ namespace TeamManager.Application.Common.Events.EventHandlers.Notifications
         {
             var domainEvent = notification.DomainEvent;
 
-            if (domainEvent.ToStatus != TaskItemStatus.Done || domainEvent.Task.AssigneeUserId is not Guid assigneeUserId)
+            if (domainEvent.ToStatus != TaskItemStatus.Done || domainEvent.ActorUserId == domainEvent.Task.CreatedBy)
                 return;
 
-            await notificationWriter.CreateIfEnabledAsync(assigneeUserId, NotificationType.TaskCompleted, "Task Completed",
-                "A task assigned to you has been completed.", EntityType.Task, domainEvent.Task.Id.ToString(), cancellationToken);
+            await notificationWriter.CreateIfEnabledAsync(domainEvent.Task.CreatedBy, NotificationType.TaskCompleted, "Task Completed",
+                "A task you created has been completed.", EntityType.Task, domainEvent.Task.Id.ToString(), cancellationToken);
         }
     }
 }

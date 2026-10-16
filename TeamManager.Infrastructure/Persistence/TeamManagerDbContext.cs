@@ -90,7 +90,6 @@ namespace TeamManager.Infrastructure.Persistence
                 await SaveChangesAsync(cancellationToken);
 
                 await transaction.CommitAsync(cancellationToken);
-                await realtimeDispatcher.DispatchAsync(cancellationToken);
             }
             catch
             {
@@ -98,6 +97,8 @@ namespace TeamManager.Infrastructure.Persistence
                 await transaction.RollbackAsync(cancellationToken);
                 throw;
             }
+
+            await realtimeDispatcher.DispatchAsync(cancellationToken);
         }
 
         public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken)
@@ -111,15 +112,12 @@ namespace TeamManager.Infrastructure.Persistence
                 return await base.SaveChangesAsync(cancellationToken);
 
             await using var transaction = await Database.BeginTransactionAsync(cancellationToken);
-
+            int result = 0;
             try
             {
-                var result = await SaveChangesCoreAsync(cancellationToken);
+                result = await SaveChangesCoreAsync(cancellationToken);
 
                 await transaction.CommitAsync(cancellationToken);
-
-                await realtimeDispatcher.DispatchAsync(cancellationToken);
-                return result;
             }
             catch
             {
@@ -128,6 +126,9 @@ namespace TeamManager.Infrastructure.Persistence
 
                 throw;
             }
+
+            await realtimeDispatcher.DispatchAsync(cancellationToken);
+            return result;
         }
 
         private async Task<int> SaveChangesCoreAsync(CancellationToken cancellationToken)
