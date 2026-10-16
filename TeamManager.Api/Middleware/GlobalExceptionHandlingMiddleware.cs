@@ -12,7 +12,7 @@ using TeamManager.Domain.Exceptions;
 
 namespace TeamManager.Api.Middleware
 {
-    public class GlobalExceptionHandlingMiddleware(RequestDelegate next)
+    public class GlobalExceptionHandlingMiddleware(RequestDelegate next, ILogger<GlobalExceptionHandlingMiddleware> logger)
     {
         public async Task InvokeAsync(HttpContext context)
         {
@@ -83,12 +83,16 @@ namespace TeamManager.Api.Middleware
                 NotificationNotFoundException => StatusCodes.Status404NotFound,
                 CommentNotFoundException => StatusCodes.Status404NotFound,
                 InvalidTokenException => StatusCodes.Status403Forbidden,
+                DbUpdateException => StatusCodes.Status409Conflict,
                 _ => StatusCodes.Status500InternalServerError
             };
 
             //to prevent exposing sensitive information,
             //we can log the exception details and return a generic error message to the client for unhandled exceptions.
             var isUnhandled = statusCode == StatusCodes.Status500InternalServerError;
+
+            if (isUnhandled)
+                logger.LogError(exception, exception.Message);
 
             if (statusCode is StatusCodes.Status401Unauthorized or StatusCodes.Status403Forbidden)
             {

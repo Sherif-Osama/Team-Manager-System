@@ -5,7 +5,7 @@ namespace TeamManager.Infrastructure.Services.Caching
 {
     public sealed class HybridCacheService(HybridCache hybridCache) : ICacheService
     {
-        public async Task<T?> GetOrCreateAsync<T>(string key, Func<CancellationToken, Task<T>> factory, TimeSpan expiration,
+        public async Task<T> GetOrCreateAsync<T>(string key, Func<CancellationToken, Task<T>> factory, TimeSpan expiration,
             IReadOnlyCollection<string>? tags = null, CancellationToken cancellationToken = default)
         {
             if (string.IsNullOrWhiteSpace(key))

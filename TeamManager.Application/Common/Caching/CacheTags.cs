@@ -3,5 +3,6 @@
     public static class CacheTags
     {
         public static string UserPermissions(Guid userId) => $"teammanager:permissions:user:{userId:N}";
+        public static string TeamLabels(Guid teamId) => $"teammanager:labels:team:{teamId:N}";
     }
 }

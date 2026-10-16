@@ -148,7 +148,7 @@ namespace TeamManager.Domain.Entities
             _labels.Add(label);
 
             Touch();
-
+            AddDomainEvent(new TeamLabelsChangedDomainEvent(Id));
             return label;
         }
 
@@ -174,6 +174,7 @@ namespace TeamManager.Domain.Entities
             if (!string.IsNullOrWhiteSpace(colorHex))
                 label.ChangeColor(colorHex);
 
+            AddDomainEvent(new TeamLabelsChangedDomainEvent(Id));
             Touch();
         }
 
@@ -188,6 +189,7 @@ namespace TeamManager.Domain.Entities
 
             _labels.Remove(label);
             Touch();
+            AddDomainEvent(new TeamLabelsChangedDomainEvent(Id));
             return label;
         }
 

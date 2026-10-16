@@ -19,6 +19,7 @@ namespace TeamManager.Application
                 configuration.AddOpenBehavior(typeof(TeamAuthorizationBehavior<,>));
                 configuration.AddOpenBehavior(typeof(ProjectAuthorizationBehavior<,>));
                 configuration.AddOpenBehavior(typeof(TaskAuthorizationBehavior<,>));
+                configuration.AddOpenBehavior(typeof(CachingBehavior<,>));
             });
 
             services.AddValidatorsFromAssembly(typeof(DependencyInjection).Assembly);
