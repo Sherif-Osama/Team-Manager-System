@@ -6,6 +6,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using TeamManager.Application.Abstractions.Authentication;
+using TeamManager.Application.Abstractions.Caching;
 using TeamManager.Application.Abstractions.Configuration;
 using TeamManager.Application.Abstractions.Persistence;
 using TeamManager.Application.Abstractions.Security;
@@ -14,13 +15,16 @@ using TeamManager.Infrastructure.BackgroundJobs.DeleteInactiveUsers;
 using TeamManager.Infrastructure.BackgroundJobs.InvitationExpiration;
 using TeamManager.Infrastructure.BackgroundJobs.ProcessOutboxMessages.MessageHandlers;
 using TeamManager.Infrastructure.BackgroundJobs.ProcessOutboxMessages.OutboxMessages;
+using TeamManager.Infrastructure.BackgroundJobs.OutboxRetention;
 using TeamManager.Infrastructure.BackgroundJobs.RefreshTokenCleanup;
 using TeamManager.Infrastructure.Communication;
 using TeamManager.Infrastructure.Persistence;
 using TeamManager.Infrastructure.Persistence.Outbox;
 using TeamManager.Infrastructure.Persistence.Repositories;
 using TeamManager.Infrastructure.Services.AuthenticationServices;
+using TeamManager.Infrastructure.Services.Caching;
 using TeamManager.Infrastructure.Services.SecurityService;
+using TeamManager.Infrastructure.Services.SecurityServices;
 using TeamManager.Infrastructure.Storage;
 
 namespace TeamManager.Infrastructure
@@ -47,6 +51,8 @@ namespace TeamManager.Infrastructure
             services.AddScoped<IOutbox, Outbox>();
             services.AddHostedService<ProcessOutboxMessagesJob>();
             services.AddScoped<OutboxProcessorService>();
+            services.AddHostedService<OutboxRetentionCleanupJob>();
+            services.AddScoped<OutboxRetentionCleanupService>();
             services.AddScoped<IEmailConfirmationTokenService, EmailConfirmationTokenService>();
             services.AddScoped<INotificationRepository, NotificationRepository>();
             services.AddScoped<IOutboxMessageHandler, PasswordResetEmailOutboxMessageHandler>();
@@ -87,6 +93,11 @@ namespace TeamManager.Infrastructure
 
             services.AddScoped<IActivityLogRepository, ActivityLogRepository>();
             services.AddScoped<IAuditLogRepository, AuditLogRepository>();
+            services.AddScoped<IPermissionService, PermissionService>();
+            services.AddMemoryCache();
+
+            services.AddSingleton<ICacheService, MemoryCacheService>();
+
             return services;
         }
     }
