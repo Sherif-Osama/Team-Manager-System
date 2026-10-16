@@ -30,12 +30,17 @@ namespace TeamManager.Application.Features.Users.AdminUserManagement.Commands.Re
             {
                 await unitOfWork.ExecuteInSerializableTransactionAsync(async ct =>
                 {
-                    var isLastSystemAdmin = await userRepository.IsLastSystemAdminAsync(user.Id, ct);
+                    var transactionalUser = await userRepository.GetByIdWithRolesAsync(request.UserId, ct);
+
+                    if (transactionalUser is null)
+                        throw new UserNotFoundException(request.UserId);
+
+                    var isLastSystemAdmin = await userRepository.IsLastSystemAdminAsync(transactionalUser.Id, ct);
 
                     if (isLastSystemAdmin)
                         throw new ForbiddenException("The last system administrator role cannot be revoked.");
 
-                    user.RemoveRole(role.Id);
+                    transactionalUser.RemoveRole(role.Id);
                 }, cancellationToken);
 
                 return;

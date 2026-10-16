@@ -50,13 +50,17 @@ namespace TeamManager.Infrastructure.Persistence
         {
             for (var attempt = 1; attempt <= MaxDeadlockRetries; attempt++)
             {
+                // A transaction owns its complete unit of work. Start every attempt with
+                // a clean identity map so reads are made against the current database state.
+                ChangeTracker.Clear();
+
                 try
                 {
                     await ExecuteInTransactionAsync(action, IsolationLevel.Serializable, cancellationToken);
 
                     return;
                 }
-                catch (SqlException ex) when (ex.Number == 1205 && attempt < MaxDeadlockRetries)
+                catch (Exception ex) when (IsDeadlock(ex) && attempt < MaxDeadlockRetries)
                 {
                     var delay = TimeSpan.FromMilliseconds(100 * attempt);
 
@@ -65,8 +69,17 @@ namespace TeamManager.Infrastructure.Persistence
             }
         }
 
-        private async Task ExecuteInTransactionAsync(Func<CancellationToken, Task> action,
-            IsolationLevel isolationLevel, CancellationToken cancellationToken)
+        private static bool IsDeadlock(Exception exception)
+        {
+            return exception switch
+            {
+                SqlException { Number: 1205 } => true,
+                DbUpdateException { InnerException: SqlException { Number: 1205 } } => true,
+                _ => exception.GetBaseException() is SqlException { Number: 1205 }
+            };
+        }
+
+        private async Task ExecuteInTransactionAsync(Func<CancellationToken, Task> action, IsolationLevel isolationLevel, CancellationToken cancellationToken)
         {
             await using var transaction = await Database.BeginTransactionAsync(isolationLevel, cancellationToken);
 

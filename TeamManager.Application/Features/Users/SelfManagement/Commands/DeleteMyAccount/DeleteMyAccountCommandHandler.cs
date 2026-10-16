@@ -29,6 +29,11 @@ namespace TeamManager.Application.Features.Users.SelfManagement.Commands.DeleteM
 
             await unitOfWork.ExecuteInSerializableTransactionAsync(async ct =>
             {
+                var transactionalUser = await userRepository.GetByIdAsync(userId, ct);
+
+                if (transactionalUser is null)
+                    throw new UserNotFoundException(userId);
+
                 var hasActiveOwnedTeams = await teamRepository.HasActiveOwnedTeamsAsync(userId, ct);
 
                 if (hasActiveOwnedTeams)
@@ -39,12 +44,12 @@ namespace TeamManager.Application.Features.Users.SelfManagement.Commands.DeleteM
                 if (hasActiveOwnedProject)
                     throw new UserOwnsActiveProjectException(userId);
 
-                var isLastSystemAdmin = await userRepository.IsLastSystemAdminAsync(user.Id, ct);
+                var isLastSystemAdmin = await userRepository.IsLastSystemAdminAsync(transactionalUser.Id, ct);
 
                 if (isLastSystemAdmin)
                     throw new ForbiddenException("The last system administrator cannot delete their account.");
 
-                user.SoftDelete();
+                transactionalUser.SoftDelete();
 
                 await userRepository.RevokeAllRefreshTokensAsync(userId, ct);
             }, cancellationToken);

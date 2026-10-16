@@ -15,24 +15,31 @@ namespace TeamManager.Application.Features.Users.SelfManagement.Commands.Deactiv
             if (!currentUser.UserId.HasValue)
                 throw new UnauthorizedAccessException("User is not authenticated.");
 
-            var user = await userRepository.GetByIdAsync(currentUser.UserId.Value, cancellationToken);
+            var userId = currentUser.UserId.Value;
+
+            var user = await userRepository.GetByIdAsync(userId, cancellationToken);
 
             if (user is null)
-                throw new UserNotFoundException(currentUser.UserId.Value);
+                throw new UserNotFoundException(userId);
 
             if (!passwordHasher.Verify(request.CurrentPassword, user.PasswordHash))
                 throw new ForbiddenException("Invalid password.");
 
             await unitOfWork.ExecuteInSerializableTransactionAsync(async ct =>
             {
-                var isLastSystemAdmin = await userRepository.IsLastSystemAdminAsync(user.Id, ct);
+                var transactionalUser = await userRepository.GetByIdAsync(userId, ct);
+
+                if (transactionalUser is null)
+                    throw new UserNotFoundException(userId);
+
+                var isLastSystemAdmin = await userRepository.IsLastSystemAdminAsync(transactionalUser.Id, ct);
 
                 if (isLastSystemAdmin)
                     throw new ForbiddenException("The last system administrator cannot deactivate their account.");
 
-                user.Deactivate();
+                transactionalUser.Deactivate();
 
-                await userRepository.RevokeAllRefreshTokensAsync(user.Id, ct);
+                await userRepository.RevokeAllRefreshTokensAsync(transactionalUser.Id, ct);
 
             }, cancellationToken);
         }
