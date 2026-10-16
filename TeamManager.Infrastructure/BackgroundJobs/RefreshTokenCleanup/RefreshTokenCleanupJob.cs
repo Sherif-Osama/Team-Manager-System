@@ -9,37 +9,40 @@ namespace TeamManager.Infrastructure.BackgroundJobs.RefreshTokenCleanup
     {
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            using var timer = new PeriodicTimer(TimeSpan.FromDays(30));
-
             try
             {
+                await CleanupExpiredTokensAsync(stoppingToken);
+
+                using var timer = new PeriodicTimer(TimeSpan.FromDays(1));
+
                 while (await timer.WaitForNextTickAsync(stoppingToken))
-                {
-                    try
-                    {
-                        using var scope = scopeFactory.CreateScope();
-
-                        var cleanupService = scope.ServiceProvider.GetRequiredService<ExpiredRefreshTokenCleanupService>();
-
-                        var deletedCount = await cleanupService.CleanupAsync(stoppingToken);
-
-                        if (deletedCount > 0)
-                            logger.LogInformation("Deleted {DeletedCount} expired refresh token records.", deletedCount);
-
-                    }
-                    catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
-                    {
-                        break;
-                    }
-                    catch (Exception ex)
-                    {
-                        logger.LogError(ex, "An error occurred while cleaning up expired refresh tokens.");
-                    }
-                }
+                    await CleanupExpiredTokensAsync(stoppingToken);
             }
             catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
             {
                 // Expected when the application is stopping.
+            }
+        }
+
+        private async Task CleanupExpiredTokensAsync(CancellationToken stoppingToken)
+        {
+            try
+            {
+                using var scope = scopeFactory.CreateScope();
+
+                var cleanupService = scope.ServiceProvider.GetRequiredService<ExpiredRefreshTokenCleanupService>();
+                var deletedCount = await cleanupService.CleanupAsync(stoppingToken);
+
+                if (deletedCount > 0)
+                    logger.LogInformation("Deleted {DeletedCount} expired refresh token records.", deletedCount);
+            }
+            catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "An error occurred while cleaning up expired refresh tokens.");
             }
         }
     }
