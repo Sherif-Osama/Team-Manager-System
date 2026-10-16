@@ -4,8 +4,7 @@ using TeamManager.Application.Abstractions.Persistence;
 
 namespace TeamManager.Application.Features.Teams.Team.Queries.GetTeams
 {
-    public sealed class GetTeamsQueryHandler(IApplicationDbContext context)
-        : IRequestHandler<GetTeamsQuery, GetTeamsResponse>
+    public sealed class GetTeamsQueryHandler(IApplicationDbContext context) : IRequestHandler<GetTeamsQuery, GetTeamsResponse>
     {
         public async Task<GetTeamsResponse> Handle(GetTeamsQuery request, CancellationToken cancellationToken)
         {

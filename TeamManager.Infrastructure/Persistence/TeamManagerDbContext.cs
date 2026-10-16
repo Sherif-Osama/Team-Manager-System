@@ -2,6 +2,7 @@
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using System.Data;
+using TeamManager.Application.Abstractions.Caching;
 using TeamManager.Application.Abstractions.Persistence;
 using TeamManager.Application.Abstractions.Realtime;
 using TeamManager.Application.Common.Events;
@@ -12,7 +13,7 @@ namespace TeamManager.Infrastructure.Persistence
 {
 
     public class TeamManagerDbContext(DbContextOptions<TeamManagerDbContext> options, IPublisher publisher,
-        IPostCommitNotificationDispatcher realtimeDispatcher) : DbContext(options), IUnitOfWork, IApplicationDbContext
+        IPostCommitNotificationDispatcher realtimeDispatcher, IPostCommitCacheInvalidationDispatcher cacheInvalidationDispatcher) : DbContext(options), IUnitOfWork, IApplicationDbContext
     {
         public DbSet<User> Users => Set<User>();
         public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
@@ -94,10 +95,12 @@ namespace TeamManager.Infrastructure.Persistence
             catch
             {
                 realtimeDispatcher.Discard();
+                cacheInvalidationDispatcher.Discard();
                 await transaction.RollbackAsync(cancellationToken);
                 throw;
             }
 
+            await cacheInvalidationDispatcher.DispatchAsync(CancellationToken.None);
             await realtimeDispatcher.DispatchAsync(cancellationToken);
         }
 
@@ -122,11 +125,13 @@ namespace TeamManager.Infrastructure.Persistence
             catch
             {
                 realtimeDispatcher.Discard();
+                cacheInvalidationDispatcher.Discard();
                 await transaction.RollbackAsync(cancellationToken);
 
                 throw;
             }
 
+            await cacheInvalidationDispatcher.DispatchAsync(CancellationToken.None);
             await realtimeDispatcher.DispatchAsync(cancellationToken);
             return result;
         }
@@ -135,8 +140,7 @@ namespace TeamManager.Infrastructure.Persistence
         {
             var result = await base.SaveChangesAsync(cancellationToken);
 
-            var aggregatesWithEvents = ChangeTracker.Entries<IHasDomainEvents>().Select(e => e.Entity).Where(e => e.DomainEvents.Count > 0)
-                    .ToList();
+            var aggregatesWithEvents = ChangeTracker.Entries<IHasDomainEvents>().Select(e => e.Entity).Where(e => e.DomainEvents.Count > 0).ToList();
 
             var events = aggregatesWithEvents.SelectMany(e => e.DomainEvents).ToList();
 
@@ -151,12 +155,11 @@ namespace TeamManager.Infrastructure.Persistence
                 await publisher.Publish(notification, cancellationToken);
             }
 
-            var newNotifications = ChangeTracker.Entries<Notification>().Where(e => e.State == EntityState.Added).Select(e => e.Entity)
-                    .ToList();
+            var newNotifications = ChangeTracker.Entries<Notification>().Where(e => e.State == EntityState.Added).Select(e => e.Entity).ToList();
 
             if (events.Count > 0 && ChangeTracker.HasChanges())
             {
-                await base.SaveChangesAsync(cancellationToken);
+                result += await base.SaveChangesAsync(cancellationToken);
             }
 
             foreach (var notification in newNotifications)

@@ -2,7 +2,7 @@
 using TeamManager.Application.Abstractions.Authentication;
 using TeamManager.Application.Abstractions.Persistence;
 
-namespace TeamManager.Application.Common.AuditLog
+namespace TeamManager.Infrastructure.Services.AuditLog
 {
     public sealed class AuditLogWriter(IAuditLogRepository auditLogRepository, ICurrentUser currentUser) : IAuditLogWriter
     {

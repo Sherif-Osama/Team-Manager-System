@@ -2,7 +2,7 @@
 using TeamManager.Application.Abstractions.Persistence;
 using TeamManager.Application.Common.Exceptions.ProjectExceptions;
 
-namespace TeamManager.Application.Common.ActivityLog
+namespace TeamManager.Infrastructure.Services.ActivityLog
 {
     public sealed class ActivityLogWriter(IProjectRepository projectRepository, IActivityLogRepository activityLogRepository)
         : IActivityLogWriter

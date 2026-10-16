@@ -1,0 +1,7 @@
+﻿namespace TeamManager.Application.Common.Caching
+{
+    public static class CacheTags
+    {
+        public static string UserPermissions(Guid userId) => $"teammanager:permissions:user:{userId:N}";
+    }
+}

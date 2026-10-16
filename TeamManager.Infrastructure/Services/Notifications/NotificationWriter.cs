@@ -3,7 +3,7 @@ using TeamManager.Application.Abstractions.Persistence;
 using TeamManager.Domain.Entities;
 using TeamManager.Domain.Enums;
 
-namespace TeamManager.Application.Common.Notifications
+namespace TeamManager.Infrastructure.Services.Notifications
 {
     public sealed class NotificationWriter(INotificationRepository notificationRepository) : INotificationWriter
     {

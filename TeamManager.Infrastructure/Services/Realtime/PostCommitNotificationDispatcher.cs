@@ -2,7 +2,7 @@
 using TeamManager.Application.Features.Notifications.Realtime;
 using TeamManager.Domain.Entities;
 
-namespace TeamManager.Application.Common.Realtime
+namespace TeamManager.Infrastructure.Services.Realtime
 {
     public sealed class PostCommitNotificationDispatcher(IRealtimeNotifier realtimeNotifier) : IPostCommitNotificationDispatcher
     {
@@ -24,8 +24,7 @@ namespace TeamManager.Application.Common.Realtime
 
             foreach (var notification in notifications)
             {
-                var payload = new NotificationRealtimePayload(notification.Id, notification.Type, notification.Title, notification.Body,
-                    notification.RelatedEntityType, notification.RelatedEntityId, notification.CreatedAtUtc);
+                var payload = new NotificationRealtimePayload(notification.Id, notification.Type, notification.Title, notification.Body, notification.RelatedEntityType, notification.RelatedEntityId, notification.CreatedAtUtc);
 
                 try
                 {

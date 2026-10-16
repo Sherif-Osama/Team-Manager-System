@@ -16,7 +16,11 @@ namespace TeamManager.Infrastructure.BackgroundJobs.ProcessOutboxMessages.Outbox
             var now = DateTime.UtcNow;
             var leaseId = Guid.NewGuid();
             var leaseExpiresAtUtc = now.Add(LeaseDuration);
-
+            //this process need to optimizetion 
+            //-1. Get candidate messages in a batch
+            //-2. Try to lease each candidate message
+            //-3. Process the leased messages
+            //-4. Save changes to the database
             var candidateIds = await context.OutboxMessages.AsNoTracking().Where(message =>
                     message.ProcessedOnUtc == null && message.FailedOnUtc == null &&
                     message.NextAttemptOnUtc <= now &&

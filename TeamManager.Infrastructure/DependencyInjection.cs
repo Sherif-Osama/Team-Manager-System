@@ -5,24 +5,32 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
+using TeamManager.Application.Abstractions.ActivityLog;
+using TeamManager.Application.Abstractions.AuditLog;
 using TeamManager.Application.Abstractions.Authentication;
 using TeamManager.Application.Abstractions.Caching;
 using TeamManager.Application.Abstractions.Configuration;
+using TeamManager.Application.Abstractions.Notifications;
 using TeamManager.Application.Abstractions.Persistence;
+using TeamManager.Application.Abstractions.Realtime;
 using TeamManager.Application.Abstractions.Security;
 using TeamManager.Application.Abstractions.Storage;
 using TeamManager.Infrastructure.BackgroundJobs.DeleteInactiveUsers;
 using TeamManager.Infrastructure.BackgroundJobs.InvitationExpiration;
+using TeamManager.Infrastructure.BackgroundJobs.OutboxRetention;
 using TeamManager.Infrastructure.BackgroundJobs.ProcessOutboxMessages.MessageHandlers;
 using TeamManager.Infrastructure.BackgroundJobs.ProcessOutboxMessages.OutboxMessages;
-using TeamManager.Infrastructure.BackgroundJobs.OutboxRetention;
 using TeamManager.Infrastructure.BackgroundJobs.RefreshTokenCleanup;
 using TeamManager.Infrastructure.Communication;
 using TeamManager.Infrastructure.Persistence;
 using TeamManager.Infrastructure.Persistence.Outbox;
 using TeamManager.Infrastructure.Persistence.Repositories;
+using TeamManager.Infrastructure.Services.ActivityLog;
+using TeamManager.Infrastructure.Services.AuditLog;
 using TeamManager.Infrastructure.Services.AuthenticationServices;
 using TeamManager.Infrastructure.Services.Caching;
+using TeamManager.Infrastructure.Services.Notifications;
+using TeamManager.Infrastructure.Services.Realtime;
 using TeamManager.Infrastructure.Services.SecurityService;
 using TeamManager.Infrastructure.Services.SecurityServices;
 using TeamManager.Infrastructure.Storage;
@@ -67,8 +75,12 @@ namespace TeamManager.Infrastructure
             services.Configure<BootstrapOptions>(configuration.GetSection(BootstrapOptions.SectionName));
             services.AddScoped<IBootstrapSecretProvider, BootstrapSecretProvider>();
             services.AddScoped<IRoleRepository, RoleRepository>();
+            services.AddScoped<IActivityLogWriter, ActivityLogWriter>();
             services.AddScoped<IProjectRepository, ProjectRepository>();
             services.AddScoped<ITaskRepository, TaskRepository>();
+            services.AddScoped<INotificationWriter, NotificationWriter>();
+            services.AddScoped<IAuditLogWriter, AuditLogWriter>();
+            services.AddScoped<IPostCommitNotificationDispatcher, PostCommitNotificationDispatcher>();
             services.AddScoped<ExpiredRefreshTokenCleanupService>();
             services.AddHostedService<RefreshTokenCleanupJob>();
             services.Configure<FileStorageOptions>(configuration.GetSection(FileStorageOptions.SectionName));
@@ -94,10 +106,10 @@ namespace TeamManager.Infrastructure
             services.AddScoped<IActivityLogRepository, ActivityLogRepository>();
             services.AddScoped<IAuditLogRepository, AuditLogRepository>();
             services.AddScoped<IPermissionService, PermissionService>();
-            services.AddMemoryCache();
 
-            services.AddSingleton<ICacheService, MemoryCacheService>();
-
+            services.AddHybridCache();
+            services.AddSingleton<ICacheService, HybridCacheService>();
+            services.AddScoped<IPostCommitCacheInvalidationDispatcher, PostCommitCacheInvalidationDispatcher>();
             return services;
         }
     }
