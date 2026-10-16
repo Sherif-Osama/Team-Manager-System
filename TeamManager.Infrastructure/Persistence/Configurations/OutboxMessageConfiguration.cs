@@ -29,6 +29,8 @@ namespace TeamManager.Infrastructure.Persistence.Configurations
 
             builder.Property(x => x.NextAttemptOnUtc).HasColumnType("datetime2(3)");
 
+            builder.Property(x => x.LeaseExpiresAtUtc).HasColumnType("datetime2(3)");
+
             builder.Property(x => x.Error).HasColumnType("nvarchar(max)");
 
             builder.HasIndex(x => new
@@ -37,6 +39,15 @@ namespace TeamManager.Infrastructure.Persistence.Configurations
                 x.NextAttemptOnUtc
             })
             .HasDatabaseName("IX_OutboxMessages_Processing");
+
+            builder.HasIndex(x => new
+            {
+                x.ProcessedOnUtc,
+                x.FailedOnUtc,
+                x.NextAttemptOnUtc,
+                x.LeaseExpiresAtUtc
+            })
+            .HasDatabaseName("IX_OutboxMessages_Lease");
 
             builder.Property(x => x.FailedOnUtc).HasColumnType("datetime2(3)");
         }

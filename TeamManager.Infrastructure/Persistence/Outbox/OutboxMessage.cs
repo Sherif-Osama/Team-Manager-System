@@ -9,6 +9,8 @@
         public DateTime? ProcessedOnUtc { get; set; }
         public int RetryCount { get; set; }
         public DateTime? NextAttemptOnUtc { get; set; }
+        public Guid? LeaseId { get; set; }
+        public DateTime? LeaseExpiresAtUtc { get; set; }
         public string? Error { get; set; }
         public DateTime? FailedOnUtc { get; set; }
     }

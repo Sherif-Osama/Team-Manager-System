@@ -1328,6 +1328,12 @@ namespace TeamManager.Infrastructure.Migrations
                     b.Property<DateTime?>("FailedOnUtc")
                         .HasColumnType("datetime2(3)");
 
+                    b.Property<DateTime?>("LeaseExpiresAtUtc")
+                        .HasColumnType("datetime2(3)");
+
+                    b.Property<Guid?>("LeaseId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<DateTime?>("NextAttemptOnUtc")
                         .HasColumnType("datetime2(3)");
 
@@ -1356,6 +1362,9 @@ namespace TeamManager.Infrastructure.Migrations
 
                     b.HasIndex("ProcessedOnUtc", "NextAttemptOnUtc")
                         .HasDatabaseName("IX_OutboxMessages_Processing");
+
+                    b.HasIndex("ProcessedOnUtc", "FailedOnUtc", "NextAttemptOnUtc", "LeaseExpiresAtUtc")
+                        .HasDatabaseName("IX_OutboxMessages_Lease");
 
                     b.ToTable("OutboxMessages", (string)null);
                 });
