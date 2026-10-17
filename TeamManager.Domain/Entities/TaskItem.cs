@@ -329,7 +329,7 @@ namespace TeamManager.Domain.Entities
 
             AddDomainEvent(new CommentAddedDomainEvent(this, comment, AssigneeUserId, authorUserId));
 
-            Touch();
+            Touch(new TaskCommentsChangedDomainEvent(Id));
             return comment;
         }
 
@@ -356,7 +356,7 @@ namespace TeamManager.Domain.Entities
 
             comment.Edit(content);
 
-            Touch();
+            Touch(new TaskCommentsChangedDomainEvent(Id));
         }
 
         public void DeleteComment(long commentId)
@@ -371,7 +371,7 @@ namespace TeamManager.Domain.Entities
 
             _comments.Remove(comment);
 
-            Touch();
+            Touch(new TaskCommentsChangedDomainEvent(Id));
         }
 
         public void CompleteChecklistItem(long checklistItemId, Guid completedBy)

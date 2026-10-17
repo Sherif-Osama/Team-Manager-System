@@ -7,5 +7,6 @@
         public static string Task(long taskId) => $"teammanager:task:{taskId}";
         public static string TaskChecklist(long taskId) => $"teammanager:task:{taskId}:checklist";
         public static string TaskAttachments(long taskId) => $"teammanager:task:{taskId}:attachments";
+        public static string TaskComments(long taskId) => $"teammanager:task:{taskId}:comments";
     }
 }
