@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using TeamManager.Application.Common.DefaultValues;
 using TeamManager.Application.Features.Admin.Commands.BootstrapAdmin;
 using TeamManager.Application.Features.AuditLogs.Queries;
+using TeamManager.Application.Features.Permissions.Queries;
 using TeamManager.Application.Features.Users.AdminUserManagement.Commands.AssignRole;
 using TeamManager.Application.Features.Users.AdminUserManagement.Commands.RevokeRole;
 using TeamManager.Application.Features.Users.AdminUserManagement.Queries.GetUserByEmail;
@@ -69,6 +70,15 @@ namespace TeamManager.Api.Controllers.Admin
         public async Task<IActionResult> GetAuditLogs([FromQuery] GetAuditLogsQuery query, CancellationToken cancellationToken)
         {
             var result = await sender.Send(query, cancellationToken);
+            return Ok(result);
+        }
+
+        [HttpGet("permissions")]
+        [Authorize]
+        public async Task<IActionResult> GetPermissions(CancellationToken cancellationToken)
+        {
+            var result = await sender.Send(new GetPermissionsQuery(), cancellationToken);
+
             return Ok(result);
         }
     }

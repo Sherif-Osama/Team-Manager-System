@@ -22,5 +22,6 @@ namespace TeamManager.Application.Abstractions.Persistence
         DbSet<NotificationPreference> NotificationPreferences { get; }
         DbSet<Domain.Entities.ActivityLog> ActivityLogs { get; }
         DbSet<Domain.Entities.AuditLog> AuditLogs { get; }
+        DbSet<Permission> Permissions { get; }
     }
 }

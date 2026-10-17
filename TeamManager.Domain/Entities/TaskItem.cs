@@ -282,7 +282,6 @@ namespace TeamManager.Domain.Entities
             var attachment = new TaskAttachment(Id, originalFileName, storageKey, contentType, sizeBytes,
                 uploadedBy, fileHash);
             _attachments.Add(attachment);
-            Touch(new TaskAttachmentsChangedDomainEvent(Id));
             return attachment;
         }
 
@@ -298,7 +297,6 @@ namespace TeamManager.Domain.Entities
 
             _attachments.Remove(attachment);
 
-            Touch(new TaskAttachmentsChangedDomainEvent(Id));
 
             return attachment;
         }
@@ -388,7 +386,7 @@ namespace TeamManager.Domain.Entities
                 throw new DomainException("Checklist item is already completed");
 
             item.Complete(completedBy);
-            Touch(new TaskChecklistChangedDomainEvent(Id));
+            Touch();
         }
 
         public void ReopenChecklistItem(long checklistItemId)
@@ -405,7 +403,7 @@ namespace TeamManager.Domain.Entities
                 throw new DomainException("Checklist item is already incomplete");
 
             item.Reopen();
-            Touch(new TaskChecklistChangedDomainEvent(Id));
+            Touch();
         }
 
         public void RemoveChecklistItem(long checklistItemId)
@@ -420,7 +418,7 @@ namespace TeamManager.Domain.Entities
 
             _checklistItems.Remove(item);
 
-            Touch(new TaskChecklistChangedDomainEvent(Id));
+            Touch();
         }
 
         public TaskChecklistItem AddChecklistItem(string content)
@@ -435,7 +433,7 @@ namespace TeamManager.Domain.Entities
 
             _checklistItems.Add(item);
 
-            Touch(new TaskChecklistChangedDomainEvent(Id));
+            Touch();
 
             return item;
         }
@@ -457,10 +455,7 @@ namespace TeamManager.Domain.Entities
             UpdatedAtUtc = DateTime.UtcNow;
 
             // New task: TaskCreatedDomainEvent handles creation.
-            if (Id <= 0)
-                return;
 
-            AddDomainEvent(domainEvent ?? new TaskChangedDomainEvent(Id));
         }
     }
 }

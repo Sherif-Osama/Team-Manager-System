@@ -307,5 +307,8 @@ public class User : AggregateRoot<Guid>
         AddDomainEvent(new UserRoleRevokedDomainEvent(Id, roleId));
     }
 
-    private void Touch() => UpdatedAtUtc = DateTime.UtcNow;
+    private void Touch()
+    {
+        UpdatedAtUtc = DateTime.UtcNow;
+    }
 }
