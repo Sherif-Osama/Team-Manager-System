@@ -5,6 +5,7 @@ using System.Data;
 using TeamManager.Application.Common.Exceptions.AuthorizationExceptions;
 using TeamManager.Application.Common.Exceptions.NotificationExceptions;
 using TeamManager.Application.Common.Exceptions.ProjectExceptions;
+using TeamManager.Application.Common.Exceptions.RoleExceptions;
 using TeamManager.Application.Common.Exceptions.TaskExceptions;
 using TeamManager.Application.Common.Exceptions.TeamExceptions;
 using TeamManager.Application.Common.Exceptions.UserExceptions;
@@ -84,6 +85,7 @@ namespace TeamManager.Api.Middleware
                 CommentNotFoundException => StatusCodes.Status404NotFound,
                 InvalidTokenException => StatusCodes.Status403Forbidden,
                 DbUpdateException => StatusCodes.Status409Conflict,
+                RoleNameAlreadyExistsException => StatusCodes.Status409Conflict,
                 _ => StatusCodes.Status500InternalServerError
             };
 

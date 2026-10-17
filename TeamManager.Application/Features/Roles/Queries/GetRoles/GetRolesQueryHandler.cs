@@ -8,7 +8,7 @@ namespace TeamManager.Application.Features.Roles.Queries.GetRoles
     {
         public async Task<GetRolesResponse> Handle(GetRolesQuery request, CancellationToken cancellationToken)
         {
-            var roles = await context.Roles.AsNoTracking().OrderBy(r => r.Name)
+            var roles = await context.Roles.AsNoTracking().OrderBy(r => r.Id)
                 .Select(r => new RoleListItem(r.Id, r.Name, r.Description)).ToListAsync(cancellationToken);
 
             return new GetRolesResponse(roles);

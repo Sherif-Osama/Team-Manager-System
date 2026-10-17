@@ -5,6 +5,7 @@ using TeamManager.Application.Common.DefaultValues;
 using TeamManager.Application.Features.Admin.Commands.BootstrapAdmin;
 using TeamManager.Application.Features.AuditLogs.Queries;
 using TeamManager.Application.Features.Permissions.Queries.GetPermissions;
+using TeamManager.Application.Features.Roles.Commands.CreateRole;
 using TeamManager.Application.Features.Roles.Queries.GetRoles;
 using TeamManager.Application.Features.Users.AdminUserManagement.Commands.AssignRole;
 using TeamManager.Application.Features.Users.AdminUserManagement.Commands.RevokeRole;
@@ -88,6 +89,14 @@ namespace TeamManager.Api.Controllers.Admin
             var result = await sender.Send(new GetRolesQuery(), cancellationToken);
 
             return Ok(result);
+        }
+
+        [HttpPost("roles")]
+        public async Task<IActionResult> CreateRole(CreateRoleCommand command, CancellationToken cancellationToken)
+        {
+            var roleId = await sender.Send(command, cancellationToken);
+
+            return StatusCode(StatusCodes.Status201Created, new { RoleId = roleId });
         }
     }
 }
