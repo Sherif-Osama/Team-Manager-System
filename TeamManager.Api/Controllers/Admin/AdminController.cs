@@ -4,12 +4,14 @@ using Microsoft.AspNetCore.Mvc;
 using TeamManager.Application.Common.DefaultValues;
 using TeamManager.Application.Features.Admin.Commands.BootstrapAdmin;
 using TeamManager.Application.Features.AuditLogs.Queries;
+using TeamManager.Application.Features.Permissions.Queries.GetPermissionById;
 using TeamManager.Application.Features.Permissions.Queries.GetPermissions;
 using TeamManager.Application.Features.Roles.Commands.AddPermissionToRole;
 using TeamManager.Application.Features.Roles.Commands.CreateRole;
 using TeamManager.Application.Features.Roles.Commands.DeleteRole;
 using TeamManager.Application.Features.Roles.Commands.RemovePermissionFromRole;
 using TeamManager.Application.Features.Roles.Commands.RenameRole;
+using TeamManager.Application.Features.Roles.Queries.GetRoleById;
 using TeamManager.Application.Features.Roles.Queries.GetRoles;
 using TeamManager.Application.Features.Users.AdminUserManagement.Commands.AssignRole;
 using TeamManager.Application.Features.Users.AdminUserManagement.Commands.RevokeRole;
@@ -87,10 +89,26 @@ namespace TeamManager.Api.Controllers.Admin
             return Ok(result);
         }
 
+        [HttpGet("permissions/{permissionId:int}")]
+        public async Task<IActionResult> GetPermissionById(int permissionId, CancellationToken cancellationToken)
+        {
+            var result = await sender.Send(new GetPermissionByIdQuery(permissionId), cancellationToken);
+
+            return Ok(result);
+        }
+
         [HttpGet("roles")]
         public async Task<IActionResult> GetRoles(CancellationToken cancellationToken)
         {
             var result = await sender.Send(new GetRolesQuery(), cancellationToken);
+
+            return Ok(result);
+        }
+
+        [HttpGet("roles/{roleId:int}")]
+        public async Task<IActionResult> GetRoleById(int roleId, CancellationToken cancellationToken)
+        {
+            var result = await sender.Send(new GetRoleByIdQuery(roleId), cancellationToken);
 
             return Ok(result);
         }
@@ -100,7 +118,7 @@ namespace TeamManager.Api.Controllers.Admin
         {
             var roleId = await sender.Send(command, cancellationToken);
 
-            return StatusCode(StatusCodes.Status201Created, new { RoleId = roleId });
+            return CreatedAtAction(nameof(GetRoleById), new { RoleId = roleId });
         }
 
         [HttpPut("roles/{roleId:int}/name")]
