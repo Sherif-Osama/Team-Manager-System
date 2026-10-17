@@ -1,8 +1,9 @@
-﻿using TeamManager.Application.Abstractions.Caching;
-
+﻿using Microsoft.Extensions.Logging;
+using TeamManager.Application.Abstractions.Caching;
 namespace TeamManager.Infrastructure.Services.Caching
 {
-    public sealed class PostCommitCacheInvalidationDispatcher(ICacheService cacheService) : IPostCommitCacheInvalidationDispatcher
+    public sealed class PostCommitCacheInvalidationDispatcher(ICacheService cacheService,
+        ILogger<PostCommitCacheInvalidationDispatcher> logger) : IPostCommitCacheInvalidationDispatcher
     {
         private readonly HashSet<string> _pendingTags = new(StringComparer.OrdinalIgnoreCase);
 
@@ -18,11 +19,16 @@ namespace TeamManager.Infrastructure.Services.Caching
 
         public async Task DispatchAsync(CancellationToken cancellationToken)
         {
-            foreach (var tag in _pendingTags)
-            {
-                await cacheService.RemoveByTagAsync(tag, cancellationToken);
+            var tags = _pendingTags.ToArray();
+            _pendingTags.Clear();
 
-                _pendingTags.Remove(tag);
+            foreach (var tag in tags)
+            {
+                try { await cacheService.RemoveByTagAsync(tag, cancellationToken); }
+                catch (Exception ex)
+                {
+                    logger.LogWarning(ex, "Cache invalidation failed for tag {Tag}", tag);
+                }
             }
         }
 

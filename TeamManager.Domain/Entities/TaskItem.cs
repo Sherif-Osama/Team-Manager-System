@@ -204,6 +204,7 @@ namespace TeamManager.Domain.Entities
             Status = TaskItemStatus.Cancelled;
             DeletedAtUtc = DateTime.UtcNow;
             CompletedAtUtc = null;
+            Touch();
         }
 
         public TaskDependency AddDependency(long dependsOnTaskId, Guid createdBy)
@@ -271,23 +272,6 @@ namespace TeamManager.Domain.Entities
             Touch();
         }
 
-        public TaskChecklistItem AddChecklistItem(string content)
-        {
-            EnsureNotDeleted("cannot add check list to deleted task");
-
-            EnsureNotCancelled("cannot add check list to cancelled task");
-
-            short nextOrder = (short)(_checklistItems.Count == 0 ? 0 : _checklistItems.Max(c => c.SortOrder) + 1);
-
-            var item = new TaskChecklistItem(Id, content, nextOrder);
-
-            _checklistItems.Add(item);
-
-            Touch();
-
-            return item;
-        }
-
         public TaskAttachment AddAttachment(string originalFileName, string storageKey, string contentType, long sizeBytes,
             Guid uploadedBy, string fileHash)
         {
@@ -298,7 +282,7 @@ namespace TeamManager.Domain.Entities
             var attachment = new TaskAttachment(Id, originalFileName, storageKey, contentType, sizeBytes,
                 uploadedBy, fileHash);
             _attachments.Add(attachment);
-            Touch();
+            Touch(new TaskAttachmentsChangedDomainEvent(Id));
             return attachment;
         }
 
@@ -314,7 +298,7 @@ namespace TeamManager.Domain.Entities
 
             _attachments.Remove(attachment);
 
-            Touch();
+            Touch(new TaskAttachmentsChangedDomainEvent(Id));
 
             return attachment;
         }
@@ -404,7 +388,7 @@ namespace TeamManager.Domain.Entities
                 throw new DomainException("Checklist item is already completed");
 
             item.Complete(completedBy);
-            Touch();
+            Touch(new TaskChecklistChangedDomainEvent(Id));
         }
 
         public void ReopenChecklistItem(long checklistItemId)
@@ -421,7 +405,7 @@ namespace TeamManager.Domain.Entities
                 throw new DomainException("Checklist item is already incomplete");
 
             item.Reopen();
-            Touch();
+            Touch(new TaskChecklistChangedDomainEvent(Id));
         }
 
         public void RemoveChecklistItem(long checklistItemId)
@@ -435,7 +419,25 @@ namespace TeamManager.Domain.Entities
                 throw new DomainException("Checklist item not found.");
 
             _checklistItems.Remove(item);
-            Touch();
+
+            Touch(new TaskChecklistChangedDomainEvent(Id));
+        }
+
+        public TaskChecklistItem AddChecklistItem(string content)
+        {
+            EnsureNotDeleted("cannot add check list to deleted task");
+
+            EnsureNotCancelled("cannot add check list to cancelled task");
+
+            short nextOrder = (short)(_checklistItems.Count == 0 ? 0 : _checklistItems.Max(c => c.SortOrder) + 1);
+
+            var item = new TaskChecklistItem(Id, content, nextOrder);
+
+            _checklistItems.Add(item);
+
+            Touch(new TaskChecklistChangedDomainEvent(Id));
+
+            return item;
         }
 
         private void EnsureNotDeleted(string message)
@@ -450,6 +452,15 @@ namespace TeamManager.Domain.Entities
                 throw new DomainException(message);
         }
 
-        private void Touch() => UpdatedAtUtc = DateTime.UtcNow;
+        private void Touch(IDomainEvent? domainEvent = null)
+        {
+            UpdatedAtUtc = DateTime.UtcNow;
+
+            // New task: TaskCreatedDomainEvent handles creation.
+            if (Id <= 0)
+                return;
+
+            AddDomainEvent(domainEvent ?? new TaskChangedDomainEvent(Id));
+        }
     }
 }
