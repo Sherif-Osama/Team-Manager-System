@@ -2,9 +2,9 @@
 using TeamManager.Application.Abstractions.Scopes;
 using TeamManager.Application.Common.DefaultValues;
 
-namespace TeamManager.Application.Features.Permissions.Queries
+namespace TeamManager.Application.Features.Roles.Queries.GetRoles
 {
-    public sealed record GetPermissionsQuery : IRequest<GetPermissionsResponse>, IRequiresPermission
+    public sealed record GetRolesQuery : IRequest<GetRolesResponse>, IRequiresPermission
     {
         public string PermissionCode => PermissionCodes.ManageRoles;
     }

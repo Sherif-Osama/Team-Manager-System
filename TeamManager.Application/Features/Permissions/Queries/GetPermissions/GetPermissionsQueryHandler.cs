@@ -2,7 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using TeamManager.Application.Abstractions.Persistence;
 
-namespace TeamManager.Application.Features.Permissions.Queries
+namespace TeamManager.Application.Features.Permissions.Queries.GetPermissions
 {
     public sealed class GetPermissionsQueryHandler(IApplicationDbContext context) : IRequestHandler<GetPermissionsQuery, GetPermissionsResponse>
     {

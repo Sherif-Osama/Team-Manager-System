@@ -1,4 +1,4 @@
-﻿namespace TeamManager.Application.Features.Permissions.Queries
+﻿namespace TeamManager.Application.Features.Permissions.Queries.GetPermissions
 {
     public sealed record GetPermissionsResponse(IReadOnlyList<PermissionItemResponse> Permissions);
 
