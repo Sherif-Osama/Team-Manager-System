@@ -86,6 +86,7 @@ namespace TeamManager.Api.Middleware
                 InvalidTokenException => StatusCodes.Status403Forbidden,
                 DbUpdateException => StatusCodes.Status409Conflict,
                 RoleNameAlreadyExistsException => StatusCodes.Status409Conflict,
+                RoleInUseException => StatusCodes.Status409Conflict,
                 _ => StatusCodes.Status500InternalServerError
             };
 

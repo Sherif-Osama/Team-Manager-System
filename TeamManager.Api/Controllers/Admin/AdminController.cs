@@ -6,6 +6,8 @@ using TeamManager.Application.Features.Admin.Commands.BootstrapAdmin;
 using TeamManager.Application.Features.AuditLogs.Queries;
 using TeamManager.Application.Features.Permissions.Queries.GetPermissions;
 using TeamManager.Application.Features.Roles.Commands.CreateRole;
+using TeamManager.Application.Features.Roles.Commands.DeleteRole;
+using TeamManager.Application.Features.Roles.Commands.RenameRole;
 using TeamManager.Application.Features.Roles.Queries.GetRoles;
 using TeamManager.Application.Features.Users.AdminUserManagement.Commands.AssignRole;
 using TeamManager.Application.Features.Users.AdminUserManagement.Commands.RevokeRole;
@@ -97,6 +99,22 @@ namespace TeamManager.Api.Controllers.Admin
             var roleId = await sender.Send(command, cancellationToken);
 
             return StatusCode(StatusCodes.Status201Created, new { RoleId = roleId });
+        }
+
+        [HttpPut("roles/{roleId:int}/name")]
+        public async Task<IActionResult> RenameRole(int roleId, RenameRoleRequest request, CancellationToken cancellationToken)
+        {
+            var result = await sender.Send(new RenameRoleCommand(roleId, request.NewName), cancellationToken);
+
+            return Ok(new { RoleId = result });
+        }
+
+        [HttpDelete("roles/{roleId:int}")]
+        public async Task<IActionResult> DeleteRole(int roleId, CancellationToken cancellationToken)
+        {
+            await sender.Send(new DeleteRoleCommand(roleId), cancellationToken);
+
+            return NoContent();
         }
     }
 }

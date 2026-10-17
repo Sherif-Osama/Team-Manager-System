@@ -20,9 +20,20 @@ namespace TeamManager.Infrastructure.Persistence.Repositories
             return context.UserRoles.AnyAsync(ur => ur.RoleId == roleId, cancellationToken);
         }
 
+        public Task<bool> IsAssignedToUsersAsync(int roleId, CancellationToken cancellationToken)
+        {
+            return context.Users.AnyAsync(u => u.DeletedAtUtc == null && u.UserRoles.Any(ur => ur.RoleId == roleId),
+                cancellationToken);
+        }
+
         public async Task AddAsync(Role role, CancellationToken cancellationToken)
         {
             await context.Roles.AddAsync(role, cancellationToken);
+        }
+
+        public void Delete(Role role)
+        {
+            context.Roles.Remove(role);
         }
     }
 }
