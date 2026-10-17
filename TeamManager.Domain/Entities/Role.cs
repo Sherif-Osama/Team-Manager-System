@@ -1,9 +1,10 @@
 using TeamManager.Domain.Common;
+using TeamManager.Domain.Common.Events.Roles;
 using TeamManager.Domain.Exceptions;
 
 namespace TeamManager.Domain.Entities;
 
-public class Role : Entity<int>
+public class Role : AggregateRoot<int>
 {
     private readonly List<RolePermission> _rolePermissions = new();
     private readonly List<UserRole> _userRoles = new();
@@ -33,5 +34,27 @@ public class Role : Entity<int>
             throw new DomainException("A role must have a name.");
 
         Name = name;
+    }
+
+    public void AddPermission(int permissionId)
+    {
+        if (_rolePermissions.Any(rp => rp.PermissionId == permissionId))
+            throw new DomainException("Role already has this permission.");
+
+        _rolePermissions.Add(new RolePermission(Id, permissionId));
+
+        AddDomainEvent(new RolePermissionAddedDomainEvent(Id, permissionId));
+    }
+
+    public void RemovePermission(int permissionId)
+    {
+        var rolePermission = _rolePermissions.FirstOrDefault(rp => rp.PermissionId == permissionId);
+
+        if (rolePermission is null)
+            throw new DomainException("Role does not have this permission.");
+
+        _rolePermissions.Remove(rolePermission);
+
+        AddDomainEvent(new RolePermissionRemovedDomainEvent(Id, permissionId));
     }
 }

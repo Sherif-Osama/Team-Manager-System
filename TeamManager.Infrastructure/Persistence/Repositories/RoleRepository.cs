@@ -15,6 +15,12 @@ namespace TeamManager.Infrastructure.Persistence.Repositories
             return await context.Roles.FindAsync([roleId], cancellationToken);
         }
 
+        public Task<Role?> GetByIdWithPermissionsAsync(int roleId, CancellationToken cancellationToken)
+        {
+            return context.Roles.Include(x => x.RolePermissions)
+                .FirstOrDefaultAsync(x => x.Id == roleId, cancellationToken);
+        }
+
         public Task<bool> ExistsAdminAsync(int roleId, CancellationToken cancellationToken)
         {
             return context.UserRoles.AnyAsync(ur => ur.RoleId == roleId, cancellationToken);

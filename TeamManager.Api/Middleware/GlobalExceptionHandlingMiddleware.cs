@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Data;
 using TeamManager.Application.Common.Exceptions.AuthorizationExceptions;
 using TeamManager.Application.Common.Exceptions.NotificationExceptions;
+using TeamManager.Application.Common.Exceptions.PermissionExceptions;
 using TeamManager.Application.Common.Exceptions.ProjectExceptions;
 using TeamManager.Application.Common.Exceptions.RoleExceptions;
 using TeamManager.Application.Common.Exceptions.TaskExceptions;
@@ -87,6 +88,7 @@ namespace TeamManager.Api.Middleware
                 DbUpdateException => StatusCodes.Status409Conflict,
                 RoleNameAlreadyExistsException => StatusCodes.Status409Conflict,
                 RoleInUseException => StatusCodes.Status409Conflict,
+                PermissionNotFoundException => StatusCodes.Status404NotFound,
                 _ => StatusCodes.Status500InternalServerError
             };
 

@@ -75,6 +75,7 @@ namespace TeamManager.Infrastructure
             services.Configure<BootstrapOptions>(configuration.GetSection(BootstrapOptions.SectionName));
             services.AddScoped<IBootstrapSecretProvider, BootstrapSecretProvider>();
             services.AddScoped<IRoleRepository, RoleRepository>();
+            services.AddScoped<IPermissionRepository, PermissionRepository>();
             services.AddScoped<IActivityLogWriter, ActivityLogWriter>();
             services.AddScoped<IProjectRepository, ProjectRepository>();
             services.AddScoped<ITaskRepository, TaskRepository>();

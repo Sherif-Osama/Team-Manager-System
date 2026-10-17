@@ -12,7 +12,8 @@ namespace TeamManager.Infrastructure.Services.SecurityServices
         public async Task<bool> HasPermissionAsync(Guid userId, string permissionCode, CancellationToken cancellationToken)
         {
             var permissions = await cacheService.GetOrCreateAsync(GetCacheKey(userId),
-                ct => userRepository.GetPermissionCodesAsync(userId, ct), CacheExpiration, [CacheTags.UserPermissions(userId)], cancellationToken);
+                ct => userRepository.GetPermissionCodesAsync(userId, ct), CacheExpiration,
+                [CacheTags.UserPermissions(userId), CacheTags.AllUserPermissions], cancellationToken);
 
             return permissions?.Contains(permissionCode, StringComparer.OrdinalIgnoreCase) == true;
         }

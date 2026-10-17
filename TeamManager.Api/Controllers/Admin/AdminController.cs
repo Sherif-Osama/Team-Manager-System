@@ -5,8 +5,10 @@ using TeamManager.Application.Common.DefaultValues;
 using TeamManager.Application.Features.Admin.Commands.BootstrapAdmin;
 using TeamManager.Application.Features.AuditLogs.Queries;
 using TeamManager.Application.Features.Permissions.Queries.GetPermissions;
+using TeamManager.Application.Features.Roles.Commands.AddPermissionToRole;
 using TeamManager.Application.Features.Roles.Commands.CreateRole;
 using TeamManager.Application.Features.Roles.Commands.DeleteRole;
+using TeamManager.Application.Features.Roles.Commands.RemovePermissionFromRole;
 using TeamManager.Application.Features.Roles.Commands.RenameRole;
 using TeamManager.Application.Features.Roles.Queries.GetRoles;
 using TeamManager.Application.Features.Users.AdminUserManagement.Commands.AssignRole;
@@ -113,6 +115,22 @@ namespace TeamManager.Api.Controllers.Admin
         public async Task<IActionResult> DeleteRole(int roleId, CancellationToken cancellationToken)
         {
             await sender.Send(new DeleteRoleCommand(roleId), cancellationToken);
+
+            return NoContent();
+        }
+
+        [HttpPost("roles/{roleId:int}/permissions")]
+        public async Task<IActionResult> AddPermissionToRole(int roleId, AddPermissionToRoleRequest request, CancellationToken cancellationToken)
+        {
+            await sender.Send(new AddPermissionToRoleCommand(roleId, request.PermissionId), cancellationToken);
+
+            return NoContent();
+        }
+
+        [HttpDelete("roles/{roleId:int}/permissions/{permissionId:int}")]
+        public async Task<IActionResult> RemovePermissionFromRole(int roleId, int permissionId, CancellationToken cancellationToken)
+        {
+            await sender.Send(new RemovePermissionFromRoleCommand(roleId, permissionId), cancellationToken);
 
             return NoContent();
         }
