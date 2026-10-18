@@ -1,4 +1,5 @@
-﻿using TeamManager.Domain.Entities;
+using TeamManager.Domain.Common.Events.Users;
+using TeamManager.Domain.Entities;
 using TeamManager.Domain.Exceptions;
 
 namespace TeamManager.Tests.UnitTest.Domain
@@ -6,9 +7,17 @@ namespace TeamManager.Tests.UnitTest.Domain
     public sealed class UserTests
     {
         #region Helper methods
-        private User CreateUser(string email = "user@example.com", string displayName = "Test User", string passwordHash = "password-hash", int roleId = 1)
+        private static User CreateUser(string email = "user@example.com", string displayName = "Test User", string passwordHash = "password-hash", int roleId = 1)
         {
             return new(Guid.NewGuid(), email, displayName, passwordHash, roleId);
+        }
+
+        private static User CreateConfirmedUser()
+        {
+            var user = CreateUser();
+            user.RequestEmailConfirmation("confirmation-token", DateTime.UtcNow.AddHours(1));
+            user.ConfirmEmail("confirmation-token");
+            return user;
         }
         #endregion
 
@@ -24,7 +33,16 @@ namespace TeamManager.Tests.UnitTest.Domain
             Assert.Equal("password-hash", user.PasswordHash);
             Assert.True(user.IsActive);
             Assert.False(user.IsEmailConfirmed);
-            Assert.NotEmpty(user.UserRoles);
+        }
+
+        [Fact]
+        public void Constructor_CreatesInitialRoleMembership()
+        {
+            var user = CreateUser(roleId: 1);
+
+            var role = Assert.Single(user.UserRoles);
+            Assert.Equal(user.Id, role.UserId);
+            Assert.Equal(1, role.RoleId);
         }
 
         [Theory]
@@ -44,17 +62,19 @@ namespace TeamManager.Tests.UnitTest.Domain
         [Fact]
         public void AssignRole_WithNewRole_AddsRole()
         {
-            var user = CreateUser(roleId: 1);
+            var user = CreateUser();
 
-            var role = Assert.Single(user.UserRoles);
-            Assert.Equal(user.Id, role.UserId);
-            Assert.Equal(1, role.RoleId);
+            user.AssignRole(2);
+
+            Assert.Equal(2, user.UserRoles.Count);
+            Assert.Contains(user.UserRoles, role => role.RoleId == 2);
         }
 
         [Fact]
         public void AssignRole_WhenRoleAlreadyAssigned_Throws()
         {
             var user = CreateUser();
+
             Assert.Throws<DomainException>(() => user.AssignRole(1));
         }
 
@@ -68,7 +88,7 @@ namespace TeamManager.Tests.UnitTest.Domain
         }
         #endregion
 
-        #region Remove role
+        #region Remove Role
         [Fact]
         public void RemoveRole_WhenUserHasMultipleRoles_RemovesRequestedRole()
         {
@@ -86,7 +106,16 @@ namespace TeamManager.Tests.UnitTest.Domain
         public void RemoveRole_WhenRemovingLastRole_Throws()
         {
             var user = CreateUser();
+
             Assert.Throws<DomainException>(() => user.RemoveRole(1));
+        }
+
+        [Fact]
+        public void RemoveRole_WhenUserDoesNotHaveRole_Throws()
+        {
+            var user = CreateUser();
+
+            Assert.Throws<DomainException>(() => user.RemoveRole(999));
         }
 
         [Fact]
@@ -97,14 +126,6 @@ namespace TeamManager.Tests.UnitTest.Domain
 
             Assert.Throws<DomainException>(() => user.RemoveRole(user.UserRoles.First().RoleId));
         }
-
-        [Fact]
-        public void RemoveRole_WhenUserDoesNotHaveRole_Throws()
-        {
-            var user = CreateUser();
-
-            Assert.Throws<DomainException>(() => user.RemoveRole(999));
-        }
         #endregion
 
         #region Deactivate
@@ -112,6 +133,7 @@ namespace TeamManager.Tests.UnitTest.Domain
         public void Deactivate_WhenActive_SetsInactive()
         {
             var user = CreateUser();
+
             user.Deactivate();
 
             Assert.False(user.IsActive);
@@ -157,11 +179,12 @@ namespace TeamManager.Tests.UnitTest.Domain
         }
         #endregion
 
-        #region SoftDelete
+        #region Soft Delete
         [Fact]
         public void SoftDelete_WhenNotDeleted_SetsDeletedAndInactive()
         {
             var user = CreateUser();
+
             user.SoftDelete();
 
             Assert.NotNull(user.DeletedAtUtc);
@@ -178,11 +201,12 @@ namespace TeamManager.Tests.UnitTest.Domain
         }
         #endregion
 
-        #region Display name
+        #region Display Name
         [Fact]
         public void ChangeDisplayName_WhenActive_ChangesNameAndTimestamp()
         {
             var user = CreateUser();
+
             user.ChangeDisplayName("Updated User");
 
             Assert.Equal("Updated User", user.DisplayName);
@@ -219,44 +243,82 @@ namespace TeamManager.Tests.UnitTest.Domain
         }
         #endregion
 
-        #region Password
+        #region Change Email
         [Fact]
-        public void ChangePasswordHash_WhenActive_ChangesHashAndTimestamp()
+        public void ChangeEmail_WithValidData_StoresPendingEmailAndToken()
         {
             var user = CreateUser();
-            user.ChangePasswordHash("new-password-hash");
+            var expiry = DateTime.UtcNow.AddHours(1);
 
-            Assert.Equal("new-password-hash", user.PasswordHash);
-            Assert.NotNull(user.UpdatedAtUtc);
+            user.ChangeEmail("new@example.com", "token-hash", expiry);
+
+            Assert.Equal("user@example.com", user.Email);
+            Assert.Equal("new@example.com", user.PendingEmail);
+            Assert.Equal("token-hash", user.EmailConfirmationTokenHash);
+            Assert.Equal(expiry, user.EmailConfirmationTokenExpiresAtUtc);
         }
 
         [Theory]
         [InlineData(null)]
         [InlineData("")]
         [InlineData("   ")]
-        public void ChangePasswordHash_WithBlankHash_Throws(string? hash)
+        public void ChangeEmail_WithBlankEmail_Throws(string? email)
         {
             var user = CreateUser();
 
-            Assert.Throws<DomainException>(() => user.ChangePasswordHash(hash!));
+            Assert.Throws<DomainException>(() => user.ChangeEmail(email!, "token-hash", DateTime.UtcNow.AddHours(1)));
+        }
+
+        [Theory]
+        [InlineData(null)]
+        [InlineData("")]
+        [InlineData("   ")]
+        public void ChangeEmail_WithBlankToken_Throws(string? tokenHash)
+        {
+            var user = CreateUser();
+
+            Assert.Throws<DomainException>(() => user.ChangeEmail("new@example.com", tokenHash!, DateTime.UtcNow.AddHours(1)));
         }
 
         [Fact]
-        public void ChangePasswordHash_WhenInactive_Throws()
+        public void ChangeEmail_WithExpiredToken_Throws()
+        {
+            var user = CreateUser();
+
+            Assert.Throws<DomainException>(() => user.ChangeEmail("new@example.com", "token-hash", DateTime.UtcNow.AddSeconds(-1)));
+        }
+
+        [Fact]
+        public void ChangeEmail_WithSameEmailCaseInsensitive_Throws()
+        {
+            var user = CreateUser();
+            var originalUpdatedAt = user.UpdatedAtUtc;
+
+            Assert.Throws<DomainException>(() => user.ChangeEmail("USER@EXAMPLE.COM", "token-hash", DateTime.UtcNow.AddHours(1)));
+
+            Assert.Equal("user@example.com", user.Email);
+            Assert.Null(user.PendingEmail);
+            Assert.Null(user.EmailConfirmationTokenHash);
+            Assert.Equal(originalUpdatedAt, user.UpdatedAtUtc);
+        }
+
+        [Fact]
+        public void ChangeEmail_WhenInactive_Throws()
         {
             var user = CreateUser();
             user.Deactivate();
 
-            Assert.Throws<DomainException>(() => user.ChangePasswordHash("new-hash"));
+            Assert.Throws<DomainException>(() => user.ChangeEmail("new@example.com", "token-hash", DateTime.UtcNow.AddHours(1)));
         }
 
         [Fact]
-        public void ChangePasswordHash_WhenDeleted_Throws()
+        public void ChangeEmail_WhenDeleted_Throws()
         {
             var user = CreateUser();
             user.SoftDelete();
 
-            Assert.Throws<DomainException>(() => user.ChangePasswordHash("new-hash"));
+            Assert.Throws<DomainException>(() =>
+                user.ChangeEmail("new@example.com", "token-hash", DateTime.UtcNow.AddHours(1)));
         }
         #endregion
 
@@ -297,9 +359,7 @@ namespace TeamManager.Tests.UnitTest.Domain
         [Fact]
         public void RequestEmailConfirmation_WhenAlreadyConfirmed_Throws()
         {
-            var user = CreateUser();
-            user.RequestEmailConfirmation("token-hash", DateTime.UtcNow.AddHours(1));
-            user.ConfirmEmail("token-hash");
+            var user = CreateConfirmedUser();
 
             Assert.Throws<DomainException>(() =>
                 user.RequestEmailConfirmation("new-token-hash", DateTime.UtcNow.AddHours(1)));
@@ -310,6 +370,15 @@ namespace TeamManager.Tests.UnitTest.Domain
         {
             var user = CreateUser();
             user.Deactivate();
+
+            Assert.Throws<DomainException>(() => user.RequestEmailConfirmation("token-hash", DateTime.UtcNow.AddHours(1)));
+        }
+
+        [Fact]
+        public void RequestEmailConfirmation_WhenDeleted_Throws()
+        {
+            var user = CreateUser();
+            user.SoftDelete();
 
             Assert.Throws<DomainException>(() => user.RequestEmailConfirmation("token-hash", DateTime.UtcNow.AddHours(1)));
         }
@@ -342,8 +411,8 @@ namespace TeamManager.Tests.UnitTest.Domain
         public void ConfirmEmail_WithExpiredToken_Throws()
         {
             var user = CreateUser();
-            user.RequestEmailConfirmation("token-hash", DateTime.UtcNow.AddMilliseconds(10));
-            Thread.Sleep(20);
+            user.RequestEmailConfirmation("token-hash", DateTime.UtcNow.AddMilliseconds(20));
+            Thread.Sleep(50);
 
             Assert.Throws<DomainException>(() => user.ConfirmEmail("token-hash"));
         }
@@ -378,52 +447,226 @@ namespace TeamManager.Tests.UnitTest.Domain
             Assert.Null(user.PendingEmail);
             Assert.True(user.IsEmailConfirmed);
         }
+        #endregion
 
+        #region Request Password Reset
         [Fact]
-        public void ChangeEmail_WithSameEmailCaseInsensitive_Throws()
+        public void RequestPasswordReset_WhenEmailConfirmed_StoresTokenAndReturnsTrue()
         {
-            var user = CreateUser();
-            var originalUpdatedAt = user.UpdatedAtUtc;
+            var user = CreateConfirmedUser();
+            var expiry = DateTime.UtcNow.AddMinutes(30);
 
-            Assert.Throws<DomainException>(() => user.ChangeEmail("USER@EXAMPLE.COM", "token-hash", DateTime.UtcNow.AddHours(1)));
-            Assert.Equal("user@example.com", user.Email);
-            Assert.Null(user.PendingEmail);
-            Assert.Null(user.EmailConfirmationTokenHash);
-            Assert.Equal(originalUpdatedAt, user.UpdatedAtUtc);
+            var result = user.RequestPasswordReset("reset-token", expiry);
+
+            Assert.True(result);
+            Assert.Equal("reset-token", user.PasswordResetTokenHash);
+            Assert.Equal(expiry, user.PasswordResetTokenExpiresAtUtc);
         }
 
         [Fact]
-        public void ChangeEmail_WhenInactive_Throws()
+        public void RequestPasswordReset_WhenEmailNotConfirmed_ReturnsFalse()
+        {
+            var user = CreateUser();
+
+            Assert.False(user.RequestPasswordReset("reset-token", DateTime.UtcNow.AddMinutes(30)));
+            Assert.Null(user.PasswordResetTokenHash);
+        }
+
+        [Fact]
+        public void RequestPasswordReset_WhenInactive_ReturnsFalse()
+        {
+            var user = CreateConfirmedUser();
+            user.Deactivate();
+
+            Assert.False(user.RequestPasswordReset("reset-token", DateTime.UtcNow.AddMinutes(30)));
+        }
+
+        [Fact]
+        public void RequestPasswordReset_WhenDeleted_ReturnsFalse()
+        {
+            var user = CreateConfirmedUser();
+            user.SoftDelete();
+
+            Assert.False(user.RequestPasswordReset("reset-token", DateTime.UtcNow.AddMinutes(30)));
+        }
+
+        [Theory]
+        [InlineData(null)]
+        [InlineData("")]
+        [InlineData("   ")]
+        public void RequestPasswordReset_WithBlankToken_ReturnsFalse(string? tokenHash)
+        {
+            var user = CreateConfirmedUser();
+
+            Assert.False(user.RequestPasswordReset(tokenHash!, DateTime.UtcNow.AddMinutes(30)));
+        }
+
+        [Fact]
+        public void RequestPasswordReset_WithExpiredDate_ReturnsFalse()
+        {
+            var user = CreateConfirmedUser();
+
+            Assert.False(user.RequestPasswordReset("reset-token", DateTime.UtcNow.AddSeconds(-1)));
+        }
+        #endregion
+
+        #region Reset Password
+        [Fact]
+        public void ResetPassword_WithValidToken_ChangesHashAndClearsToken()
+        {
+            var user = CreateConfirmedUser();
+            user.RequestPasswordReset("reset-token", DateTime.UtcNow.AddMinutes(30));
+
+            user.ResetPassword("reset-token", "new-password-hash");
+
+            Assert.Equal("new-password-hash", user.PasswordHash);
+            Assert.Null(user.PasswordResetTokenHash);
+            Assert.Null(user.PasswordResetTokenExpiresAtUtc);
+        }
+
+        [Fact]
+        public void ResetPassword_WithWrongToken_Throws()
+        {
+            var user = CreateConfirmedUser();
+            user.RequestPasswordReset("reset-token", DateTime.UtcNow.AddMinutes(30));
+
+            Assert.Throws<DomainException>(() => user.ResetPassword("wrong-token", "new-password-hash"));
+            Assert.Equal("password-hash", user.PasswordHash);
+        }
+
+        [Fact]
+        public void ResetPassword_WithExpiredToken_Throws()
+        {
+            var user = CreateConfirmedUser();
+            user.RequestPasswordReset("reset-token", DateTime.UtcNow.AddMilliseconds(20));
+            Thread.Sleep(50);
+
+            Assert.Throws<DomainException>(() => user.ResetPassword("reset-token", "new-password-hash"));
+        }
+
+        [Theory]
+        [InlineData(null)]
+        [InlineData("")]
+        [InlineData("   ")]
+        public void ResetPassword_WithBlankNewHash_Throws(string? newPasswordHash)
+        {
+            var user = CreateConfirmedUser();
+            user.RequestPasswordReset("reset-token", DateTime.UtcNow.AddMinutes(30));
+
+            Assert.Throws<DomainException>(() => user.ResetPassword("reset-token", newPasswordHash!));
+        }
+
+        [Fact]
+        public void ResetPassword_WithoutRequestedReset_Throws()
+        {
+            var user = CreateConfirmedUser();
+
+            Assert.Throws<DomainException>(() => user.ResetPassword("reset-token", "new-password-hash"));
+        }
+        #endregion
+
+        #region Has Valid Password Reset Token
+        [Fact]
+        public void HasValidPasswordResetToken_WithMatchingToken_ReturnsTrue()
+        {
+            var user = CreateConfirmedUser();
+            user.RequestPasswordReset("reset-token", DateTime.UtcNow.AddMinutes(30));
+
+            Assert.True(user.HasValidPasswordResetToken("reset-token"));
+        }
+
+        [Fact]
+        public void HasValidPasswordResetToken_WithWrongToken_ReturnsFalse()
+        {
+            var user = CreateConfirmedUser();
+            user.RequestPasswordReset("reset-token", DateTime.UtcNow.AddMinutes(30));
+
+            Assert.False(user.HasValidPasswordResetToken("wrong-token"));
+        }
+
+        [Fact]
+        public void HasValidPasswordResetToken_WhenExpired_ReturnsFalse()
+        {
+            var user = CreateConfirmedUser();
+            user.RequestPasswordReset("reset-token", DateTime.UtcNow.AddMilliseconds(20));
+            Thread.Sleep(50);
+
+            Assert.False(user.HasValidPasswordResetToken("reset-token"));
+        }
+
+        [Fact]
+        public void HasValidPasswordResetToken_WhenNoneRequested_ReturnsFalse()
+        {
+            var user = CreateConfirmedUser();
+
+            Assert.False(user.HasValidPasswordResetToken("reset-token"));
+        }
+
+        [Theory]
+        [InlineData(null)]
+        [InlineData("")]
+        [InlineData("   ")]
+        public void HasValidPasswordResetToken_WithBlankToken_ReturnsFalse(string? tokenHash)
+        {
+            var user = CreateConfirmedUser();
+            user.RequestPasswordReset("reset-token", DateTime.UtcNow.AddMinutes(30));
+
+            Assert.False(user.HasValidPasswordResetToken(tokenHash!));
+        }
+        #endregion
+
+        #region Change Password
+        [Fact]
+        public void ChangePasswordHash_WhenActive_ChangesHashAndTimestamp()
+        {
+            var user = CreateUser();
+
+            user.ChangePasswordHash("new-password-hash");
+
+            Assert.Equal("new-password-hash", user.PasswordHash);
+            Assert.NotNull(user.UpdatedAtUtc);
+        }
+
+        [Theory]
+        [InlineData(null)]
+        [InlineData("")]
+        [InlineData("   ")]
+        public void ChangePasswordHash_WithBlankHash_Throws(string? hash)
+        {
+            var user = CreateUser();
+
+            Assert.Throws<DomainException>(() => user.ChangePasswordHash(hash!));
+        }
+
+        [Fact]
+        public void ChangePasswordHash_WhenInactive_Throws()
         {
             var user = CreateUser();
             user.Deactivate();
 
-            Assert.Throws<DomainException>(() => user.ChangeEmail("new@example.com", "token-hash", DateTime.UtcNow.AddHours(1)));
+            Assert.Throws<DomainException>(() => user.ChangePasswordHash("new-hash"));
         }
 
         [Fact]
-        public void ChangeEmail_WhenDeleted_Throws()
+        public void ChangePasswordHash_WhenDeleted_Throws()
         {
             var user = CreateUser();
             user.SoftDelete();
 
-            Assert.Throws<DomainException>(() =>
-                user.ChangeEmail("new@example.com", "token-hash", DateTime.UtcNow.AddHours(1)));
+            Assert.Throws<DomainException>(() => user.ChangePasswordHash("new-hash"));
         }
         #endregion
 
-        #region  Record Success
+        #region Login Attempts
         [Fact]
         public void RecordSuccessfulLogin_ResetsFailuresLockoutAndRecordsTime()
         {
             var user = CreateUser();
 
-            //MaxFailedLoginAttempts is 5, so we need to record 5 failed attempts to lock the user out
             for (var i = 0; i < 5; i++)
                 user.RecordFailedLoginAttempt();
 
             Assert.True(user.IsLockedOut);
-
             Assert.Equal(5, user.FailedLoginAttempts);
 
             user.RecordSuccessfulLogin();
@@ -482,6 +725,60 @@ namespace TeamManager.Tests.UnitTest.Domain
         public void IsLockedOut_WhenNoLockoutExists_ReturnsFalse()
         {
             Assert.False(CreateUser().IsLockedOut);
+        }
+        #endregion
+
+        #region Domain Events
+        [Fact]
+        public void Deactivate_RaisesUserDeactivatedDomainEvent()
+        {
+            var user = CreateUser();
+
+            user.Deactivate();
+
+            Assert.Contains(user.DomainEvents, e => e is UserDeactivatedDomainEvent);
+        }
+
+        [Fact]
+        public void SoftDelete_RaisesUserDeletedDomainEvent()
+        {
+            var user = CreateUser();
+
+            user.SoftDelete();
+
+            Assert.Contains(user.DomainEvents, e => e is UserDeletedDomainEvent);
+        }
+
+        [Fact]
+        public void RecordSuccessfulLogin_OnInactiveUser_RaisesUserReactivatedDomainEvent()
+        {
+            var user = CreateUser();
+            user.Deactivate();
+
+            user.RecordSuccessfulLogin();
+
+            Assert.Contains(user.DomainEvents, e => e is UserReactivatedDomainEvent);
+        }
+
+        [Fact]
+        public void AssignRole_RaisesUserRoleAssignedDomainEvent()
+        {
+            var user = CreateUser();
+
+            user.AssignRole(2);
+
+            Assert.Contains(user.DomainEvents, e => e is UserRoleAssignedDomainEvent);
+        }
+
+        [Fact]
+        public void RemoveRole_RaisesUserRoleRevokedDomainEvent()
+        {
+            var user = CreateUser();
+            user.AssignRole(2);
+
+            user.RemoveRole(1);
+
+            Assert.Contains(user.DomainEvents, e => e is UserRoleRevokedDomainEvent);
         }
         #endregion
     }
