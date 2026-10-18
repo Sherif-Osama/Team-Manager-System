@@ -30,6 +30,12 @@
   <ItemGroup>
     <ProjectReference Include="..\TeamManager.Domain\TeamManager.Domain.csproj" />
     <ProjectReference Include="..\TeamManager.Application\TeamManager.Application.csproj" />
+    <ProjectReference Include="..\TeamManager.Infrastructure\TeamManager.Infrastructure.csproj" />
+    <ProjectReference Include="..\TeamManager.Api\TeamManager.Api.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
   </ItemGroup>
 
 </Project>
