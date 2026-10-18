@@ -1,6 +1,6 @@
 using TeamManager.Application.Features.Users.AdminUserManagement.Queries.GetUsers;
 
-namespace TeamManager.Tests.UnitTest.Users.AdminUserManagement.GetUsersTests;
+namespace TeamManager.Tests.UnitTest.Application.Features.Users.AdminUserManagement.GetUsersTests;
 
 public sealed class GetUsersQueryValidatorTests
 {

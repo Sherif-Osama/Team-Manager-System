@@ -1,6 +1,6 @@
 using TeamManager.Application.Features.Authentication.Commands.Register;
 
-namespace TeamManager.Tests.UnitTest.Authentication.RegisterTests;
+namespace TeamManager.Tests.UnitTest.Application.Features.Authentication.RegisterTests;
 
 public sealed class RegisterCommandValidatorTests
 {

@@ -1,6 +1,6 @@
 using TeamManager.Application.Features.Users.AdminUserManagement.Queries.GetUserById;
 
-namespace TeamManager.Tests.UnitTest.Users.AdminUserManagement.GetUserByIdTests;
+namespace TeamManager.Tests.UnitTest.Application.Features.Users.AdminUserManagement.GetUserByIdTests;
 
 public sealed class GetUserByIdQueryValidatorTests
 {

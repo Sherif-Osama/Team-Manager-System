@@ -7,7 +7,7 @@ using TeamManager.Application.Common.Exceptions.UserExceptions;
 using TeamManager.Application.Features.Admin.Commands.BootstrapAdmin;
 using TeamManager.Domain.Entities;
 
-namespace TeamManager.Tests.UnitTest.Admin.BootstrapAdminTests
+namespace TeamManager.Tests.UnitTest.Application.Features.Admin.BootstrapAdminTests
 {
     public sealed class BootstrapAdminCommandHandlerTests
     {

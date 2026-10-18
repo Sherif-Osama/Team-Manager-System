@@ -1,6 +1,6 @@
 using TeamManager.Application.Features.Users.AdminUserManagement.Queries.GetUserByEmail;
 
-namespace TeamManager.Tests.UnitTest.Users.AdminUserManagement.GetUserByEmailTests;
+namespace TeamManager.Tests.UnitTest.Application.Features.Users.AdminUserManagement.GetUserByEmailTests;
 
 public sealed class GetUserByEmailQueryValidatorTests
 {

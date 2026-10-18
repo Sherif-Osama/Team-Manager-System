@@ -8,7 +8,7 @@ using TeamManager.Application.Common.Exceptions.UserExceptions;
 using TeamManager.Application.Common.Outbox;
 using TeamManager.Application.Features.Authentication.Commands.Register;
 using TeamManager.Domain.Entities;
-namespace TeamManager.Tests.UnitTest.Authentication.RegisterTests
+namespace TeamManager.Tests.UnitTest.Application.Features.Authentication.RegisterTests
 {
     public sealed class RegisterCommandHandlerTests
     {

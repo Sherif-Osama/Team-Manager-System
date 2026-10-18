@@ -8,7 +8,7 @@ using TeamManager.Application.Common.Exceptions.AuthorizationExceptions;
 using TeamManager.Application.Features.Admin.Commands.BootstrapAdmin;
 using TeamManager.Domain.Entities;
 
-namespace TeamManager.Tests.UnitTest.Behaviors;
+namespace TeamManager.Tests.UnitTest.Application.Behaviors;
 
 public sealed class ConfirmedEmailBehaviorTests
 {

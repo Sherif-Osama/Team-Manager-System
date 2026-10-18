@@ -1,6 +1,6 @@
 using TeamManager.Application.Features.Users.AdminUserManagement.Commands.RevokeRole;
 
-namespace TeamManager.Tests.UnitTest.Users.AdminUserManagement.RevokeRoleTests;
+namespace TeamManager.Tests.UnitTest.Application.Features.Users.AdminUserManagement.RevokeRoleTests;
 
 public sealed class RevokeRoleValidatorTests
 {

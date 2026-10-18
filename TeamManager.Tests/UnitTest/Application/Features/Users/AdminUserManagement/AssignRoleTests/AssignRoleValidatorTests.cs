@@ -1,6 +1,6 @@
 using TeamManager.Application.Features.Users.AdminUserManagement.Commands.AssignRole;
 
-namespace TeamManager.Tests.UnitTest.Users.AdminUserManagement.AssignRoleTests;
+namespace TeamManager.Tests.UnitTest.Application.Features.Users.AdminUserManagement.AssignRoleTests;
 
 public sealed class AssignRoleValidatorTests
 {

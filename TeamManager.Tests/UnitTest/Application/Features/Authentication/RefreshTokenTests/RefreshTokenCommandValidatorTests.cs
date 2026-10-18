@@ -1,6 +1,6 @@
 using TeamManager.Application.Features.Authentication.Commands.RefreshToken;
 
-namespace TeamManager.Tests.UnitTest.Authentication.RefreshTokenTests;
+namespace TeamManager.Tests.UnitTest.Application.Features.Authentication.RefreshTokenTests;
 
 public sealed class RefreshTokenCommandValidatorTests
 {

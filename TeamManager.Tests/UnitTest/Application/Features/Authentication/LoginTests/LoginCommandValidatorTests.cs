@@ -1,6 +1,6 @@
 using TeamManager.Application.Features.Authentication.Commands.Login;
 
-namespace TeamManager.Tests.UnitTest.Authentication.LoginTests;
+namespace TeamManager.Tests.UnitTest.Application.Features.Authentication.LoginTests;
 
 public sealed class LoginCommandValidatorTests
 {

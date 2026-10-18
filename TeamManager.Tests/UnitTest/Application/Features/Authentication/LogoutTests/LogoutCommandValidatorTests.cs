@@ -1,6 +1,6 @@
 using TeamManager.Application.Features.Authentication.Commands.Logout;
 
-namespace TeamManager.Tests.UnitTest.Authentication.LogoutTests;
+namespace TeamManager.Tests.UnitTest.Application.Features.Authentication.LogoutTests;
 
 public sealed class LogoutCommandValidatorTests
 {
