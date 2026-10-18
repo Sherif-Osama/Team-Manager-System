@@ -56,10 +56,10 @@ namespace TeamManager.Domain.Entities
         {
             EnsureNotDeleted("cannot modify deleted team");
 
-            var trimmedName = name.Trim();
-
-            if (string.IsNullOrWhiteSpace(trimmedName))
+            if (string.IsNullOrWhiteSpace(name))
                 throw new DomainException("A team must have a name.");
+
+            var trimmedName = name.Trim();
 
             Name = trimmedName;
             Touch();
@@ -138,6 +138,9 @@ namespace TeamManager.Domain.Entities
         {
             EnsureNotDeleted("cannot add label to deleted team");
 
+            if (string.IsNullOrWhiteSpace(name))
+                throw new DomainException("Label name cannot be empty.");
+
             var trimmedName = name.Trim();
 
             if (_labels.Any(x => x.Name.Equals(trimmedName, StringComparison.OrdinalIgnoreCase)))
@@ -156,10 +159,10 @@ namespace TeamManager.Domain.Entities
         {
             EnsureNotDeleted("cannot update label on deleted team");
 
-            var trimmedName = name.Trim();
-
-            if (string.IsNullOrWhiteSpace(trimmedName))
+            if (string.IsNullOrWhiteSpace(name))
                 throw new DomainException("Label name cannot be empty.");
+
+            var trimmedName = name.Trim();
 
             var label = _labels.FirstOrDefault(x => x.Id == labelId);
 

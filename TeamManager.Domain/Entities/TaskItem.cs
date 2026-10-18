@@ -454,8 +454,8 @@ namespace TeamManager.Domain.Entities
         {
             UpdatedAtUtc = DateTime.UtcNow;
 
-            // New task: TaskCreatedDomainEvent handles creation.
-
+            if (domainEvent is not null)
+                AddDomainEvent(domainEvent);
         }
     }
 }
