@@ -3,6 +3,7 @@ using Moq;
 using TeamManager.Application.Abstractions.Authentication;
 using TeamManager.Application.Abstractions.Persistence;
 using TeamManager.Application.Abstractions.Scopes;
+using TeamManager.Application.Abstractions.Security;
 using TeamManager.Application.Common.Behaviors;
 using TeamManager.Application.Common.Exceptions.AuthorizationExceptions;
 using TeamManager.Application.Common.Exceptions.UserExceptions;
@@ -10,7 +11,7 @@ using TeamManager.Application.Features.Users.AdminUserManagement.Commands.Revoke
 using TeamManager.Domain.Entities;
 using TeamManager.Domain.Exceptions;
 
-namespace TeamManager.Tests.UnitTest.Users.AdminUserManagement.RevokeRoleTests
+namespace TeamManager.Tests.UnitTest.Application.Features.Users.AdminUserManagement.RevokeRoleTests
 {
 
     public sealed class RevokeRoleCommandHandlerTests
@@ -174,10 +175,12 @@ namespace TeamManager.Tests.UnitTest.Users.AdminUserManagement.RevokeRoleTests
 
             currentUser.SetupGet(x => x.UserId).Returns(Guid.NewGuid());
 
-            _userRepository.Setup(x => x.HasPermissionAsync(It.IsAny<Guid>(), It.IsAny<string>(),
+            var permissionService = new Mock<IPermissionService>();
+
+            permissionService.Setup(x => x.HasPermissionAsync(It.IsAny<Guid>(), It.IsAny<string>(),
                 It.IsAny<CancellationToken>())).ReturnsAsync(false);
 
-            var behavior = new PermissionAuthorizationBehavior<RevokeRoleCommand, Unit>(currentUser.Object, _userRepository.Object);
+            var behavior = new PermissionAuthorizationBehavior<RevokeRoleCommand, Unit>(currentUser.Object, permissionService.Object);
 
             var nextCalled = false;
 
@@ -190,7 +193,7 @@ namespace TeamManager.Tests.UnitTest.Users.AdminUserManagement.RevokeRoleTests
 
             Assert.False(nextCalled);
 
-            _userRepository.Verify(x => x.HasPermissionAsync(It.IsAny<Guid>(), It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Once);
+            permissionService.Verify(x => x.HasPermissionAsync(It.IsAny<Guid>(), It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Once);
 
             //First Method called in RevokeRoleCommand
             _userRepository.Verify(x => x.GetByIdWithRolesAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()), Times.Never);

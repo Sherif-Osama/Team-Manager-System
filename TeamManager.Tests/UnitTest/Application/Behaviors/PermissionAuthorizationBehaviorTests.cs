@@ -1,29 +1,29 @@
 using MediatR;
 using Moq;
 using TeamManager.Application.Abstractions.Authentication;
-using TeamManager.Application.Abstractions.Persistence;
 using TeamManager.Application.Abstractions.Scopes;
+using TeamManager.Application.Abstractions.Security;
 using TeamManager.Application.Common.Behaviors;
 using TeamManager.Application.Common.Exceptions.AuthorizationExceptions;
 
-namespace TeamManager.Tests.UnitTest.Behaviors;
+namespace TeamManager.Tests.UnitTest.Application.Behaviors;
 
 public sealed class PermissionAuthorizationBehaviorTests
 {
     private const string PermissionCode = "system.manage_roles";
     private readonly Guid _userId = Guid.NewGuid();
     private readonly Mock<ICurrentUser> _currentUser = new();
-    private readonly Mock<IUserRepository> _userRepository = new();
+    private readonly Mock<IPermissionService> _permissionService = new();
     private readonly PermissionAuthorizationBehavior<TestPermissionRequest, string> _sut;
 
     public PermissionAuthorizationBehaviorTests()
     {
-        _sut = new(_currentUser.Object, _userRepository.Object);
+        _sut = new(_currentUser.Object, _permissionService.Object);
         _currentUser.SetupGet(x => x.UserId).Returns(_userId);
     }
 
     private void SetupPermission(bool hasPermission) =>
-    _userRepository.Setup(x => x.HasPermissionAsync(_userId, PermissionCode, It.IsAny<CancellationToken>())).ReturnsAsync(hasPermission);
+    _permissionService.Setup(x => x.HasPermissionAsync(_userId, PermissionCode, It.IsAny<CancellationToken>())).ReturnsAsync(hasPermission);
 
     private sealed record TestPermissionRequest : IRequest<string>, IRequiresPermission
     {
@@ -45,7 +45,7 @@ public sealed class PermissionAuthorizationBehaviorTests
             }, CancellationToken.None));
 
         Assert.False(nextCalled);
-        _userRepository.Verify(x => x.HasPermissionAsync(It.IsAny<Guid>(), It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Never);
+        _permissionService.Verify(x => x.HasPermissionAsync(It.IsAny<Guid>(), It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
     [Fact]
@@ -104,6 +104,6 @@ public sealed class PermissionAuthorizationBehaviorTests
 
         await _sut.Handle(new TestPermissionRequest(), _ => Task.FromResult("allowed"), CancellationToken.None);
 
-        _userRepository.Verify(x => x.HasPermissionAsync(_userId, PermissionCode, It.IsAny<CancellationToken>()), Times.Once);
+        _permissionService.Verify(x => x.HasPermissionAsync(_userId, PermissionCode, It.IsAny<CancellationToken>()), Times.Once);
     }
 }

@@ -2,6 +2,7 @@ using Moq;
 using TeamManager.Application.Abstractions.Authentication;
 using TeamManager.Application.Abstractions.Persistence;
 using TeamManager.Application.Abstractions.Scopes;
+using TeamManager.Application.Abstractions.Security;
 using TeamManager.Application.Common.Behaviors;
 using TeamManager.Application.Common.Exceptions.AuthorizationExceptions;
 using TeamManager.Application.Common.Exceptions.UserExceptions;
@@ -9,7 +10,7 @@ using TeamManager.Application.Features.Users.AdminUserManagement.Commands.Assign
 using TeamManager.Domain.Entities;
 using TeamManager.Domain.Exceptions;
 
-namespace TeamManager.Tests.UnitTest.Users.AdminUserManagement.AssignRoleTests;
+namespace TeamManager.Tests.UnitTest.Application.Features.Users.AdminUserManagement.AssignRoleTests;
 
 public sealed class AssignRoleCommandHandlerTests
 {
@@ -102,8 +103,9 @@ public sealed class AssignRoleCommandHandlerTests
         var currentUser = new Mock<ICurrentUser>();
         var caller = Guid.NewGuid();
         currentUser.SetupGet(x => x.UserId).Returns(caller);
-        _userRepository.Setup(x => x.HasPermissionAsync(caller, "system.manage_roles", It.IsAny<CancellationToken>())).ReturnsAsync(false);
-        var behavior = new PermissionAuthorizationBehavior<AssignRoleCommand, int>(currentUser.Object, _userRepository.Object);
+        var permissionService = new Mock<IPermissionService>();
+        permissionService.Setup(x => x.HasPermissionAsync(caller, "system.manage_roles", It.IsAny<CancellationToken>())).ReturnsAsync(false);
+        var behavior = new PermissionAuthorizationBehavior<AssignRoleCommand, int>(currentUser.Object, permissionService.Object);
         var nextCalled = false;
 
         await Assert.ThrowsAsync<ForbiddenException>(() => behavior.Handle(
