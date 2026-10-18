@@ -10,6 +10,7 @@ namespace TeamManager.Application.Abstractions.Persistence
         Task<Team?> GetByNameAsync(string name, CancellationToken cancellationToken);
         Task<Team?> GetByIdWithMembersAsync(Guid teamId, CancellationToken cancellationToken);
         Task<bool> HasActiveRoleAsync(Guid teamId, Guid userId, IReadOnlyCollection<TeamRole> roles, CancellationToken cancellationToken);
+        Task<TeamRole?> GetActiveRoleAsync(Guid teamId, Guid userId, CancellationToken cancellationToken);
         Task<Team?> GetByIdWithMembersAndInvitationsAsync(Guid teamId, CancellationToken cancellationToken);
         Task<Team?> GetByInvitationTokenHashAsync(string tokenHash, CancellationToken cancellationToken);
         Task<Team?> GetByInvitationTokenHashWithMemberAsync(string tokenHash, Guid memberUserId, CancellationToken cancellationToken);

@@ -108,5 +108,18 @@ namespace TeamManager.Infrastructure.Persistence.Repositories
                 tm.Status == TeamMemberStatus.Active && tm.Team.DeletedAtUtc == null && tm.User.IsActive &&
                 tm.TeamRole == TeamRole.Owner))).FirstOrDefaultAsync(cancellationToken);
         }
+
+        public Task<ProjectMembershipInfo?> GetMembershipInfoAsync(Guid projectId, Guid userId,
+            CancellationToken cancellationToken)
+        {
+            return context.Projects.AsNoTracking().Where(p => p.Id == projectId && p.DeletedAtUtc == null)
+                .Select(p => new ProjectMembershipInfo(
+                    p.Members.Where(m => m.UserId == userId && m.Status == ProjectMemberStatus.Active
+                        && m.User.IsActive).Select(m => (ProjectRole?)m.ProjectRole).FirstOrDefault(),
+                    p.Team.Members.Any(tm => tm.UserId == userId && tm.Status == TeamMemberStatus.Active
+                        && tm.Team.DeletedAtUtc == null && tm.User.IsActive && tm.TeamRole == TeamRole.Owner),
+                    p.TeamId))
+                .FirstOrDefaultAsync(cancellationToken);
+        }
     }
 }

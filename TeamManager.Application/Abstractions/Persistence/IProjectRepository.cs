@@ -19,6 +19,7 @@ namespace TeamManager.Application.Abstractions.Persistence
         Task RemoveMembershipsByTeamAsync(Guid teamId, Guid userId, CancellationToken cancellationToken);
         Task<bool> IsActiveMemberAsync(Guid projectId, Guid userId, CancellationToken cancellationToken);
         Task<ProjectAuthorizationInfo?> GetAuthorizationInfoAsync(Guid projectId, Guid userId, ProjectRole[] requiredRoles, CancellationToken cancellationToken);
+        Task<ProjectMembershipInfo?> GetMembershipInfoAsync(Guid projectId, Guid userId, CancellationToken cancellationToken);
         Task<bool> HasActiveProjectsInTeamAsync(Guid teamId, CancellationToken cancellationToken);
     }
 }
