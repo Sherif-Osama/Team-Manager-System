@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using TeamManager.Application.Abstractions.Persistence;
 using TeamManager.Domain.Entities;
 using TeamManager.Domain.Enums;
@@ -29,6 +29,13 @@ namespace TeamManager.Infrastructure.Persistence.Repositories
         public Task<Team?> GetByNameAsync(string name, CancellationToken cancellationToken)
         {
             return context.Teams.FirstOrDefaultAsync(x => x.Name == name && x.DeletedAtUtc == null, cancellationToken);
+        }
+
+        public Task<Team?> GetWithLabelAsync(Guid teamId, string labelName, CancellationToken cancellationToken)
+        {
+            var trimmedName = labelName.Trim();
+            return context.Teams.Include(t => t.Labels.Where(L => L.Name == trimmedName))
+                .FirstOrDefaultAsync(t => t.Id == teamId && t.DeletedAtUtc == null, cancellationToken);
         }
 
         public Task<Team?> GetByIdWithMembersAsync(Guid teamId, CancellationToken cancellationToken)
@@ -143,3 +150,4 @@ namespace TeamManager.Infrastructure.Persistence.Repositories
         #endregion
     }
 }
+

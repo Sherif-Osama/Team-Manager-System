@@ -10,7 +10,7 @@ namespace TeamManager.Application.Features.Teams.Labels.Commands.CreateLabel
         public async Task<long> Handle(CreateLabelCommand request, CancellationToken cancellationToken)
         {
 
-            var team = await teamRepository.GetByIdWithLabelsAsync(request.TeamId, cancellationToken);
+            var team = await teamRepository.GetWithLabelAsync(request.TeamId, request.Name, cancellationToken);
 
             if (team is null)
                 throw new TeamNotFoundException(request.TeamId);
@@ -18,6 +18,7 @@ namespace TeamManager.Application.Features.Teams.Labels.Commands.CreateLabel
             var label = team.AddLabel(request.Name, request.ColorHex);
 
             await unitOfWork.SaveChangesAsync(cancellationToken);
+
 
             return label.Id;
         }

@@ -24,5 +24,6 @@ namespace TeamManager.Application.Abstractions.Persistence
         void DeleteLabel(Label label);
         Task<bool> LabelExistsInTeamAsync(Guid teamId, long labelId, CancellationToken cancellationToken);
         Task<Team?> GetByIdWithLabelsAsync(Guid teamId, CancellationToken cancellationToken);
+        Task<Team?> GetWithLabelAsync(Guid teamId, string labelName, CancellationToken cancellationToken);
     }
 }
