@@ -17,7 +17,7 @@ namespace TeamManager.Infrastructure.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "8.0.30")
+                .HasAnnotation("ProductVersion", "10.0.13")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -1019,6 +1019,11 @@ namespace TeamManager.Infrastructure.Migrations
                         .HasName("PK_Teams");
 
                     SqlServerKeyBuilderExtensions.IsClustered(b.HasKey("Id"));
+
+                    b.HasIndex("CreatedAtUtc")
+                        .IsDescending()
+                        .HasDatabaseName("IX_Teams_CreatedAtUtc_Desc")
+                        .HasFilter("[DeletedAtUtc] IS NULL");
 
                     b.HasIndex("CreatedBy");
 

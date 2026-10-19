@@ -36,6 +36,9 @@ public class TeamConfiguration : IEntityTypeConfiguration<Team>
         builder.HasOne(x => x.Creator).WithMany().HasForeignKey(x => x.CreatedBy)
             .HasConstraintName("FK_Teams_Users_CreatedBy").OnDelete(DeleteBehavior.NoAction);
 
+        builder.HasIndex(x => x.CreatedAtUtc).IsDescending(true).HasDatabaseName("IX_Teams_CreatedAtUtc_Desc")
+            .HasFilter("[DeletedAtUtc] IS NULL");
+
         builder.HasIndex(x => x.OwnerUserId).HasDatabaseName("IX_Teams_OwnerUserId").HasFilter("[DeletedAtUtc] IS NULL");
 
         builder.Navigation(x => x.Members).HasField("_members").UsePropertyAccessMode(PropertyAccessMode.Field);
