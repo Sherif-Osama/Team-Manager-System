@@ -16,5 +16,6 @@ namespace TeamManager.Application.Abstractions.Persistence
         Task<User?> GetByIdWithRolesAsync(Guid userId, CancellationToken cancellationToken);
         Task<User?> GetByEmailWithRolesAsync(string email, CancellationToken cancellationToken);
         Task<IReadOnlyCollection<string>> GetPermissionCodesAsync(Guid userId, CancellationToken cancellationToken);
+        public Task UpdateLastLoginAsync(Guid userId, DateTime now, CancellationToken cancellationToken);
     }
 }

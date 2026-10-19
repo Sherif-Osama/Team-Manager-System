@@ -11,6 +11,7 @@ public sealed class LoginCommandHandler(IUserRepository userRepository, IPasswor
 {
     public async Task<LoginResponse> Handle(LoginCommand request, CancellationToken cancellationToken)
     {
+        var now = DateTime.UtcNow;
         var user = await userRepository.GetByEmailWithRolesAsync(request.Email, cancellationToken);
 
         if (user is null)
@@ -45,6 +46,7 @@ public sealed class LoginCommandHandler(IUserRepository userRepository, IPasswor
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
+        await userRepository.UpdateLastLoginAsync(user.Id, now, cancellationToken);
         return new LoginResponse(accessToken, refreshToken);
     }
 }

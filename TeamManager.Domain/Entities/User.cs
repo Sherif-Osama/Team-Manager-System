@@ -232,7 +232,6 @@ public class User : AggregateRoot<Guid>
 
         FailedLoginAttempts = 0;
         LockoutEndUtc = null;
-        LastLoginUtc = DateTime.UtcNow;
     }
 
     public void RecordFailedLoginAttempt()

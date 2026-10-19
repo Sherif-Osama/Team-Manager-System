@@ -101,9 +101,14 @@ namespace TeamManager.Tests.UnitTest.Application.Features.Authentication.LoginTe
             Assert.Equal(user.Id, savedToken.UserId);
             Assert.Equal("test-device", savedToken.DeviceInfo);
             Assert.Equal("127.0.0.1", savedToken.IpAddress);
-            Assert.NotNull(user.LastLoginUtc);
             Assert.Equal(0, user.FailedLoginAttempts);
             _unitOfWork.Verify(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
+
+            _userRepository.Verify(x => x.UpdateLastLoginAsync(user.Id, It.Is<DateTime>
+                (time => time.Kind == DateTimeKind.Utc), It.IsAny<CancellationToken>()), Times.Once);
+
+
+
         }
 
         [Fact]

@@ -77,5 +77,11 @@ namespace TeamManager.Infrastructure.Persistence.Repositories
             return await context.UserRoles.Where(ur => ur.UserId == userId && ur.User.IsActive && ur.User.DeletedAtUtc == null)
                 .SelectMany(ur => ur.Role.RolePermissions.Select(rp => rp.Permission.Code)).Distinct().ToListAsync(cancellationToken);
         }
+
+        public async Task UpdateLastLoginAsync(Guid userId, DateTime lastLoginUtc, CancellationToken cancellationToken)
+        {
+            await context.Users.Where(u => u.Id == userId)
+                .ExecuteUpdateAsync(setters => setters.SetProperty(u => u.LastLoginUtc, lastLoginUtc), cancellationToken);
+        }
     }
 }

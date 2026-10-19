@@ -673,7 +673,6 @@ namespace TeamManager.Tests.UnitTest.Domain
 
             Assert.Equal(0, user.FailedLoginAttempts);
             Assert.Null(user.LockoutEndUtc);
-            Assert.NotNull(user.LastLoginUtc);
         }
 
         [Fact]
