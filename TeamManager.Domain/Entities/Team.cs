@@ -150,7 +150,6 @@ namespace TeamManager.Domain.Entities
 
             _labels.Add(label);
 
-            Touch();
             AddDomainEvent(new TeamLabelsChangedDomainEvent(Id));
             return label;
         }
@@ -178,7 +177,6 @@ namespace TeamManager.Domain.Entities
                 label.ChangeColor(colorHex);
 
             AddDomainEvent(new TeamLabelsChangedDomainEvent(Id));
-            Touch();
         }
 
         public Label RemoveLabel(long labelId)
@@ -191,7 +189,6 @@ namespace TeamManager.Domain.Entities
                 throw new DomainException("Label not found.");
 
             _labels.Remove(label);
-            Touch();
             AddDomainEvent(new TeamLabelsChangedDomainEvent(Id));
             return label;
         }
