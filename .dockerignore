@@ -1,0 +1,33 @@
+# Source control and IDE state
+.git/
+.vs/
+.idea/
+.vscode/
+
+# Build and test output
+**/bin/
+**/obj/
+**/TestResults/
+publish/
+TeamManager.Tests/
+
+# Local configuration and secrets. Production configuration is injected at runtime.
+**/appsettings*.json
+**/secrets.json
+.env
+.env.*
+**/.aws/
+**/credentials
+**/credentials.json
+*.pem
+*.key
+*.pfx
+
+# User- and OS-specific files
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+*.log
+.DS_Store
+Thumbs.db
