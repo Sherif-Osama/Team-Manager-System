@@ -18,7 +18,9 @@ namespace TeamManager.Application.Common.Events.EventHandlers.Caching
         INotificationHandler<DomainEventNotification<ProjectOwnershipTransferredDomainEvent>>,
         INotificationHandler<DomainEventNotification<UserDeactivatedDomainEvent>>,
         INotificationHandler<DomainEventNotification<UserReactivatedDomainEvent>>,
-        INotificationHandler<DomainEventNotification<UserDeletedDomainEvent>>
+        INotificationHandler<DomainEventNotification<UserDeletedDomainEvent>>,
+        INotificationHandler<DomainEventNotification<TeamMemberAddedDomainEvent>>,
+        INotificationHandler<DomainEventNotification<ProjectMemberAddedDomainEvent>>
     {
         public Task Handle(DomainEventNotification<TeamMemberRemovedDomainEvent> notification, CancellationToken cancellationToken)
             => InvalidateTeamMembership(notification.DomainEvent.TeamId, notification.DomainEvent.RemovedUserId);
@@ -59,6 +61,12 @@ namespace TeamManager.Application.Common.Events.EventHandlers.Caching
 
         public Task Handle(DomainEventNotification<UserDeletedDomainEvent> notification, CancellationToken cancellationToken)
             => InvalidateUserMemberships(notification.DomainEvent.UserId);
+
+        public Task Handle(DomainEventNotification<TeamMemberAddedDomainEvent> notification, CancellationToken cancellationToken)
+            => InvalidateTeamMembership(notification.DomainEvent.Member.TeamId, notification.DomainEvent.Member.UserId);
+
+        public Task Handle(DomainEventNotification<ProjectMemberAddedDomainEvent> notification, CancellationToken cancellationToken)
+        => InvalidateProjectMembership(notification.DomainEvent.member.ProjectId, notification.DomainEvent.member.UserId);
 
         private Task InvalidateTeamMembership(Guid teamId, Guid userId)
         {

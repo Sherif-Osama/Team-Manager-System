@@ -201,6 +201,9 @@ namespace TeamManager.Domain.Entities
             var member = new ProjectMember(Id, userId, role, addedBy);
 
             _members.Add(member);
+
+            AddDomainEvent(new ProjectMemberAddedDomainEvent(member));
+
             return member;
         }
 

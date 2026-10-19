@@ -210,6 +210,8 @@ namespace TeamManager.Domain.Entities
 
             _members.Add(member);
 
+            AddDomainEvent(new TeamMemberAddedDomainEvent(member));
+
             return member;
         }
 
