@@ -118,7 +118,7 @@ public sealed class CachingHandlersTests
 
     #region InvalidateAuthorizationCacheHandler
     [Fact]
-    public async Task AuthorizationHandler_OnTeamMemberRemoved_EnqueuesTeamAndUserTags()
+    public async Task AuthorizationHandler_OnTeamMemberRemoved_EnqueuesUserTag()
     {
         var handler = new InvalidateAuthorizationCacheHandler(_dispatcher.Object);
         var teamId = Guid.NewGuid();
@@ -127,12 +127,11 @@ public sealed class CachingHandlersTests
         await handler.Handle(new DomainEventNotification<TeamMemberRemovedDomainEvent>(
             new TeamMemberRemovedDomainEvent(teamId, 1, userId, Guid.NewGuid())), CancellationToken.None);
 
-        _dispatcher.Verify(x => x.EnqueueTag(CacheTags.TeamAuthorization(teamId)), Times.Once);
         _dispatcher.Verify(x => x.EnqueueTag(CacheTags.UserAuthorization(userId)), Times.Once);
     }
 
     [Fact]
-    public async Task AuthorizationHandler_OnTeamMemberRoleChanged_EnqueuesTeamAndUserTags()
+    public async Task AuthorizationHandler_OnTeamMemberRoleChanged_EnqueuesUserTag()
     {
         var handler = new InvalidateAuthorizationCacheHandler(_dispatcher.Object);
         var teamId = Guid.NewGuid();
@@ -142,12 +141,11 @@ public sealed class CachingHandlersTests
             new TeamMemberRoleChangedDomainEvent(teamId, 1, userId, Guid.NewGuid(), TeamRole.Member, TeamRole.Admin)),
             CancellationToken.None);
 
-        _dispatcher.Verify(x => x.EnqueueTag(CacheTags.TeamAuthorization(teamId)), Times.Once);
         _dispatcher.Verify(x => x.EnqueueTag(CacheTags.UserAuthorization(userId)), Times.Once);
     }
 
     [Fact]
-    public async Task AuthorizationHandler_OnInvitationAccepted_EnqueuesTeamAndUserTags()
+    public async Task AuthorizationHandler_OnInvitationAccepted_EnqueuesUserTag()
     {
         var handler = new InvalidateAuthorizationCacheHandler(_dispatcher.Object);
         var teamId = Guid.NewGuid();
@@ -157,7 +155,6 @@ public sealed class CachingHandlersTests
             new TeamInvitationAcceptedDomainEvent(teamId, Guid.NewGuid(), userId, "u@example.com", TeamRole.Member)),
             CancellationToken.None);
 
-        _dispatcher.Verify(x => x.EnqueueTag(CacheTags.TeamAuthorization(teamId)), Times.Once);
         _dispatcher.Verify(x => x.EnqueueTag(CacheTags.UserAuthorization(userId)), Times.Once);
     }
 
@@ -178,7 +175,7 @@ public sealed class CachingHandlersTests
     }
 
     [Fact]
-    public async Task AuthorizationHandler_OnProjectMemberRemoved_EnqueuesProjectAndUserTags()
+    public async Task AuthorizationHandler_OnProjectMemberRemoved_EnqueuesUserTag()
     {
         var handler = new InvalidateAuthorizationCacheHandler(_dispatcher.Object);
         var projectId = Guid.NewGuid();
@@ -187,12 +184,11 @@ public sealed class CachingHandlersTests
         await handler.Handle(new DomainEventNotification<ProjectMemberRemovedDomainEvent>(
             new ProjectMemberRemovedDomainEvent(projectId, 1, userId, Guid.NewGuid())), CancellationToken.None);
 
-        _dispatcher.Verify(x => x.EnqueueTag(CacheTags.ProjectAuthorization(projectId)), Times.Once);
         _dispatcher.Verify(x => x.EnqueueTag(CacheTags.UserAuthorization(userId)), Times.Once);
     }
 
     [Fact]
-    public async Task AuthorizationHandler_OnProjectMemberRoleChanged_EnqueuesProjectAndUserTags()
+    public async Task AuthorizationHandler_OnProjectMemberRoleChanged_EnqueuesUserTag()
     {
         var handler = new InvalidateAuthorizationCacheHandler(_dispatcher.Object);
         var projectId = Guid.NewGuid();
@@ -202,7 +198,6 @@ public sealed class CachingHandlersTests
             new ProjectMemberRoleChangedDomainEvent(projectId, 1, userId, Guid.NewGuid(), ProjectRole.Member, ProjectRole.Admin)),
             CancellationToken.None);
 
-        _dispatcher.Verify(x => x.EnqueueTag(CacheTags.ProjectAuthorization(projectId)), Times.Once);
         _dispatcher.Verify(x => x.EnqueueTag(CacheTags.UserAuthorization(userId)), Times.Once);
     }
 
@@ -256,6 +251,32 @@ public sealed class CachingHandlersTests
             new UserDeletedDomainEvent(userId, "u@example.com")), CancellationToken.None);
 
         _dispatcher.Verify(x => x.EnqueueTag(CacheTags.UserAuthorization(userId)), Times.Once);
+    }
+
+    [Fact]
+    public async Task AuthorizationHandler_OnTeamMemberAdded_EnqueuesUserTag()
+    {
+        var handler = new InvalidateAuthorizationCacheHandler(_dispatcher.Object);
+        var team = new global::TeamManager.Domain.Entities.Team(Guid.NewGuid(), "T1", Guid.NewGuid(), Guid.NewGuid());
+        var member = team.AddMember(Guid.NewGuid(), TeamRole.Member);
+
+        await handler.Handle(new DomainEventNotification<TeamMemberAddedDomainEvent>(
+            new TeamMemberAddedDomainEvent(member)), CancellationToken.None);
+
+        _dispatcher.Verify(x => x.EnqueueTag(CacheTags.UserAuthorization(member.UserId)), Times.Once);
+    }
+
+    [Fact]
+    public async Task AuthorizationHandler_OnProjectMemberAdded_EnqueuesUserTag()
+    {
+        var handler = new InvalidateAuthorizationCacheHandler(_dispatcher.Object);
+        var project = new global::TeamManager.Domain.Entities.Project(Guid.NewGuid(), Guid.NewGuid(), "P1", Guid.NewGuid());
+        var member = project.AddMember(Guid.NewGuid(), ProjectRole.Member);
+
+        await handler.Handle(new DomainEventNotification<ProjectMemberAddedDomainEvent>(
+            new ProjectMemberAddedDomainEvent(member)), CancellationToken.None);
+
+        _dispatcher.Verify(x => x.EnqueueTag(CacheTags.UserAuthorization(member.UserId)), Times.Once);
     }
     #endregion
 }

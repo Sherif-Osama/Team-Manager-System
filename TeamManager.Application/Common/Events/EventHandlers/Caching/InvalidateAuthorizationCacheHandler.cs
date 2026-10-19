@@ -70,14 +70,12 @@ namespace TeamManager.Application.Common.Events.EventHandlers.Caching
 
         private Task InvalidateTeamMembership(Guid teamId, Guid userId)
         {
-            dispatcher.EnqueueTag(CacheTags.TeamAuthorization(teamId));
             dispatcher.EnqueueTag(CacheTags.UserAuthorization(userId));
             return Task.CompletedTask;
         }
 
         private Task InvalidateProjectMembership(Guid projectId, Guid userId)
         {
-            dispatcher.EnqueueTag(CacheTags.ProjectAuthorization(projectId));
             dispatcher.EnqueueTag(CacheTags.UserAuthorization(userId));
             return Task.CompletedTask;
         }
