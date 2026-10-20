@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using TeamManager.Application.Features.ActivityLog.Queries.GetProjectActivity;
 using TeamManager.Application.Features.Projects.Project.Commands.ChangeProjectStatus;
 using TeamManager.Application.Features.Projects.Project.Commands.CreateProject;
+using TeamManager.Application.Features.Projects.Project.Commands.DeleteProject;
 using TeamManager.Application.Features.Projects.Project.Commands.ScheduleProject;
 using TeamManager.Application.Features.Projects.Project.Commands.TransferProjectOwnership;
 using TeamManager.Application.Features.Projects.Project.Commands.UpdateProject;
@@ -60,6 +61,14 @@ namespace TeamManager.Api.Controllers.Projects
         public async Task<IActionResult> TransferOwnership(Guid projectId, TransferProjectOwnershipRequest request, CancellationToken cancellationToken)
         {
             await sender.Send(new TransferProjectOwnershipCommand(projectId, request.NewOwnerUserId), cancellationToken);
+
+            return NoContent();
+        }
+
+        [HttpDelete("{projectId:guid}")]
+        public async Task<IActionResult> Delete(Guid projectId, CancellationToken cancellationToken)
+        {
+            await sender.Send(new DeleteProjectCommand(projectId), cancellationToken);
 
             return NoContent();
         }
