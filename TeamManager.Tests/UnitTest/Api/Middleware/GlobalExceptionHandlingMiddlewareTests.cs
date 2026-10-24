@@ -128,6 +128,20 @@ public sealed class GlobalExceptionHandlingMiddlewareTests
     }
 
     [Fact]
+    public async Task InvokeAsync_WhenClientAbortsRequest_PropagatesCancellationWithoutWritingResponse()
+    {
+        var context = new DefaultHttpContext { Response = { Body = new MemoryStream() } };
+        context.RequestAborted = new CancellationToken(canceled: true);
+        var middleware = new GlobalExceptionHandlingMiddleware(_ => throw new OperationCanceledException(), _logger.Object);
+
+        await Assert.ThrowsAsync<OperationCanceledException>(() => middleware.InvokeAsync(context));
+
+        Assert.Equal(0, context.Response.Body.Length);
+        _logger.Verify(x => x.Log(It.IsAny<LogLevel>(), It.IsAny<EventId>(), It.IsAny<It.IsAnyType>(),
+            It.IsAny<Exception?>(), It.IsAny<Func<It.IsAnyType, Exception?, string>>()), Times.Never);
+    }
+
+    [Fact]
     public async Task InvokeAsync_WithUnhandledException_Returns500RedactedAndLogs()
     {
         var context = await InvokeAsync(new InvalidOperationException("secret internal detail"));

@@ -22,6 +22,10 @@ namespace TeamManager.Api.Middleware
             {
                 await next(context);
             }
+            catch (OperationCanceledException) when (context.RequestAborted.IsCancellationRequested)
+            {
+                throw;
+            }
             catch (Exception exception)
             {
                 await HandleExceptionAsync(context, exception);
