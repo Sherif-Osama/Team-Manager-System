@@ -11,8 +11,11 @@
 publish/
 TeamManager.Tests/
 
-# Local configuration and secrets. Production configuration is injected at runtime.
-**/appsettings*.json
+# Keep the base appsettings.json: non-secret defaults are published with the API and
+# production environment variables override them. Exclude only machine-specific files.
+**/appsettings.Development.json
+**/appsettings.Local.json
+**/appsettings.Secrets.json
 **/secrets.json
 .env
 .env.*
