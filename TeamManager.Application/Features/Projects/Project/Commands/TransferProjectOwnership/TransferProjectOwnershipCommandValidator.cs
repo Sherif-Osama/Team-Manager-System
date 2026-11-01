@@ -1,4 +1,4 @@
-﻿using FluentValidation;
+using FluentValidation;
 
 namespace TeamManager.Application.Features.Projects.Project.Commands.TransferProjectOwnership
 {
@@ -6,9 +6,13 @@ namespace TeamManager.Application.Features.Projects.Project.Commands.TransferPro
     {
         public TransferProjectOwnershipCommandValidator()
         {
-            RuleFor(x => x.ProjectId).NotEmpty();
+            RuleFor(x => x.ProjectId)
+                .NotEmpty()
+                .WithMessage("Project ID is required.");
 
-            RuleFor(x => x.NewOwnerUserId).NotEmpty();
+            RuleFor(x => x.NewOwnerUserId)
+                .NotEmpty()
+                .WithMessage("New owner user ID is required.");
         }
     }
 }

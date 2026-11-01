@@ -1,4 +1,4 @@
-﻿using FluentValidation;
+using FluentValidation;
 
 namespace TeamManager.Application.Features.Tasks.TaskAttachment.Commands.DeleteTaskAttachment
 {
@@ -6,9 +6,13 @@ namespace TeamManager.Application.Features.Tasks.TaskAttachment.Commands.DeleteT
     {
         public DeleteTaskAttachmentCommandValidator()
         {
-            RuleFor(x => x.TaskId).GreaterThan(0);
+            RuleFor(x => x.TaskId)
+                .GreaterThan(0)
+                .WithMessage("Task ID must be greater than 0.");
 
-            RuleFor(x => x.AttachmentId).GreaterThan(0);
+            RuleFor(x => x.AttachmentId)
+                .GreaterThan(0)
+                .WithMessage("Attachment ID must be greater than 0.");
         }
     }
 }

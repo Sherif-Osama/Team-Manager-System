@@ -1,4 +1,4 @@
-﻿using FluentValidation;
+using FluentValidation;
 
 namespace TeamManager.Application.Features.Projects.ProjectMembers.Queries.GetProjectMembers
 {
@@ -6,17 +6,29 @@ namespace TeamManager.Application.Features.Projects.ProjectMembers.Queries.GetPr
     {
         public GetProjectMembersQueryValidator()
         {
-            RuleFor(x => x.ProjectId).NotEmpty();
+            RuleFor(x => x.ProjectId)
+                .NotEmpty()
+                .WithMessage("Project ID is required.");
 
-            RuleFor(x => x.Search).MaximumLength(150);
+            RuleFor(x => x.Search)
+                .MaximumLength(150)
+                .WithMessage("Search term must not exceed 150 characters.");
 
-            RuleFor(x => x.Role).IsInEnum();
+            RuleFor(x => x.Role)
+                .IsInEnum()
+                .WithMessage("Invalid project role.");
 
-            RuleFor(x => x.Status).IsInEnum();
+            RuleFor(x => x.Status)
+                .IsInEnum()
+                .WithMessage("Invalid project status.");
 
-            RuleFor(x => x.Page).GreaterThan(0);
+            RuleFor(x => x.Page)
+                .GreaterThan(0)
+                .WithMessage("Page must be greater than 0.");
 
-            RuleFor(x => x.PageSize).InclusiveBetween(1, 100);
+            RuleFor(x => x.PageSize)
+                .InclusiveBetween(1, 100)
+                .WithMessage("Page size must be between 1 and 100.");
         }
     }
 }

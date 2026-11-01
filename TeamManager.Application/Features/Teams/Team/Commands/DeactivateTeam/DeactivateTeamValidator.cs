@@ -1,4 +1,4 @@
-﻿using FluentValidation;
+using FluentValidation;
 
 namespace TeamManager.Application.Features.Teams.Team.Commands.DeactivateTeam
 {
@@ -6,7 +6,9 @@ namespace TeamManager.Application.Features.Teams.Team.Commands.DeactivateTeam
     {
         public DeactivateTeamValidator()
         {
-            RuleFor(C => C.TeamId).NotEmpty();
+            RuleFor(C => C.TeamId)
+                .NotEmpty()
+                .WithMessage("Team ID is required.");
         }
     }
 }

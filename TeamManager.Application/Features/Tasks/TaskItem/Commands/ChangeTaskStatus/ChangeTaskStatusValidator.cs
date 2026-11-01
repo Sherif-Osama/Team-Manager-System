@@ -1,4 +1,4 @@
-﻿using FluentValidation;
+using FluentValidation;
 
 namespace TeamManager.Application.Features.Tasks.TaskItem.Commands.ChangeTaskStatus
 {
@@ -6,9 +6,13 @@ namespace TeamManager.Application.Features.Tasks.TaskItem.Commands.ChangeTaskSta
     {
         public ChangeTaskStatusValidator()
         {
-            RuleFor(x => x.TaskId).GreaterThan(0);
+            RuleFor(x => x.TaskId)
+                .GreaterThan(0)
+                .WithMessage("Task ID must be greater than 0.");
 
-            RuleFor(x => x.Status).IsInEnum();
+            RuleFor(x => x.Status)
+                .IsInEnum()
+                .WithMessage("Invalid task status.");
         }
     }
 }

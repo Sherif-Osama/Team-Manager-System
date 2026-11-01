@@ -1,4 +1,4 @@
-﻿using FluentValidation;
+using FluentValidation;
 
 namespace TeamManager.Application.Features.Tasks.TaskItem.Commands.UnassignTask
 {
@@ -6,7 +6,9 @@ namespace TeamManager.Application.Features.Tasks.TaskItem.Commands.UnassignTask
     {
         public UnassignTaskValidator()
         {
-            RuleFor(x => x.TaskId).GreaterThan(0);
+            RuleFor(x => x.TaskId)
+                .GreaterThan(0)
+                .WithMessage("Task ID must be greater than 0.");
         }
     }
 }

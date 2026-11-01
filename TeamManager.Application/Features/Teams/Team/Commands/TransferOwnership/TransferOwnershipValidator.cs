@@ -1,4 +1,4 @@
-﻿using FluentValidation;
+using FluentValidation;
 
 namespace TeamManager.Application.Features.Teams.Team.Commands.TransferOwnership
 {
@@ -6,9 +6,13 @@ namespace TeamManager.Application.Features.Teams.Team.Commands.TransferOwnership
     {
         public TransferOwnershipValidator()
         {
-            RuleFor(C => C.TeamId).NotEmpty();
+            RuleFor(C => C.TeamId)
+                .NotEmpty()
+                .WithMessage("Team ID is required.");
 
-            RuleFor(C => C.NewOwnerUserId).NotEmpty();
+            RuleFor(C => C.NewOwnerUserId)
+                .NotEmpty()
+                .WithMessage("New owner user ID is required.");
         }
     }
 }

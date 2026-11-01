@@ -1,4 +1,4 @@
-﻿using FluentValidation;
+using FluentValidation;
 
 namespace TeamManager.Application.Features.Tasks.TaskDependency.Commands.AddTaskDependency
 {
@@ -6,9 +6,13 @@ namespace TeamManager.Application.Features.Tasks.TaskDependency.Commands.AddTask
     {
         public AddTaskDependencyValidator()
         {
-            RuleFor(x => x.TaskId).GreaterThan(0);
+            RuleFor(x => x.TaskId)
+                .GreaterThan(0)
+                .WithMessage("Task ID must be greater than 0.");
 
-            RuleFor(x => x.DependsOnTaskId).GreaterThan(0);
+            RuleFor(x => x.DependsOnTaskId)
+                .GreaterThan(0)
+                .WithMessage("Depends on task ID must be greater than 0.");
         }
     }
 }

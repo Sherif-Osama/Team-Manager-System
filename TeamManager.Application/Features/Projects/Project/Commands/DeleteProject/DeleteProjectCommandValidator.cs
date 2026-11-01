@@ -6,7 +6,9 @@ namespace TeamManager.Application.Features.Projects.Project.Commands.DeleteProje
     {
         public DeleteProjectCommandValidator()
         {
-            RuleFor(x => x.ProjectId).NotEmpty();
+            RuleFor(x => x.ProjectId)
+                .NotEmpty()
+                .WithMessage("Project ID is required.");
         }
     }
 }

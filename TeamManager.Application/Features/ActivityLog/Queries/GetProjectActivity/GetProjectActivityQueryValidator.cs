@@ -1,4 +1,4 @@
-﻿using FluentValidation;
+using FluentValidation;
 
 namespace TeamManager.Application.Features.ActivityLog.Queries.GetProjectActivity
 {
@@ -6,11 +6,17 @@ namespace TeamManager.Application.Features.ActivityLog.Queries.GetProjectActivit
     {
         public GetProjectActivityQueryValidator()
         {
-            RuleFor(x => x.ProjectId).NotEmpty();
+            RuleFor(x => x.ProjectId)
+                .NotEmpty()
+                .WithMessage("Project ID is required.");
 
-            RuleFor(x => x.Page).GreaterThan(0);
+            RuleFor(x => x.Page)
+                .GreaterThan(0)
+                .WithMessage("Page must be greater than 0.");
 
-            RuleFor(x => x.PageSize).InclusiveBetween(1, 100);
+            RuleFor(x => x.PageSize)
+                .InclusiveBetween(1, 100)
+                .WithMessage("Page size must be between 1 and 100.");
         }
     }
 }

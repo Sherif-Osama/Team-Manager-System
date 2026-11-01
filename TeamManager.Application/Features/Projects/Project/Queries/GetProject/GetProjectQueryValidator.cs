@@ -1,4 +1,4 @@
-﻿using FluentValidation;
+using FluentValidation;
 
 namespace TeamManager.Application.Features.Projects.Project.Queries.GetProject
 {
@@ -6,7 +6,9 @@ namespace TeamManager.Application.Features.Projects.Project.Queries.GetProject
     {
         public GetProjectQueryValidator()
         {
-            RuleFor(x => x.ProjectId).NotEmpty();
+            RuleFor(x => x.ProjectId)
+                .NotEmpty()
+                .WithMessage("Project ID is required.");
         }
     }
 }

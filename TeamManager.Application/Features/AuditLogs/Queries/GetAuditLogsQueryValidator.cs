@@ -1,4 +1,4 @@
-﻿using FluentValidation;
+using FluentValidation;
 
 namespace TeamManager.Application.Features.AuditLogs.Queries
 {
@@ -6,11 +6,18 @@ namespace TeamManager.Application.Features.AuditLogs.Queries
     {
         public GetAuditLogsQueryValidator()
         {
-            RuleFor(x => x.Page).GreaterThan(0);
+            RuleFor(x => x.Page)
+                .GreaterThan(0)
+                .WithMessage("Page must be greater than 0.");
 
-            RuleFor(x => x.PageSize).InclusiveBetween(1, 100);
+            RuleFor(x => x.PageSize)
+                .InclusiveBetween(1, 100)
+                .WithMessage("Page size must be between 1 and 100.");
 
-            RuleFor(x => x.ToUtc).GreaterThanOrEqualTo(x => x.FromUtc).When(x => x.FromUtc.HasValue && x.ToUtc.HasValue);
+            RuleFor(x => x.ToUtc)
+                .GreaterThanOrEqualTo(x => x.FromUtc)
+                .WithMessage("To date must be greater than or equal to from date.")
+                .When(x => x.FromUtc.HasValue && x.ToUtc.HasValue);
         }
     }
 }

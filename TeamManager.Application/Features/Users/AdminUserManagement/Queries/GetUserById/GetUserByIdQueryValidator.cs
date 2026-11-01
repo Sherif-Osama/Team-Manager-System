@@ -1,4 +1,4 @@
-﻿using FluentValidation;
+using FluentValidation;
 
 namespace TeamManager.Application.Features.Users.AdminUserManagement.Queries.GetUserById
 {
@@ -6,7 +6,9 @@ namespace TeamManager.Application.Features.Users.AdminUserManagement.Queries.Get
     {
         public GetUserByIdQueryValidator()
         {
-            RuleFor(x => x.UserId).NotEmpty();
+            RuleFor(x => x.UserId)
+                .NotEmpty()
+                .WithMessage("User ID is required.");
         }
     }
 }

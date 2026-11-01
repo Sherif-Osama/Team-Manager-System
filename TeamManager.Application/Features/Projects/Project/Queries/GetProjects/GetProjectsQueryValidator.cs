@@ -1,4 +1,4 @@
-﻿using FluentValidation;
+using FluentValidation;
 
 namespace TeamManager.Application.Features.Projects.Project.Queries.GetProjects
 {
@@ -6,13 +6,21 @@ namespace TeamManager.Application.Features.Projects.Project.Queries.GetProjects
     {
         public GetProjectsQueryValidator()
         {
-            RuleFor(x => x.Search).MaximumLength(150);
+            RuleFor(x => x.Search)
+                .MaximumLength(150)
+                .WithMessage("Search term must not exceed 150 characters.");
 
-            RuleFor(x => x.Status).IsInEnum();
+            RuleFor(x => x.Status)
+                .IsInEnum()
+                .WithMessage("Invalid project status.");
 
-            RuleFor(x => x.Page).GreaterThan(0);
+            RuleFor(x => x.Page)
+                .GreaterThan(0)
+                .WithMessage("Page must be greater than 0.");
 
-            RuleFor(x => x.PageSize).InclusiveBetween(1, 100);
+            RuleFor(x => x.PageSize)
+                .InclusiveBetween(1, 100)
+                .WithMessage("Page size must be between 1 and 100.");
         }
     }
 }

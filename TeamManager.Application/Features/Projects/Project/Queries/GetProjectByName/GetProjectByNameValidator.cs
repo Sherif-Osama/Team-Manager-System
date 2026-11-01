@@ -1,4 +1,4 @@
-﻿using FluentValidation;
+using FluentValidation;
 
 namespace TeamManager.Application.Features.Projects.Project.Queries.GetProjectByName
 {
@@ -6,7 +6,13 @@ namespace TeamManager.Application.Features.Projects.Project.Queries.GetProjectBy
     {
         public GetProjectByNameValidator()
         {
-            RuleFor(x => x.Name).Must(name => !string.IsNullOrWhiteSpace(name)).MaximumLength(100);
+            RuleFor(x => x.Name)
+                .NotEmpty()
+                .WithMessage("Project name is required.")
+                .Must(name => !string.IsNullOrWhiteSpace(name))
+                .WithMessage("Project name cannot be whitespace.")
+                .MaximumLength(100)
+                .WithMessage("Project name must not exceed 100 characters.");
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿using FluentValidation;
+using FluentValidation;
 
 namespace TeamManager.Application.Features.Authentication.Commands.RefreshToken
 {
@@ -6,7 +6,11 @@ namespace TeamManager.Application.Features.Authentication.Commands.RefreshToken
     {
         public RefreshTokenCommandValidator()
         {
-            RuleFor(C => C.RefreshToken).NotEmpty().Must(R => !string.IsNullOrWhiteSpace(R));
+            RuleFor(C => C.RefreshToken)
+                .NotEmpty()
+                .WithMessage("Refresh token is required.")
+                .Must(R => !string.IsNullOrWhiteSpace(R))
+                .WithMessage("Refresh token cannot be whitespace.");
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿using FluentValidation;
+using FluentValidation;
 
 namespace TeamManager.Application.Features.Teams.TeamMembers.Commands.ChangeMemberRole
 {
@@ -7,11 +7,16 @@ namespace TeamManager.Application.Features.Teams.TeamMembers.Commands.ChangeMemb
         public ChangeMemberRoleValidator()
         {
             RuleFor(x => x.TeamId)
-                .NotEmpty();
+                .NotEmpty()
+                .WithMessage("Team ID is required.");
 
-            RuleFor(x => x.MemberId).GreaterThan(0);
+            RuleFor(x => x.MemberId)
+                .GreaterThan(0)
+                .WithMessage("Member ID must be greater than 0.");
 
-            RuleFor(x => x.Role).IsInEnum();
+            RuleFor(x => x.Role)
+                .IsInEnum()
+                .WithMessage("Invalid team role.");
         }
     }
 }

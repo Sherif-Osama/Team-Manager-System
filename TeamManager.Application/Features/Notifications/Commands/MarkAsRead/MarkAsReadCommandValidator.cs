@@ -1,4 +1,4 @@
-﻿using FluentValidation;
+using FluentValidation;
 
 namespace TeamManager.Application.Features.Notifications.Commands.MarkAsRead
 {
@@ -6,7 +6,9 @@ namespace TeamManager.Application.Features.Notifications.Commands.MarkAsRead
     {
         public MarkAsReadCommandValidator()
         {
-            RuleFor(x => x.NotificationId).GreaterThan(0);
+            RuleFor(x => x.NotificationId)
+                .GreaterThan(0)
+                .WithMessage("Notification ID must be greater than 0.");
         }
     }
 }

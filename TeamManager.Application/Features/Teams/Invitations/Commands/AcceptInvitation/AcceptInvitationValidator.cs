@@ -1,4 +1,4 @@
-﻿using FluentValidation;
+using FluentValidation;
 
 namespace TeamManager.Application.Features.Teams.Invitations.Commands.AcceptInvitation
 {
@@ -6,7 +6,13 @@ namespace TeamManager.Application.Features.Teams.Invitations.Commands.AcceptInvi
     {
         public AcceptInvitationValidator()
         {
-            RuleFor(c => c.Token).Must(T => !string.IsNullOrWhiteSpace(T)).NotEmpty().MaximumLength(500);
+            RuleFor(c => c.Token)
+                .NotEmpty()
+                .WithMessage("Invitation token is required.")
+                .Must(T => !string.IsNullOrWhiteSpace(T))
+                .WithMessage("Invitation token cannot be whitespace.")
+                .MaximumLength(500)
+                .WithMessage("Invitation token must not exceed 500 characters.");
         }
     }
 }

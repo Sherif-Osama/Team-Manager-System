@@ -6,7 +6,9 @@ namespace TeamManager.Application.Features.Permissions.Queries.GetPermissionById
     {
         public GetPermissionByIdQueryValidator()
         {
-            RuleFor(x => x.PermissionId).GreaterThan(0);
+            RuleFor(x => x.PermissionId)
+                .GreaterThan(0)
+                .WithMessage("Permission ID must be greater than 0.");
         }
     }
 }

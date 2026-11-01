@@ -1,4 +1,4 @@
-﻿using FluentValidation;
+using FluentValidation;
 
 namespace TeamManager.Application.Features.Teams.Invitations.Commands.CancelInvitation
 {
@@ -6,9 +6,13 @@ namespace TeamManager.Application.Features.Teams.Invitations.Commands.CancelInvi
     {
         public CancelInvitationValidator()
         {
-            RuleFor(x => x.TeamId).NotEmpty();
+            RuleFor(x => x.TeamId)
+                .NotEmpty()
+                .WithMessage("Team ID is required.");
 
-            RuleFor(x => x.InvitationId).NotEmpty();
+            RuleFor(x => x.InvitationId)
+                .NotEmpty()
+                .WithMessage("Invitation ID is required.");
         }
     }
 }

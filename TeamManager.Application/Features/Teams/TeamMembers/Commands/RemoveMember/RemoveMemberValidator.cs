@@ -1,4 +1,4 @@
-﻿using FluentValidation;
+using FluentValidation;
 
 namespace TeamManager.Application.Features.Teams.TeamMembers.Commands.RemoveMember
 {
@@ -6,9 +6,13 @@ namespace TeamManager.Application.Features.Teams.TeamMembers.Commands.RemoveMemb
     {
         public RemoveMemberValidator()
         {
-            RuleFor(x => x.TeamId).NotEmpty();
+            RuleFor(x => x.TeamId)
+                .NotEmpty()
+                .WithMessage("Team ID is required.");
 
-            RuleFor(x => x.MemberId).GreaterThan(0);
+            RuleFor(x => x.MemberId)
+                .GreaterThan(0)
+                .WithMessage("Member ID must be greater than 0.");
         }
     }
 }

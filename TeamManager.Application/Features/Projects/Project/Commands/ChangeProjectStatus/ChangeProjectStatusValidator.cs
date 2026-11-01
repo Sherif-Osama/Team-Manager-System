@@ -1,4 +1,4 @@
-﻿using FluentValidation;
+using FluentValidation;
 
 namespace TeamManager.Application.Features.Projects.Project.Commands.ChangeProjectStatus
 {
@@ -6,9 +6,13 @@ namespace TeamManager.Application.Features.Projects.Project.Commands.ChangeProje
     {
         public ChangeProjectStatusValidator()
         {
-            RuleFor(c => c.ProjectId).NotEmpty();
+            RuleFor(c => c.ProjectId)
+                .NotEmpty()
+                .WithMessage("Project ID is required.");
 
-            RuleFor(c => c.Status).IsInEnum();
+            RuleFor(c => c.Status)
+                .IsInEnum()
+                .WithMessage("Invalid project status.");
         }
     }
 }

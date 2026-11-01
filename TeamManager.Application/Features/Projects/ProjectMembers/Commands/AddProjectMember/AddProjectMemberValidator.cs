@@ -1,5 +1,4 @@
-﻿using FluentValidation;
-
+using FluentValidation;
 
 namespace TeamManager.Application.Features.Projects.ProjectMembers.Commands.AddProjectMember
 {
@@ -7,11 +6,17 @@ namespace TeamManager.Application.Features.Projects.ProjectMembers.Commands.AddP
     {
         public AddProjectMemberValidator()
         {
-            RuleFor(x => x.ProjectId).NotEmpty();
+            RuleFor(x => x.ProjectId)
+                .NotEmpty()
+                .WithMessage("Project ID is required.");
 
-            RuleFor(x => x.UserId).NotEmpty();
+            RuleFor(x => x.UserId)
+                .NotEmpty()
+                .WithMessage("User ID is required.");
 
-            RuleFor(x => x.ProjectRole).IsInEnum();
+            RuleFor(x => x.ProjectRole)
+                .IsInEnum()
+                .WithMessage("Invalid project role.");
         }
     }
 }

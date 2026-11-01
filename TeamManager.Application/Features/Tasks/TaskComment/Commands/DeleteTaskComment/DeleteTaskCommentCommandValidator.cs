@@ -1,4 +1,4 @@
-﻿using FluentValidation;
+using FluentValidation;
 
 namespace TeamManager.Application.Features.Tasks.TaskComment.Commands.DeleteTaskComment
 {
@@ -6,9 +6,13 @@ namespace TeamManager.Application.Features.Tasks.TaskComment.Commands.DeleteTask
     {
         public DeleteTaskCommentCommandValidator()
         {
-            RuleFor(x => x.TaskId).GreaterThan(0);
+            RuleFor(x => x.TaskId)
+                .GreaterThan(0)
+                .WithMessage("Task ID must be greater than 0.");
 
-            RuleFor(x => x.CommentId).GreaterThan(0);
+            RuleFor(x => x.CommentId)
+                .GreaterThan(0)
+                .WithMessage("Comment ID must be greater than 0.");
         }
     }
 }

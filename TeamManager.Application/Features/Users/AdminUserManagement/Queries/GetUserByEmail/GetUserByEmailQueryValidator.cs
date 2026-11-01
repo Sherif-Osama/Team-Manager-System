@@ -1,4 +1,4 @@
-﻿using FluentValidation;
+using FluentValidation;
 
 namespace TeamManager.Application.Features.Users.AdminUserManagement.Queries.GetUserByEmail
 {
@@ -6,7 +6,11 @@ namespace TeamManager.Application.Features.Users.AdminUserManagement.Queries.Get
     {
         public GetUserByEmailQueryValidator()
         {
-            RuleFor(x => x.Email).NotEmpty().EmailAddress();
+            RuleFor(x => x.Email)
+                .NotEmpty()
+                .WithMessage("Email is required.")
+                .EmailAddress()
+                .WithMessage("Email format is invalid.");
         }
     }
 }

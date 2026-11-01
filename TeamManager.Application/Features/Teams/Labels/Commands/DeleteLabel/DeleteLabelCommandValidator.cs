@@ -1,4 +1,4 @@
-﻿using FluentValidation;
+using FluentValidation;
 
 namespace TeamManager.Application.Features.Teams.Labels.Commands.DeleteLabel
 {
@@ -6,9 +6,13 @@ namespace TeamManager.Application.Features.Teams.Labels.Commands.DeleteLabel
     {
         public DeleteLabelCommandValidator()
         {
-            RuleFor(x => x.TeamId).NotEmpty();
+            RuleFor(x => x.TeamId)
+                .NotEmpty()
+                .WithMessage("Team ID is required.");
 
-            RuleFor(x => x.LabelId).GreaterThan(0);
+            RuleFor(x => x.LabelId)
+                .GreaterThan(0)
+                .WithMessage("Label ID must be greater than 0.");
         }
     }
 }

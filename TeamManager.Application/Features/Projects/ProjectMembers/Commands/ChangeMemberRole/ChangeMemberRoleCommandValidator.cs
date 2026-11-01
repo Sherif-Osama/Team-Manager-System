@@ -1,4 +1,4 @@
-﻿using FluentValidation;
+using FluentValidation;
 
 namespace TeamManager.Application.Features.Projects.ProjectMembers.Commands.ChangeMemberRole
 {
@@ -6,11 +6,17 @@ namespace TeamManager.Application.Features.Projects.ProjectMembers.Commands.Chan
     {
         public ChangeMemberRoleCommandValidator()
         {
-            RuleFor(x => x.ProjectId).NotEmpty();
+            RuleFor(x => x.ProjectId)
+                .NotEmpty()
+                .WithMessage("Project ID is required.");
 
-            RuleFor(x => x.ProjectMemberId).GreaterThan(0);
+            RuleFor(x => x.ProjectMemberId)
+                .GreaterThan(0)
+                .WithMessage("Project member ID must be greater than 0.");
 
-            RuleFor(x => x.Role).IsInEnum();
+            RuleFor(x => x.Role)
+                .IsInEnum()
+                .WithMessage("Invalid project role.");
         }
     }
 }
