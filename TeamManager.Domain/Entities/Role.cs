@@ -33,7 +33,7 @@ public class Role : AggregateRoot<int>
         if (string.IsNullOrWhiteSpace(name))
             throw new DomainException("A role must have a name.");
 
-        Name = name;
+        Name = name.Trim();
     }
 
     public void AddPermission(int permissionId)
