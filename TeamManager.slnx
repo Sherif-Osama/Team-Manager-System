@@ -4,5 +4,5 @@
   <Project Path="TeamManager.Domain/TeamManager.Domain.csproj" />
   <Project Path="TeamManager.Infrastructure/TeamManager.Infrastructure.csproj" />
   <Project Path="TeamManager.IntegrationTest/TeamManager.IntegrationTest.csproj" Id="ad9646c8-d016-4d44-9512-e91502376261" />
-  <Project Path="TeamManager.Tests/TeamManager.UnitTest.csproj" Id="433a8e72-c8d9-42f5-82bd-ec63415caaa5" />
+  <Project Path="TeamManager.UnitTest/TeamManager.UnitTest.csproj" Id="433a8e72-c8d9-42f5-82bd-ec63415caaa5" />
 </Solution>
