@@ -108,7 +108,24 @@ namespace TeamManager.Infrastructure
             services.AddScoped<IAuditLogRepository, AuditLogRepository>();
             services.AddScoped<IPermissionService, PermissionService>();
 
+
+            var redisConnection = configuration.GetConnectionString("Redis");
+
+            if (!string.IsNullOrWhiteSpace(redisConnection))
+            {
+                services.AddStackExchangeRedisCache(options =>
+                {
+                    options.Configuration = redisConnection;
+                    options.InstanceName = "teammanager:";
+                });
+            }
+            else
+            {
+                services.AddDistributedMemoryCache();
+            }
+
             services.AddHybridCache();
+
             services.AddSingleton<ICacheService, HybridCacheService>();
             services.AddScoped<IPostCommitCacheInvalidationDispatcher, PostCommitCacheInvalidationDispatcher>();
             return services;

@@ -22,7 +22,7 @@ namespace TeamManager.Infrastructure.Services.Caching
             var options = new HybridCacheEntryOptions
             {
                 Expiration = expiration,
-                LocalCacheExpiration = expiration
+                LocalCacheExpiration = TimeSpan.FromMinutes(1)
             };
 
             return await hybridCache.GetOrCreateAsync(key, async ct => await factory(ct), options, tags, cancellationToken);

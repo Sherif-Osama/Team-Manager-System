@@ -7,7 +7,7 @@ namespace TeamManager.Infrastructure.Services.SecurityServices
 {
     public sealed class PermissionService(IUserRepository userRepository, ICacheService cacheService) : IPermissionService
     {
-        private static readonly TimeSpan CacheExpiration = TimeSpan.FromMinutes(10);
+        private static readonly TimeSpan CacheExpiration = TimeSpan.FromMinutes(20);
 
         public async Task<bool> HasPermissionAsync(Guid userId, string permissionCode, CancellationToken cancellationToken)
         {

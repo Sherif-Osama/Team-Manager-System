@@ -1,0 +1,47 @@
+services:
+  team-manager:
+    image: sherif172/team-manager
+
+    ports:
+      - "8080:8080"
+
+    deploy:
+      replicas: 2
+      update_config:
+        parallelism: 1
+        delay: 10s
+
+    env_file:
+      - .env
+    depends_on:
+      - Cache-Service
+
+    networks:
+      - CachingNetwork
+
+  Cache-Service:
+    image: redis:7-alpine
+
+    restart: unless-stopped
+
+    volumes:
+      - redis-data:/data
+
+    command: redis-server --appendonly yes
+
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+    networks:
+      - CachingNetwork
+
+volumes:
+  redis-data:
+
+networks:
+  CachingNetwork:
+    driver: overlay
+    attachable: true
