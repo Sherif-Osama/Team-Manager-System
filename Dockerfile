@@ -27,6 +27,8 @@ ENV ASPNETCORE_ENVIRONMENT=Production \
 
 EXPOSE 8080
 
+RUN apt-get update && apt-get install -y --no-install-recommends curl && rm -rf /var/lib/apt/lists/*
+
 COPY --from=publish --chown=$APP_UID:$APP_UID /app/publish .
 
 USER $APP_UID

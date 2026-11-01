@@ -3,7 +3,15 @@ services:
     image: sherif172/team-manager
 
     ports:
-      - "8080:8080"
+      - target: 8080
+        published: 8080
+
+    healthcheck:
+      test: [ "CMD", "curl", "-fsS", "http://localhost:8080/health" ]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
 
     deploy:
       replicas: 2
