@@ -17,7 +17,7 @@ namespace TeamManager.IntegrationTest.Authentication
     public sealed class RegisterIntegrationTests(TeamManagerApiFactory factory) : IClassFixture<TeamManagerApiFactory>
     {
         private readonly HttpClient _client = factory.CreateClient();
-
+        private readonly string _registerEndpoint = AuthenticationEndpoints.Register;
         private sealed record RegisterResponse(Guid Id);
 
         [Fact]
@@ -32,7 +32,7 @@ namespace TeamManager.IntegrationTest.Authentication
                 password = "P@ssword1234"
             };
 
-            var response = await _client.PostAsJsonAsync("/api/authentication/register", request);
+            var response = await _client.PostAsJsonAsync(_registerEndpoint, request);
 
             Assert.Equal(HttpStatusCode.Created, response.StatusCode);
 
@@ -73,7 +73,7 @@ namespace TeamManager.IntegrationTest.Authentication
         {
             var ownerEmail = $"inv-owner-{Guid.NewGuid():N}@example.com";
 
-            var ownerResponse = await _client.PostAsJsonAsync("/api/authentication/register", new { email = ownerEmail,
+            var ownerResponse = await _client.PostAsJsonAsync(_registerEndpoint, new { email = ownerEmail,
                 displayName = "Invitation Owner", password = "P@ssword1234" });
 
             Assert.Equal(HttpStatusCode.Created, ownerResponse.StatusCode);
@@ -97,7 +97,7 @@ namespace TeamManager.IntegrationTest.Authentication
                 await db.SaveChangesAsync(CancellationToken.None);
             }
 
-            var response = await _client.PostAsJsonAsync("/api/authentication/register",
+            var response = await _client.PostAsJsonAsync(_registerEndpoint,
                 new { email = targetEmail, displayName = "Invitee", password = "P@ssword1234" });
 
             Assert.Equal(HttpStatusCode.Created, response.StatusCode);
@@ -125,7 +125,7 @@ namespace TeamManager.IntegrationTest.Authentication
         {
             var email = $"reuse-{Guid.NewGuid():N}@example.com";
 
-            var firstResponse = await _client.PostAsJsonAsync("/api/authentication/register",
+            var firstResponse = await _client.PostAsJsonAsync(_registerEndpoint,
                 new { email, displayName = "First Registration", password = "P@ssword1234" });
 
             Assert.Equal(HttpStatusCode.Created, firstResponse.StatusCode);
@@ -139,7 +139,7 @@ namespace TeamManager.IntegrationTest.Authentication
                 await db.SaveChangesAsync(CancellationToken.None);
             }
 
-            var secondResponse = await _client.PostAsJsonAsync("/api/authentication/register",
+            var secondResponse = await _client.PostAsJsonAsync(_registerEndpoint,
                 new { email, displayName = "Re-Registered", password = "P@ssword1234" });
 
             Assert.Equal(HttpStatusCode.Created, secondResponse.StatusCode);
@@ -157,12 +157,12 @@ namespace TeamManager.IntegrationTest.Authentication
         {
             var email = $"Case-{Guid.NewGuid():N}@Example.com";
 
-            var firstResponse = await _client.PostAsJsonAsync("/api/authentication/register",
+            var firstResponse = await _client.PostAsJsonAsync(_registerEndpoint,
                 new { email, displayName = "Original Casing", password = "P@ssword1234" });
 
             Assert.Equal(HttpStatusCode.Created, firstResponse.StatusCode);
 
-            var secondResponse = await _client.PostAsJsonAsync("/api/authentication/register",
+            var secondResponse = await _client.PostAsJsonAsync(_registerEndpoint,
                 new { email = email.ToLowerInvariant(), displayName = "Lower Casing", password = "P@ssword1234" });
 
             Assert.Equal(HttpStatusCode.Conflict, secondResponse.StatusCode);
@@ -176,7 +176,7 @@ namespace TeamManager.IntegrationTest.Authentication
         [Fact]
         public async Task Register_WithInvalidPayload_Returns400WithFieldErrors()
         {
-            var response = await _client.PostAsJsonAsync("/api/authentication/register",
+            var response = await _client.PostAsJsonAsync(_registerEndpoint,
                 new { email = $"invalid-{Guid.NewGuid():N}@example.com", displayName = "", password = "P@ssword1234" });
 
             Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
@@ -203,7 +203,7 @@ namespace TeamManager.IntegrationTest.Authentication
                     await db.SaveChangesAsync(CancellationToken.None);
                 }
 
-                var response = await _client.PostAsJsonAsync("/api/authentication/register",
+                var response = await _client.PostAsJsonAsync(_registerEndpoint,
                     new { email, displayName = "No Role User", password = "P@ssword1234" });
 
                 Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
@@ -235,7 +235,7 @@ namespace TeamManager.IntegrationTest.Authentication
 
             var email = $"rollback-{Guid.NewGuid():N}@example.com";
 
-            var response = await client.PostAsJsonAsync("/api/authentication/register",
+            var response = await client.PostAsJsonAsync(_registerEndpoint,
                 new { email, displayName = "Rollback User", password = "P@ssword1234" });
 
             Assert.Equal(HttpStatusCode.InternalServerError, response.StatusCode);
@@ -254,7 +254,7 @@ namespace TeamManager.IntegrationTest.Authentication
                 $"parallel-{Guid.NewGuid():N}@example.com" };
 
             var responses = await Task.WhenAll(emails.Select(email =>
-                _client.PostAsJsonAsync("/api/authentication/register",
+                _client.PostAsJsonAsync(_registerEndpoint,
                     new { email, displayName = "Parallel User", password = "P@ssword1234" })));
 
             Assert.All(responses, response => Assert.Equal(HttpStatusCode.Created, response.StatusCode));
@@ -274,7 +274,7 @@ namespace TeamManager.IntegrationTest.Authentication
             var emails = new List<string> { email, email };
 
             var responses = await Task.WhenAll(emails.Select(email =>
-                _client.PostAsJsonAsync("/api/authentication/register",
+                _client.PostAsJsonAsync(_registerEndpoint,
                     new { email, displayName = "Duplicate Racer", password = "P@ssword1234" })));
 
             var statuses = responses.Select(r => r.StatusCode).OrderBy(code => code).ToArray();
