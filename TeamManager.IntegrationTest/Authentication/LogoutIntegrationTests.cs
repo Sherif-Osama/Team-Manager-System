@@ -5,26 +5,20 @@ using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text.Json;
 using TeamManager.Infrastructure.Persistence;
-using TeamManager.IntegrationTest.Infrastructure;
+using TeamManager.IntegrationTest.Authentication.Configuration;
 
 namespace TeamManager.IntegrationTest.Authentication
 {
-    public sealed class LogoutIntegrationTests(TeamManagerApiFactory factory) : IClassFixture<TeamManagerApiFactory>
+    [Collection("Authentication")]
+    public sealed class LogoutIntegrationTests(AuthenticationFixture factory)
     {
-        private readonly HttpClient _client = CreateClient(factory);
+        private readonly HttpClient _client = factory.CreateClient();
 
         private readonly string _registerEndpoint = AuthenticationEndpoints.Register;
         private readonly string _loginEndpoint = AuthenticationEndpoints.Login;
         private sealed record RegisterResponse(Guid Id);
 
         private sealed record LoginResponse(string AccessToken, string RefreshToken);
-
-        private static HttpClient CreateClient(TeamManagerApiFactory factory)
-        {
-            var client = factory.CreateClient();
-            client.DefaultRequestHeaders.TryAddWithoutValidation("User-Agent", "integration-tests/1.0");
-            return client;
-        }
 
         private async Task<(Guid Id, string Email)> RegisterUserAsync()
         {

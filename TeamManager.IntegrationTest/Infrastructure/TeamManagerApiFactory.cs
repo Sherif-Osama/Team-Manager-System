@@ -11,12 +11,17 @@ using Testcontainers.MsSql;
 
 namespace TeamManager.IntegrationTest.Infrastructure
 {
-    public sealed class TeamManagerApiFactory : WebApplicationFactory<Api.Program>, IAsyncLifetime
+    public class TeamManagerApiFactory(string ContainerName) : WebApplicationFactory<Api.Program>, IAsyncLifetime
     {
         private readonly MsSqlContainer _msSqlContainer = new MsSqlBuilder(
-            "mcr.microsoft.com/mssql/server:2022-CU14-ubuntu-22.04")
+            "mcr.microsoft.com/mssql/server:2022-CU14-ubuntu-22.04").WithName(ContainerName)
             .WithPassword("Test_password!123").WithDatabase("TeamManager_Test").Build();
 
+        protected override void ConfigureClient(HttpClient client)
+        {
+            base.ConfigureClient(client);
+            client.DefaultRequestHeaders.TryAddWithoutValidation("User-Agent", "integration-tests/1.0");
+        }
 
         protected override void ConfigureWebHost(IWebHostBuilder builder)
         {
@@ -32,7 +37,8 @@ namespace TeamManager.IntegrationTest.Infrastructure
                         ["Jwt:Audience"] = "TeamManager.Tests",
                         ["RateLimiting:Global:PerIpLimit"] = "10000",
                         ["RateLimiting:Authentication:Register:PermitLimit"] = "1000",
-                        ["RateLimiting:Authentication:Login:PermitLimit"] = "1000"
+                        ["RateLimiting:Authentication:Login:PermitLimit"] = "1000",
+                        ["RateLimiting:Authentication:ForgotPassword:PermitLimit"] = "1000"
                     });
             });
 

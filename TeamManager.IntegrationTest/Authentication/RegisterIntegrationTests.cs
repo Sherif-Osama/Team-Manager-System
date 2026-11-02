@@ -10,11 +10,12 @@ using TeamManager.Application.Common.Outbox;
 using TeamManager.Domain.Entities;
 using TeamManager.Domain.Enums;
 using TeamManager.Infrastructure.Persistence;
-using TeamManager.IntegrationTest.Infrastructure;
+using TeamManager.IntegrationTest.Authentication.Configuration;
 
 namespace TeamManager.IntegrationTest.Authentication
 {
-    public sealed class RegisterIntegrationTests(TeamManagerApiFactory factory) : IClassFixture<TeamManagerApiFactory>
+    [Collection("Authentication")]
+    public sealed class RegisterIntegrationTests(AuthenticationFixture factory)
     {
         private readonly HttpClient _client = factory.CreateClient();
         private readonly string _registerEndpoint = AuthenticationEndpoints.Register;
@@ -73,8 +74,12 @@ namespace TeamManager.IntegrationTest.Authentication
         {
             var ownerEmail = $"inv-owner-{Guid.NewGuid():N}@example.com";
 
-            var ownerResponse = await _client.PostAsJsonAsync(_registerEndpoint, new { email = ownerEmail,
-                displayName = "Invitation Owner", password = "P@ssword1234" });
+            var ownerResponse = await _client.PostAsJsonAsync(_registerEndpoint, new
+            {
+                email = ownerEmail,
+                displayName = "Invitation Owner",
+                password = "P@ssword1234"
+            });
 
             Assert.Equal(HttpStatusCode.Created, ownerResponse.StatusCode);
             var owner = await ownerResponse.Content.ReadFromJsonAsync<RegisterResponse>();
@@ -250,7 +255,7 @@ namespace TeamManager.IntegrationTest.Authentication
         [Fact]
         public async Task Register_ConcurrentRegistrationsWithDifferentEmails_BothSucceed()
         {
-            var emails = new List<string> { $"parallel-{Guid.NewGuid():N}@example.com", 
+            var emails = new List<string> { $"parallel-{Guid.NewGuid():N}@example.com",
                 $"parallel-{Guid.NewGuid():N}@example.com" };
 
             var responses = await Task.WhenAll(emails.Select(email =>

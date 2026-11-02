@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace TeamManager.IntegrationTest.Authentication
+﻿namespace TeamManager.IntegrationTest.Authentication.Configuration
 {
     static class AuthenticationEndpoints
     {
@@ -10,5 +6,6 @@ namespace TeamManager.IntegrationTest.Authentication
         public const string Login = "/api/authentication/login";
         public const string Refresh = "/api/authentication/refresh";
         public const string Logout = "/api/authentication/logout";
+        public const string ForgotPassword = "/api/authentication/forgot-password";
     }
 }
