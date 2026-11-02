@@ -38,7 +38,8 @@ namespace TeamManager.IntegrationTest.Infrastructure
                         ["RateLimiting:Global:PerIpLimit"] = "10000",
                         ["RateLimiting:Authentication:Register:PermitLimit"] = "1000",
                         ["RateLimiting:Authentication:Login:PermitLimit"] = "1000",
-                        ["RateLimiting:Authentication:ForgotPassword:PermitLimit"] = "1000"
+                        ["RateLimiting:Authentication:ForgotPassword:PermitLimit"] = "1000",
+                        ["RateLimiting:Authentication:ResetPassword:PermitLimit"] = "1000"
                     });
             });
 

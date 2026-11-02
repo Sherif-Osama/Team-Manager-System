@@ -7,5 +7,6 @@
         public const string Refresh = "/api/authentication/refresh";
         public const string Logout = "/api/authentication/logout";
         public const string ForgotPassword = "/api/authentication/forgot-password";
+        public const string ResetPassword = "/api/authentication/reset-password";
     }
 }
