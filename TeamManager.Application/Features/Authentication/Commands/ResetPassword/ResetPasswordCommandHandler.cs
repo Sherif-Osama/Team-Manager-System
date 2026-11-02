@@ -5,7 +5,6 @@ using TeamManager.Application.Abstractions.Persistence;
 using TeamManager.Application.Abstractions.Security;
 using TeamManager.Application.Common.Exceptions.AuthorizationExceptions;
 using TeamManager.Application.Common.Outbox;
-using TeamManager.Domain.Exceptions;
 
 namespace TeamManager.Application.Features.Authentication.Commands.ResetPassword
 {
@@ -19,7 +18,7 @@ namespace TeamManager.Application.Features.Authentication.Commands.ResetPassword
             var user = await userRepository.GetByEmailAsync(request.Email.Trim(), cancellationToken);
 
             if (user is null)
-                throw new DomainException(InvalidTokenMessage);
+                throw new InvalidTokenException(InvalidTokenMessage);
 
             var tokenHash = tokenService.HashToken(request.Token);
 
