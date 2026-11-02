@@ -31,7 +31,8 @@ namespace TeamManager.IntegrationTest.Infrastructure
                         ["Jwt:Issuer"] = "TeamManager.Tests",
                         ["Jwt:Audience"] = "TeamManager.Tests",
                         ["RateLimiting:Global:PerIpLimit"] = "10000",
-                        ["RateLimiting:Authentication:Register:PermitLimit"] = "1000"
+                        ["RateLimiting:Authentication:Register:PermitLimit"] = "1000",
+                        ["RateLimiting:Authentication:Login:PermitLimit"] = "1000"
                     });
             });
 
