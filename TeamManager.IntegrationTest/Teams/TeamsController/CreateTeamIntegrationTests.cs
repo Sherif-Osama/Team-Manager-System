@@ -63,7 +63,7 @@ namespace TeamManager.IntegrationTest.Teams.TeamsController
         [Fact]
         public async Task CreateTeam_WithoutAccessToken_Returns401()
         {
-            var response = await _client.SendAsync(CreateTeamRequest("No Token Team", null));
+            var response = await _client.SendAsync(CreateTeamRequest("No Token Team Create", null));
 
             Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
         }

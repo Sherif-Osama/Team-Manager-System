@@ -67,7 +67,7 @@ namespace TeamManager.IntegrationTest.Teams.TeamsController
         public async Task UpdateTeam_WithoutAccessToken_Returns401()
         {
             var (_, _, accessToken) = await _helpers.CreateConfirmedUserAsync("no-token");
-            var teamId = await CreateTeamAsync("No Token Team", accessToken);
+            var teamId = await CreateTeamAsync("No Token Team Update", accessToken);
 
             var response = await _client.SendAsync(UpdateTeamRequest(teamId, "Hijacked", null));
 

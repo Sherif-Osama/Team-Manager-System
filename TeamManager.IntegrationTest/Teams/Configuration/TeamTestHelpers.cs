@@ -64,5 +64,17 @@ namespace TeamManager.IntegrationTest.Teams.Configuration
             var login = await LoginAsync(email);
             return (userId, email, login.AccessToken);
         }
+
+        public async Task PromoteToAdminAsync(Guid userId)
+        {
+            using var scope = factory.Services.CreateScope();
+            var db = scope.ServiceProvider.GetRequiredService<TeamManagerDbContext>();
+
+            var adminRole = await db.Roles.SingleAsync(r => r.Name == "SystemAdmin");
+            var user = await db.Users.SingleAsync(u => u.Id == userId);
+
+            user.AssignRole(adminRole.Id);
+            await db.SaveChangesAsync(CancellationToken.None);
+        }
     }
 }
