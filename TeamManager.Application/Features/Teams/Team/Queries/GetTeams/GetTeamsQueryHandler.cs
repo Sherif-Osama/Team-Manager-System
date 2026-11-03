@@ -28,7 +28,7 @@ namespace TeamManager.Application.Features.Teams.Team.Queries.GetTeams
                 .Take(request.PageSize).Select(x => new TeamListItem(x.Id, x.Name, x.Description, x.OwnerUserId,
                 x.Owner.DisplayName, x.CreatedBy, x.Creator.DisplayName, x.CreatedAtUtc)).ToListAsync(cancellationToken);
 
-            return new GetTeamsResponse(items, request.Page, request.PageSize, totalCount);
+            return new GetTeamsResponse(items, totalCount, request.Page, request.PageSize);
         }
     }
 }
