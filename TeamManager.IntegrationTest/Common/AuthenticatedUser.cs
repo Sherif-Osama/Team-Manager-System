@@ -30,6 +30,17 @@ namespace TeamManager.IntegrationTest.Common
             return (result!.Id, email);
         }
 
+        public async Task<(Guid Id, string Email)> RegisterUserWithEmailAsync(string email, string password = "P@ssword1234")
+        {
+            var response = await _client.PostAsJsonAsync(AuthenticationEndpoints.Register,
+                new { email, displayName = "User", password });
+
+            Assert.Equal(HttpStatusCode.Created, response.StatusCode);
+            var result = await response.Content.ReadFromJsonAsync<RegisterResponse>();
+
+            return (result!.Id, email);
+        }
+
         public async Task ConfirmEmailAsync(Guid userId, string email)
         {
             using var scope = factory.Services.CreateScope();
