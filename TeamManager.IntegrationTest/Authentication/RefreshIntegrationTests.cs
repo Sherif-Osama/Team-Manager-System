@@ -3,10 +3,10 @@ using Microsoft.Extensions.DependencyInjection;
 using System.Net;
 using System.Net.Http.Json;
 using System.Security.Claims;
-using System.Text;
 using System.Text.Json;
 using TeamManager.Infrastructure.Persistence;
 using TeamManager.IntegrationTest.Authentication.Configuration;
+using TeamManager.IntegrationTest.Common;
 
 namespace TeamManager.IntegrationTest.Authentication
 {
@@ -15,53 +15,15 @@ namespace TeamManager.IntegrationTest.Authentication
     {
         private readonly HttpClient _client = factory.CreateClient();
         private readonly string _refreshTokenEndpoint = AuthenticationEndpoints.Refresh;
-        private readonly string _registerEndpoint = AuthenticationEndpoints.Register;
-        private readonly string _loginEndpoint = AuthenticationEndpoints.Login;
-        private sealed record RegisterResponse(Guid Id);
+        private readonly AuthenticatedUser _authenticatedUser = new AuthenticatedUser(factory);
 
         private sealed record LoginResponse(string AccessToken, string RefreshToken);
-
-        private async Task<(Guid Id, string Email)> RegisterUserAsync()
-        {
-            var email = $"refresh-{Guid.NewGuid():N}@example.com";
-
-            var response = await _client.PostAsJsonAsync(_registerEndpoint,
-                new { email, displayName = "Refresh Test User", password = "P@ssword1234" });
-
-            Assert.Equal(HttpStatusCode.Created, response.StatusCode);
-            var result = await response.Content.ReadFromJsonAsync<RegisterResponse>();
-
-            return (result!.Id, email);
-        }
-
-        private async Task<LoginResponse> LoginAsync(string email)
-        {
-            var response = await _client.PostAsJsonAsync(_loginEndpoint,
-                new { email, password = "P@ssword1234" });
-
-            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-            return (await response.Content.ReadFromJsonAsync<LoginResponse>())!;
-        }
-
-        private static JsonDocument DecodeJwtPayload(string token)
-        {
-            var payload = token.Split('.')[1].Replace('-', '+').Replace('_', '/');
-
-            payload = (payload.Length % 4) switch
-            {
-                2 => payload + "==",
-                3 => payload + "=",
-                _ => payload
-            };
-
-            return JsonDocument.Parse(Encoding.UTF8.GetString(Convert.FromBase64String(payload)));
-        }
 
         [Fact]
         public async Task Refresh_ValidToken_RotatesRefreshTokenAndReturnsNewAccessToken()
         {
-            var (userId, email) = await RegisterUserAsync();
-            var login = await LoginAsync(email);
+            var (userId, email) = await _authenticatedUser.RegisterUserAsync();
+            var login = await _authenticatedUser.LoginAsync(email);
 
             var response = await _client.PostAsJsonAsync(_refreshTokenEndpoint,
                 new { refreshToken = login.RefreshToken });
@@ -73,7 +35,7 @@ namespace TeamManager.IntegrationTest.Authentication
             Assert.False(string.IsNullOrWhiteSpace(result.RefreshToken));
             Assert.NotEqual(login.RefreshToken, result.RefreshToken);
 
-            using (var jwt = DecodeJwtPayload(result.AccessToken))
+            using (var jwt = _authenticatedUser.DecodeJwtPayload(result.AccessToken))
             {
                 Assert.Equal(userId.ToString(), jwt.RootElement.GetProperty(ClaimTypes.NameIdentifier).GetString());
             }
@@ -108,8 +70,8 @@ namespace TeamManager.IntegrationTest.Authentication
         [Fact]
         public async Task Refresh_WithRevokedToken_Returns401()
         {
-            var (userId, email) = await RegisterUserAsync();
-            var login = await LoginAsync(email);
+            var (userId, email) = await _authenticatedUser.RegisterUserAsync();
+            var login = await _authenticatedUser.LoginAsync(email);
 
             var firstRefresh = await _client.PostAsJsonAsync(_refreshTokenEndpoint,
                 new { refreshToken = login.RefreshToken });
@@ -131,8 +93,8 @@ namespace TeamManager.IntegrationTest.Authentication
         [Fact]
         public async Task Refresh_WithExpiredToken_Returns401()
         {
-            var (userId, email) = await RegisterUserAsync();
-            var login = await LoginAsync(email);
+            var (userId, email) = await _authenticatedUser.RegisterUserAsync();
+            var login = await _authenticatedUser.LoginAsync(email);
 
             using (var scope = factory.Services.CreateScope())
             {
@@ -151,8 +113,8 @@ namespace TeamManager.IntegrationTest.Authentication
         [Fact]
         public async Task Refresh_WithInactiveUser_Returns401()
         {
-            var (userId, email) = await RegisterUserAsync();
-            var login = await LoginAsync(email);
+            var (userId, email) = await _authenticatedUser.RegisterUserAsync();
+            var login = await _authenticatedUser.LoginAsync(email);
 
             using (var scope = factory.Services.CreateScope())
             {
@@ -171,8 +133,8 @@ namespace TeamManager.IntegrationTest.Authentication
         [Fact]
         public async Task Refresh_WithSoftDeletedUser_Returns401()
         {
-            var (userId, email) = await RegisterUserAsync();
-            var login = await LoginAsync(email);
+            var (userId, email) = await _authenticatedUser.RegisterUserAsync();
+            var login = await _authenticatedUser.LoginAsync(email);
 
             using (var scope = factory.Services.CreateScope())
             {
@@ -205,8 +167,8 @@ namespace TeamManager.IntegrationTest.Authentication
         [Fact]
         public async Task Refresh_ConcurrentRequestsWithSameToken_ExactlyOneSucceeds()
         {
-            var (userId, email) = await RegisterUserAsync();
-            var login = await LoginAsync(email);
+            var (userId, email) = await _authenticatedUser.RegisterUserAsync();
+            var login = await _authenticatedUser.LoginAsync(email);
 
             var responses = await Task.WhenAll(Enumerable.Range(0, 2).Select(_ =>
                 _client.PostAsJsonAsync(_refreshTokenEndpoint,

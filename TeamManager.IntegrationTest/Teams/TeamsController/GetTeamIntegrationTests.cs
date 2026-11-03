@@ -1,11 +1,11 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using System.Net;
-using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using TeamManager.Domain.Entities;
 using TeamManager.Domain.Enums;
 using TeamManager.Infrastructure.Persistence;
+using TeamManager.IntegrationTest.Common;
 using TeamManager.IntegrationTest.Teams.Configuration;
 
 namespace TeamManager.IntegrationTest.Teams.TeamsController
@@ -15,42 +15,21 @@ namespace TeamManager.IntegrationTest.Teams.TeamsController
     {
         private readonly HttpClient _client = factory.CreateClient();
         private readonly TeamTestHelpers _helpers = new(factory);
-
-        private sealed record CreateTeamResponse(Guid Id);
+        private readonly AuthenticatedUser _authenticatedUser = new AuthenticatedUser(factory);
 
         private sealed record GetTeamResponseDto(Guid Id, string Name, string? Description, bool IsActive,
             Guid OwnerUserId, string OwnerName, Guid CreatedBy, string CreatorName,
             int MembersCount, int ProjectsCount, DateTime CreatedAtUtc, DateTime? UpdatedAtUtc);
 
-        private async Task<Guid> CreateTeamAsync(string name, string accessToken, string? description = null)
-        {
-            var response = await _client.SendAsync(new HttpRequestMessage(HttpMethod.Post, TeamEndpoints.Teams)
-            {
-                Content = JsonContent.Create(new { name, description }),
-                Headers = { Authorization = new AuthenticationHeaderValue("Bearer", accessToken) }
-            });
 
-            Assert.Equal(HttpStatusCode.Created, response.StatusCode);
-            return (await response.Content.ReadFromJsonAsync<CreateTeamResponse>())!.Id;
-        }
-
-        private async Task<HttpResponseMessage> GetTeamAsync(Guid teamId, string? accessToken = null)
-        {
-            var request = new HttpRequestMessage(HttpMethod.Get, TeamEndpoints.Team(teamId));
-
-            if (accessToken is not null)
-                request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
-
-            return await _client.SendAsync(request);
-        }
 
         [Fact]
         public async Task GetTeam_AsOwner_ReturnsTeamDetailsWithCounts()
         {
-            var (ownerId, _, ownerToken) = await _helpers.CreateConfirmedUserAsync("owner");
-            var (memberId, _, _) = await _helpers.CreateConfirmedUserAsync("viewer");
+            var (ownerId, _, ownerToken) = await _authenticatedUser.CreateConfirmedUserAsync("owner");
+            var (memberId, _, _) = await _authenticatedUser.CreateConfirmedUserAsync("viewer");
 
-            var teamId = await CreateTeamAsync("Detail Team", ownerToken, "Detail Description");
+            var teamId = await _helpers.CreateTeamAsync("Detail Team", "Detail Description", ownerToken);
 
             using (var scope = factory.Services.CreateScope())
             {
@@ -61,7 +40,7 @@ namespace TeamManager.IntegrationTest.Teams.TeamsController
                 await db.SaveChangesAsync(CancellationToken.None);
             }
 
-            var response = await GetTeamAsync(teamId, ownerToken);
+            var response = await _helpers.GetTeamAsync(teamId, ownerToken);
 
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
             var teamDto = await response.Content.ReadFromJsonAsync<GetTeamResponseDto>();
@@ -77,10 +56,10 @@ namespace TeamManager.IntegrationTest.Teams.TeamsController
         [Fact]
         public async Task GetTeam_AsMember_Returns200()
         {
-            var (_, _, ownerToken) = await _helpers.CreateConfirmedUserAsync("owner");
-            var (memberId, _, memberToken) = await _helpers.CreateConfirmedUserAsync("viewer");
+            var (_, _, ownerToken) = await _authenticatedUser.CreateConfirmedUserAsync();
+            var (memberId, _, memberToken) = await _authenticatedUser.CreateConfirmedUserAsync();
 
-            var teamId = await CreateTeamAsync("Visible Team", ownerToken);
+            var teamId = await _helpers.CreateTeamAsync("Visible Team", null, ownerToken);
 
             using (var scope = factory.Services.CreateScope())
             {
@@ -90,7 +69,7 @@ namespace TeamManager.IntegrationTest.Teams.TeamsController
                 await db.SaveChangesAsync(CancellationToken.None);
             }
 
-            var response = await GetTeamAsync(teamId, memberToken);
+            var response = await _helpers.GetTeamAsync(teamId, memberToken);
 
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         }
@@ -98,12 +77,12 @@ namespace TeamManager.IntegrationTest.Teams.TeamsController
         [Fact]
         public async Task GetTeam_AsNonMember_Returns403()
         {
-            var (_, _, ownerToken) = await _helpers.CreateConfirmedUserAsync("owner");
-            var (_, _, outsiderToken) = await _helpers.CreateConfirmedUserAsync("outsider");
+            var (_, _, ownerToken) = await _authenticatedUser.CreateConfirmedUserAsync();
+            var (_, _, outsiderToken) = await _authenticatedUser.CreateConfirmedUserAsync();
 
-            var teamId = await CreateTeamAsync("Hidden Team", ownerToken);
+            var teamId = await _helpers.CreateTeamAsync("Hidden Team", null, ownerToken);
 
-            var response = await GetTeamAsync(teamId, outsiderToken);
+            var response = await _helpers.GetTeamAsync(teamId, outsiderToken);
 
             Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
         }
@@ -111,10 +90,10 @@ namespace TeamManager.IntegrationTest.Teams.TeamsController
         [Fact]
         public async Task GetTeam_WithoutAccessToken_Returns401()
         {
-            var (_, _, ownerToken) = await _helpers.CreateConfirmedUserAsync("owner");
-            var teamId = await CreateTeamAsync("No Token Team Get", ownerToken);
+            var (_, _, ownerToken) = await _authenticatedUser.CreateConfirmedUserAsync();
+            var teamId = await _helpers.CreateTeamAsync("No Token Team Get", null, ownerToken);
 
-            var response = await GetTeamAsync(teamId);
+            var response = await _helpers.GetTeamAsync(teamId);
 
             Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
         }
@@ -122,9 +101,9 @@ namespace TeamManager.IntegrationTest.Teams.TeamsController
         [Fact]
         public async Task GetTeam_WithUnknownTeamId_Returns403()
         {
-            var (_, _, accessToken) = await _helpers.CreateConfirmedUserAsync("unknown");
+            var (_, _, accessToken) = await _authenticatedUser.CreateConfirmedUserAsync();
 
-            var response = await GetTeamAsync(Guid.NewGuid(), accessToken);
+            var response = await _helpers.GetTeamAsync(Guid.NewGuid(), accessToken);
 
             Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
         }
@@ -132,8 +111,8 @@ namespace TeamManager.IntegrationTest.Teams.TeamsController
         [Fact]
         public async Task GetTeam_OnDeletedTeam_Returns403()
         {
-            var (_, _, ownerToken) = await _helpers.CreateConfirmedUserAsync("deleted");
-            var teamId = await CreateTeamAsync("Gone Team", ownerToken);
+            var (_, _, ownerToken) = await _authenticatedUser.CreateConfirmedUserAsync();
+            var teamId = await _helpers.CreateTeamAsync("Gone Team", null, ownerToken);
 
             using (var scope = factory.Services.CreateScope())
             {
@@ -143,7 +122,7 @@ namespace TeamManager.IntegrationTest.Teams.TeamsController
                 await db.SaveChangesAsync(CancellationToken.None);
             }
 
-            var response = await GetTeamAsync(teamId, ownerToken);
+            var response = await _helpers.GetTeamAsync(teamId, ownerToken);
 
             Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
         }

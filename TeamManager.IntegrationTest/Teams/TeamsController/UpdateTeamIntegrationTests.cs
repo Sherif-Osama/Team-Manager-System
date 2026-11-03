@@ -6,6 +6,7 @@ using System.Net.Http.Json;
 using System.Text.Json;
 using TeamManager.Domain.Enums;
 using TeamManager.Infrastructure.Persistence;
+using TeamManager.IntegrationTest.Common;
 using TeamManager.IntegrationTest.Teams.Configuration;
 
 namespace TeamManager.IntegrationTest.Teams.TeamsController
@@ -15,20 +16,7 @@ namespace TeamManager.IntegrationTest.Teams.TeamsController
     {
         private readonly HttpClient _client = factory.CreateClient();
         private readonly TeamTestHelpers _helpers = new(factory);
-
-        private sealed record CreateTeamResponse(Guid Id);
-
-        private async Task<Guid> CreateTeamAsync(string name, string accessToken, string? description = null)
-        {
-            var response = await _client.SendAsync(new HttpRequestMessage(HttpMethod.Post, TeamEndpoints.Teams)
-            {
-                Content = JsonContent.Create(new { name, description }),
-                Headers = { Authorization = new AuthenticationHeaderValue("Bearer", accessToken) }
-            });
-
-            Assert.Equal(HttpStatusCode.Created, response.StatusCode);
-            return (await response.Content.ReadFromJsonAsync<CreateTeamResponse>())!.Id;
-        }
+        private readonly AuthenticatedUser _authenticatedUser = new AuthenticatedUser(factory);
 
         private static HttpRequestMessage UpdateTeamRequest(Guid teamId, string name, string? description, string? accessToken = null)
         {
@@ -46,8 +34,8 @@ namespace TeamManager.IntegrationTest.Teams.TeamsController
         [Fact]
         public async Task UpdateTeam_ValidRequest_UpdatesNameAndDescription()
         {
-            var (_, _, accessToken) = await _helpers.CreateConfirmedUserAsync("updater");
-            var teamId = await CreateTeamAsync("Original Name", accessToken, "Original Description");
+            var (_, _, accessToken) = await _authenticatedUser.CreateConfirmedUserAsync();
+            var teamId = await _helpers.CreateTeamAsync("Original Name", "Original Description", accessToken);
 
             var response = await _client.SendAsync(
                 UpdateTeamRequest(teamId, "  Updated Name  ", "Updated Description", accessToken));
@@ -66,8 +54,8 @@ namespace TeamManager.IntegrationTest.Teams.TeamsController
         [Fact]
         public async Task UpdateTeam_WithoutAccessToken_Returns401()
         {
-            var (_, _, accessToken) = await _helpers.CreateConfirmedUserAsync("no-token");
-            var teamId = await CreateTeamAsync("No Token Team Update", accessToken);
+            var (_, _, accessToken) = await _authenticatedUser.CreateConfirmedUserAsync();
+            var teamId = await _helpers.CreateTeamAsync("No Token Team Update", null, accessToken);
 
             var response = await _client.SendAsync(UpdateTeamRequest(teamId, "Hijacked", null));
 
@@ -77,10 +65,10 @@ namespace TeamManager.IntegrationTest.Teams.TeamsController
         [Fact]
         public async Task UpdateTeam_AsNonMember_Returns403()
         {
-            var (ownerId, _, ownerToken) = await _helpers.CreateConfirmedUserAsync("owner");
-            var (_, _, outsiderToken) = await _helpers.CreateConfirmedUserAsync("outsider");
+            var (ownerId, _, ownerToken) = await _authenticatedUser.CreateConfirmedUserAsync();
+            var (_, _, outsiderToken) = await _authenticatedUser.CreateConfirmedUserAsync();
 
-            var teamId = await CreateTeamAsync("Owned Team", ownerToken);
+            var teamId = await _helpers.CreateTeamAsync("Owned Team", null, ownerToken);
 
             var response = await _client.SendAsync(UpdateTeamRequest(teamId, "Stolen", null, outsiderToken));
 
@@ -98,10 +86,10 @@ namespace TeamManager.IntegrationTest.Teams.TeamsController
         [Fact]
         public async Task UpdateTeam_AsMember_Returns403()
         {
-            var (_, _, ownerToken) = await _helpers.CreateConfirmedUserAsync("owner");
-            var (memberId, _, memberToken) = await _helpers.CreateConfirmedUserAsync("member");
+            var (_, _, ownerToken) = await _authenticatedUser.CreateConfirmedUserAsync();
+            var (memberId, _, memberToken) = await _authenticatedUser.CreateConfirmedUserAsync();
 
-            var teamId = await CreateTeamAsync("Member Team", ownerToken);
+            var teamId = await _helpers.CreateTeamAsync("Member Team", null, ownerToken);
 
             using (var scope = factory.Services.CreateScope())
             {
@@ -126,7 +114,7 @@ namespace TeamManager.IntegrationTest.Teams.TeamsController
         [Fact]
         public async Task UpdateTeam_WithUnknownTeamId_Returns403()
         {
-            var (_, _, accessToken) = await _helpers.CreateConfirmedUserAsync("unknown");
+            var (_, _, accessToken) = await _authenticatedUser.CreateConfirmedUserAsync();
 
             var response = await _client.SendAsync(
                 UpdateTeamRequest(Guid.NewGuid(), "Some Name", null, accessToken));
@@ -137,10 +125,10 @@ namespace TeamManager.IntegrationTest.Teams.TeamsController
         [Fact]
         public async Task UpdateTeam_WithDuplicateName_Returns409AndKeepsOriginal()
         {
-            var (_, _, accessToken) = await _helpers.CreateConfirmedUserAsync("duplicate");
+            var (_, _, accessToken) = await _authenticatedUser.CreateConfirmedUserAsync();
 
-            var existingId = await CreateTeamAsync("Existing Team", accessToken);
-            var targetId = await CreateTeamAsync("Another Team", accessToken);
+            var existingId = await _helpers.CreateTeamAsync("Existing Team", null, accessToken);
+            var targetId = await _helpers.CreateTeamAsync("Another Team", null, accessToken);
 
             var response = await _client.SendAsync(UpdateTeamRequest(targetId, "existing team", null, accessToken));
 
@@ -159,8 +147,8 @@ namespace TeamManager.IntegrationTest.Teams.TeamsController
         [Fact]
         public async Task UpdateTeam_WithSameName_Returns204()
         {
-            var (_, _, accessToken) = await _helpers.CreateConfirmedUserAsync("same-name");
-            var teamId = await CreateTeamAsync("Unchanged Team", accessToken);
+            var (_, _, accessToken) = await _authenticatedUser.CreateConfirmedUserAsync();
+            var teamId = await _helpers.CreateTeamAsync("Unchanged Team", null, accessToken);
 
             var response = await _client.SendAsync(UpdateTeamRequest(teamId, "Unchanged Team", null, accessToken));
 
@@ -170,8 +158,8 @@ namespace TeamManager.IntegrationTest.Teams.TeamsController
         [Fact]
         public async Task UpdateTeam_WithInvalidPayload_Returns400WithFieldErrors()
         {
-            var (_, _, accessToken) = await _helpers.CreateConfirmedUserAsync("invalid");
-            var teamId = await CreateTeamAsync("Validation Team", accessToken);
+            var (_, _, accessToken) = await _authenticatedUser.CreateConfirmedUserAsync();
+            var teamId = await _helpers.CreateTeamAsync("Validation Team", null, accessToken);
 
             var response = await _client.SendAsync(UpdateTeamRequest(teamId, "", null, accessToken));
 
@@ -186,8 +174,8 @@ namespace TeamManager.IntegrationTest.Teams.TeamsController
         [Fact]
         public async Task UpdateTeam_OnDeletedTeam_Returns403()
         {
-            var (_, _, accessToken) = await _helpers.CreateConfirmedUserAsync("deleted");
-            var teamId = await CreateTeamAsync("Deleted Team", accessToken);
+            var (_, _, accessToken) = await _authenticatedUser.CreateConfirmedUserAsync();
+            var teamId = await _helpers.CreateTeamAsync("Deleted Team", null, accessToken);
 
             using (var scope = factory.Services.CreateScope())
             {

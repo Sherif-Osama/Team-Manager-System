@@ -3,10 +3,10 @@ using Microsoft.Extensions.DependencyInjection;
 using System.Net;
 using System.Net.Http.Json;
 using System.Security.Claims;
-using System.Text;
 using System.Text.Json;
 using TeamManager.Infrastructure.Persistence;
 using TeamManager.IntegrationTest.Authentication.Configuration;
+using TeamManager.IntegrationTest.Common;
 
 namespace TeamManager.IntegrationTest.Authentication
 {
@@ -14,43 +14,15 @@ namespace TeamManager.IntegrationTest.Authentication
     public sealed class LoginIntegrationTests(AuthenticationFixture factory)
     {
         private readonly HttpClient _client = factory.CreateClient();
-        private readonly string _registerEndpoint = AuthenticationEndpoints.Register;
         private readonly string _loginEndpoint = AuthenticationEndpoints.Login;
-        private sealed record RegisterResponse(Guid Id);
-
+        private readonly AuthenticatedUser _authenticatedUser = new AuthenticatedUser(factory);
         private sealed record LoginResponse(string AccessToken, string RefreshToken);
 
-        private async Task<(Guid Id, string Email)> RegisterUserAsync(string displayName = "Login Test User")
-        {
-            var email = $"login-{Guid.NewGuid():N}@example.com";
-
-            var response = await _client.PostAsJsonAsync(_registerEndpoint,
-                new { email, displayName, password = "P@ssword1234" });
-
-            Assert.Equal(HttpStatusCode.Created, response.StatusCode);
-            var result = await response.Content.ReadFromJsonAsync<RegisterResponse>();
-
-            return (result!.Id, email);
-        }
-
-        private static JsonDocument DecodeJwtPayload(string token)
-        {
-            var payload = token.Split('.')[1].Replace('-', '+').Replace('_', '/');
-
-            payload = (payload.Length % 4) switch
-            {
-                2 => payload + "==",
-                3 => payload + "=",
-                _ => payload
-            };
-
-            return JsonDocument.Parse(Encoding.UTF8.GetString(Convert.FromBase64String(payload)));
-        }
 
         [Fact]
         public async Task Login_ValidCredentials_ReturnsTokensAndPersistsHashedRefreshToken()
         {
-            var (userId, email) = await RegisterUserAsync();
+            var (userId, email) = await _authenticatedUser.RegisterUserAsync();
 
             var response = await _client.PostAsJsonAsync(_loginEndpoint,
                 new { email, password = "P@ssword1234" });
@@ -62,15 +34,15 @@ namespace TeamManager.IntegrationTest.Authentication
             Assert.False(string.IsNullOrWhiteSpace(result.RefreshToken));
             Assert.NotEqual(result.AccessToken, result.RefreshToken);
 
-            using (var jwt = DecodeJwtPayload(result.AccessToken))
+            using (var jwt = _authenticatedUser.DecodeJwtPayload(result.AccessToken))
             {
                 var claims = jwt.RootElement;
                 Assert.Equal(userId.ToString(), claims.GetProperty(ClaimTypes.NameIdentifier).GetString());
                 Assert.Equal(email, claims.GetProperty(ClaimTypes.Email).GetString());
-                Assert.Equal("Login Test User", claims.GetProperty(ClaimTypes.Name).GetString());
+                Assert.Equal("User", claims.GetProperty(ClaimTypes.Name).GetString());
                 var roleClaim = claims.GetProperty(ClaimTypes.Role);
-                var roles = roleClaim.ValueKind == JsonValueKind.Array? 
-                    roleClaim.EnumerateArray().Select(r => r.GetString()): [roleClaim.GetString()];
+                var roles = roleClaim.ValueKind == JsonValueKind.Array ?
+                    roleClaim.EnumerateArray().Select(r => r.GetString()) : [roleClaim.GetString()];
 
                 Assert.Contains("User", roles);
             }
@@ -96,7 +68,7 @@ namespace TeamManager.IntegrationTest.Authentication
         [Fact]
         public async Task Login_WithWrongPassword_Returns401AndPersistsFailedAttempt()
         {
-            var (userId, email) = await RegisterUserAsync();
+            var (userId, email) = await _authenticatedUser.RegisterUserAsync();
 
             var response = await _client.PostAsJsonAsync(_loginEndpoint,
                 new { email, password = "WrongPass123!" });
@@ -115,7 +87,7 @@ namespace TeamManager.IntegrationTest.Authentication
         [Fact]
         public async Task Login_AfterFiveFailedAttempts_LocksAccountEvenWithCorrectPassword()
         {
-            var (userId, email) = await RegisterUserAsync();
+            var (userId, email) = await _authenticatedUser.RegisterUserAsync();
 
             for (var i = 0; i < 5; i++)
             {
@@ -150,7 +122,7 @@ namespace TeamManager.IntegrationTest.Authentication
         [Fact]
         public async Task Login_WithSoftDeletedUser_Returns401()
         {
-            var (userId, email) = await RegisterUserAsync();
+            var (userId, email) = await _authenticatedUser.RegisterUserAsync();
 
             using (var scope = factory.Services.CreateScope())
             {
@@ -169,12 +141,7 @@ namespace TeamManager.IntegrationTest.Authentication
         [Fact]
         public async Task Login_EmailComparison_IsCaseInsensitive()
         {
-            var email = $"Case-{Guid.NewGuid():N}@Example.com";
-
-            var registerResponse = await _client.PostAsJsonAsync(_registerEndpoint,
-                new { email, displayName = "Casing User", password = "P@ssword1234" });
-
-            Assert.Equal(HttpStatusCode.Created, registerResponse.StatusCode);
+            var (_, email) = await _authenticatedUser.RegisterUserAsync();
 
             var loginResponse = await _client.PostAsJsonAsync(_loginEndpoint,
                 new { email = email.ToLowerInvariant(), password = "P@ssword1234" });
@@ -199,7 +166,7 @@ namespace TeamManager.IntegrationTest.Authentication
         [Fact]
         public async Task Login_WithInactiveUser_ReactivatesAccountAndWritesAuditLog()
         {
-            var (userId, email) = await RegisterUserAsync();
+            var (userId, email) = await _authenticatedUser.RegisterUserAsync();
 
             using (var scope = factory.Services.CreateScope())
             {
@@ -228,7 +195,7 @@ namespace TeamManager.IntegrationTest.Authentication
         [Fact]
         public async Task Login_ConcurrentLogins_PersistDistinctRefreshTokens()
         {
-            var (userId, email) = await RegisterUserAsync();
+            var (userId, email) = await _authenticatedUser.RegisterUserAsync();
 
             var responses = await Task.WhenAll(Enumerable.Range(0, 3).Select(_ =>
                 _client.PostAsJsonAsync(_loginEndpoint,

@@ -1,11 +1,11 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using System.Net;
-using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text.Json;
 using TeamManager.Domain.Enums;
 using TeamManager.Infrastructure.Persistence;
+using TeamManager.IntegrationTest.Common;
 using TeamManager.IntegrationTest.Teams.Configuration;
 
 namespace TeamManager.IntegrationTest.Teams.TeamsController
@@ -13,35 +13,26 @@ namespace TeamManager.IntegrationTest.Teams.TeamsController
     [Collection("Team")]
     public sealed class CreateTeamIntegrationTests(TeamsFixture factory)
     {
-        private readonly HttpClient _client = factory.CreateClient();
-        private readonly TeamTestHelpers _helpers = new(factory);
 
+        private readonly HttpClient _client = factory.CreateClient();
+        private readonly TeamTestHelpers _helpers = new TeamTestHelpers(factory);
+        private readonly AuthenticatedUser _authenticatedUser = new AuthenticatedUser(factory);
         private sealed record CreateTeamResponse(Guid Id);
 
-        private static HttpRequestMessage CreateTeamRequest(string name, string? description, string? accessToken = null)
-        {
-            var request = new HttpRequestMessage(HttpMethod.Post, TeamEndpoints.Teams)
-            {
-                Content = JsonContent.Create(new { name, description })
-            };
-
-            if (accessToken is not null)
-                request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
-
-            return request;
-        }
 
         [Fact]
         public async Task CreateTeam_ValidRequest_CreatesTeamWithOwnerMembership()
         {
-            var (userId, _, accessToken) = await _helpers.CreateConfirmedUserAsync("creator");
+            var (userId, _, accessToken) = await _authenticatedUser.CreateConfirmedUserAsync();
 
-            var response = await _client.SendAsync(CreateTeamRequest("My New Team", "A description", accessToken));
+            var response = await _client.SendAsync(_helpers.CreateTeamRequest("My New Team", "A description", accessToken));
 
             Assert.Equal(HttpStatusCode.Created, response.StatusCode);
+
             var result = await response.Content.ReadFromJsonAsync<CreateTeamResponse>();
 
             using var scope = factory.Services.CreateScope();
+
             var db = scope.ServiceProvider.GetRequiredService<TeamManagerDbContext>();
 
             var team = await db.Teams.AsNoTracking().SingleAsync(t => t.Id == result!.Id);
@@ -63,7 +54,7 @@ namespace TeamManager.IntegrationTest.Teams.TeamsController
         [Fact]
         public async Task CreateTeam_WithoutAccessToken_Returns401()
         {
-            var response = await _client.SendAsync(CreateTeamRequest("No Token Team Create", null));
+            var response = await _client.SendAsync(_helpers.CreateTeamRequest("No Token Team Create", null));
 
             Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
         }
@@ -71,10 +62,11 @@ namespace TeamManager.IntegrationTest.Teams.TeamsController
         [Fact]
         public async Task CreateTeam_WithUnconfirmedEmail_Returns403()
         {
-            var (_, email) = await _helpers.RegisterUserAsync("unconfirmed");
-            var login = await _helpers.LoginAsync(email);
 
-            var response = await _client.SendAsync(CreateTeamRequest("Unconfirmed Team", null, login.AccessToken));
+            var (_, email) = await _authenticatedUser.RegisterUserAsync("unconfirmed");
+            var login = await _authenticatedUser.LoginAsync(email);
+
+            var response = await _client.SendAsync(_helpers.CreateTeamRequest("Unconfirmed Team", null, login.AccessToken));
 
             Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
 
@@ -87,13 +79,13 @@ namespace TeamManager.IntegrationTest.Teams.TeamsController
         [Fact]
         public async Task CreateTeam_WithDuplicateName_Returns409()
         {
-            var (_, _, accessToken) = await _helpers.CreateConfirmedUserAsync("duplicate");
+            var (_, _, accessToken) = await _authenticatedUser.CreateConfirmedUserAsync();
 
-            var first = await _client.SendAsync(CreateTeamRequest("Duplicate Team", null, accessToken));
+            var first = await _client.SendAsync(_helpers.CreateTeamRequest("Duplicate Team", null, accessToken));
 
             Assert.Equal(HttpStatusCode.Created, first.StatusCode);
 
-            var second = await _client.SendAsync(CreateTeamRequest("Duplicate Team", null, accessToken));
+            var second = await _client.SendAsync(_helpers.CreateTeamRequest("Duplicate Team", null, accessToken));
 
             Assert.Equal(HttpStatusCode.Conflict, second.StatusCode);
 
@@ -106,13 +98,13 @@ namespace TeamManager.IntegrationTest.Teams.TeamsController
         [Fact]
         public async Task CreateTeam_NameComparison_IsCaseInsensitive()
         {
-            var (_, _, accessToken) = await _helpers.CreateConfirmedUserAsync("casing");
+            var (_, _, accessToken) = await _authenticatedUser.CreateConfirmedUserAsync();
 
-            var first = await _client.SendAsync(CreateTeamRequest("Case Sensitive Team", null, accessToken));
+            var first = await _client.SendAsync(_helpers.CreateTeamRequest("Case Sensitive Team", null, accessToken));
 
             Assert.Equal(HttpStatusCode.Created, first.StatusCode);
 
-            var second = await _client.SendAsync(CreateTeamRequest("case sensitive team", null, accessToken));
+            var second = await _client.SendAsync(_helpers.CreateTeamRequest("case sensitive team", null, accessToken));
 
             Assert.Equal(HttpStatusCode.Conflict, second.StatusCode);
         }
@@ -120,9 +112,9 @@ namespace TeamManager.IntegrationTest.Teams.TeamsController
         [Fact]
         public async Task CreateTeam_WithDeletedTeamName_AllowsReuse()
         {
-            var (_, _, accessToken) = await _helpers.CreateConfirmedUserAsync("reuse");
+            var (_, _, accessToken) = await _authenticatedUser.CreateConfirmedUserAsync();
 
-            var first = await _client.SendAsync(CreateTeamRequest("Reusable Team", null, accessToken));
+            var first = await _client.SendAsync(_helpers.CreateTeamRequest("Reusable Team", null, accessToken));
 
             Assert.Equal(HttpStatusCode.Created, first.StatusCode);
             var firstResult = await first.Content.ReadFromJsonAsync<CreateTeamResponse>();
@@ -135,7 +127,7 @@ namespace TeamManager.IntegrationTest.Teams.TeamsController
                 await db.SaveChangesAsync(CancellationToken.None);
             }
 
-            var second = await _client.SendAsync(CreateTeamRequest("Reusable Team", "Recreated", accessToken));
+            var second = await _client.SendAsync(_helpers.CreateTeamRequest("Reusable Team", "Recreated", accessToken));
 
             Assert.Equal(HttpStatusCode.Created, second.StatusCode);
 
@@ -149,9 +141,9 @@ namespace TeamManager.IntegrationTest.Teams.TeamsController
         [Fact]
         public async Task CreateTeam_WithInvalidPayload_Returns400WithFieldErrors()
         {
-            var (_, _, accessToken) = await _helpers.CreateConfirmedUserAsync("invalid");
+            var (_, _, accessToken) = await _authenticatedUser.CreateConfirmedUserAsync();
 
-            var missingName = await _client.SendAsync(CreateTeamRequest("", null, accessToken));
+            var missingName = await _client.SendAsync(_helpers.CreateTeamRequest("", null, accessToken));
 
             Assert.Equal(HttpStatusCode.BadRequest, missingName.StatusCode);
 
@@ -160,7 +152,7 @@ namespace TeamManager.IntegrationTest.Teams.TeamsController
             Assert.True(body.TryGetProperty("errors", out var errors));
             Assert.True(errors.TryGetProperty("Name", out _));
 
-            var longDescription = await _client.SendAsync(CreateTeamRequest("Valid Name", new string('x', 501), accessToken));
+            var longDescription = await _client.SendAsync(_helpers.CreateTeamRequest("Valid Name", new string('x', 501), accessToken));
 
             Assert.Equal(HttpStatusCode.BadRequest, longDescription.StatusCode);
 
@@ -173,10 +165,10 @@ namespace TeamManager.IntegrationTest.Teams.TeamsController
         [Fact]
         public async Task CreateTeam_ConcurrentDuplicates_ExactlyOneSucceeds()
         {
-            var (_, _, accessToken) = await _helpers.CreateConfirmedUserAsync("concurrent");
+            var (_, _, accessToken) = await _authenticatedUser.CreateConfirmedUserAsync();
 
             var responses = await Task.WhenAll(Enumerable.Range(0, 2).Select(_ =>
-                _client.SendAsync(CreateTeamRequest("Racing Team", null, accessToken))));
+                _client.SendAsync(_helpers.CreateTeamRequest("Racing Team", null, accessToken))));
 
             var statuses = responses.Select(r => r.StatusCode).OrderBy(code => code).ToArray();
 

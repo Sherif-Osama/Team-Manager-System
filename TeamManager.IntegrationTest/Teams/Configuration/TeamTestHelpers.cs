@@ -1,11 +1,6 @@
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
 using System.Net;
+using System.Net.Http.Headers;
 using System.Net.Http.Json;
-using System.Text.Json;
-using TeamManager.Application.Abstractions.Security;
-using TeamManager.Infrastructure.Persistence;
-using TeamManager.IntegrationTest.Authentication.Configuration;
 using TeamManager.IntegrationTest.Infrastructure;
 
 namespace TeamManager.IntegrationTest.Teams.Configuration
@@ -13,68 +8,51 @@ namespace TeamManager.IntegrationTest.Teams.Configuration
     public sealed class TeamTestHelpers(TeamManagerApiFactory factory)
     {
         private readonly HttpClient _client = factory.CreateClient();
+        private sealed record CreateTeamResponse(Guid Id);
 
-        public sealed record RegisterResponse(Guid Id);
-
-        public sealed record LoginResponse(string AccessToken, string RefreshToken);
-
-        public async Task<(Guid Id, string Email)> RegisterUserAsync(string emailPrefix = "team")
+        public async Task<Guid> CreateTeamAsync(string name, string? description, string accessToken)
         {
-            var email = $"{emailPrefix}-{Guid.NewGuid():N}@example.com";
-
-            var response = await _client.PostAsJsonAsync(AuthenticationEndpoints.Register,
-                new { email, displayName = "Team Test User", password = "P@ssword1234" });
+            var response = await _client.SendAsync(new HttpRequestMessage(HttpMethod.Post, TeamEndpoints.Teams)
+            {
+                Content = JsonContent.Create(new { name, description = description }),
+                Headers = { Authorization = new AuthenticationHeaderValue("Bearer", accessToken) }
+            });
 
             Assert.Equal(HttpStatusCode.Created, response.StatusCode);
-            var result = await response.Content.ReadFromJsonAsync<RegisterResponse>();
-
-            return (result!.Id, email);
+            return (await response.Content.ReadFromJsonAsync<CreateTeamResponse>())!.Id;
         }
 
-        public async Task ConfirmEmailAsync(Guid userId, string email)
+        public HttpRequestMessage CreateTeamRequest(string name, string? description, string? accessToken = null)
         {
-            using var scope = factory.Services.CreateScope();
-            var db = scope.ServiceProvider.GetRequiredService<TeamManagerDbContext>();
-            var tokenService = scope.ServiceProvider.GetRequiredService<IEmailConfirmationTokenService>();
+            var request = new HttpRequestMessage(HttpMethod.Post, TeamEndpoints.Teams)
+            {
+                Content = JsonContent.Create(new { name, description })
+            };
 
-            var confirmationMessage = await db.OutboxMessages.AsNoTracking()
-                .SingleAsync(o => o.Type == "EmailConfirmationEmail" && o.Payload.Contains(email));
+            if (accessToken is not null)
+                request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
 
-            using var payload = JsonDocument.Parse(confirmationMessage.Payload);
-            var rawToken = payload.RootElement.GetProperty("Token").GetString();
-
-            var user = await db.Users.SingleAsync(u => u.Id == userId);
-            user.ConfirmEmail(tokenService.HashToken(rawToken!));
-            await db.SaveChangesAsync(CancellationToken.None);
+            return request;
         }
 
-        public async Task<LoginResponse> LoginAsync(string email)
+        public async Task<HttpResponseMessage> GetTeamAsync(Guid teamId, string? accessToken = null)
         {
-            var response = await _client.PostAsJsonAsync(AuthenticationEndpoints.Login,
-                new { email, password = "P@ssword1234" });
+            var request = new HttpRequestMessage(HttpMethod.Get, TeamEndpoints.Team(teamId));
 
-            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-            return (await response.Content.ReadFromJsonAsync<LoginResponse>())!;
+            if (accessToken is not null)
+                request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+
+            return await _client.SendAsync(request);
         }
 
-        public async Task<(Guid Id, string Email, string AccessToken)> CreateConfirmedUserAsync(string emailPrefix = "team")
+        public async Task<HttpResponseMessage> GetByNameAsync(string name, string? accessToken = null)
         {
-            var (userId, email) = await RegisterUserAsync(emailPrefix);
-            await ConfirmEmailAsync(userId, email);
-            var login = await LoginAsync(email);
-            return (userId, email, login.AccessToken);
-        }
+            var request = new HttpRequestMessage(HttpMethod.Get, $"{TeamEndpoints.TeamsByName}?name={Uri.EscapeDataString(name)}");
 
-        public async Task PromoteToAdminAsync(Guid userId)
-        {
-            using var scope = factory.Services.CreateScope();
-            var db = scope.ServiceProvider.GetRequiredService<TeamManagerDbContext>();
+            if (accessToken is not null)
+                request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
 
-            var adminRole = await db.Roles.SingleAsync(r => r.Name == "SystemAdmin");
-            var user = await db.Users.SingleAsync(u => u.Id == userId);
-
-            user.AssignRole(adminRole.Id);
-            await db.SaveChangesAsync(CancellationToken.None);
+            return await _client.SendAsync(request);
         }
     }
 }

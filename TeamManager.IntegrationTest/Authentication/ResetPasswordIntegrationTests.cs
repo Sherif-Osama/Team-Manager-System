@@ -3,62 +3,23 @@ using Microsoft.Extensions.DependencyInjection;
 using System.Net;
 using System.Net.Http.Json;
 using System.Text.Json;
-using TeamManager.Application.Abstractions.Security;
 using TeamManager.Infrastructure.Persistence;
 using TeamManager.IntegrationTest.Authentication.Configuration;
+using TeamManager.IntegrationTest.Common;
 
 namespace TeamManager.IntegrationTest.Authentication
 {
     [Collection("Authentication")]
     public sealed class ResetPasswordIntegrationTests(AuthenticationFixture factory)
     {
-        private readonly HttpClient _client = factory.CreateClient();
-
-        private readonly string _registerEndpoint = AuthenticationEndpoints.Register;
         private readonly string _loginEndpoint = AuthenticationEndpoints.Login;
+        private readonly HttpClient _client = factory.CreateClient();
+        private readonly AuthenticatedUser _authenticatedUser = new AuthenticatedUser(factory);
+
         private readonly string _forgotPasswordEndpoint = AuthenticationEndpoints.ForgotPassword;
         private readonly string _resetPasswordEndpoint = AuthenticationEndpoints.ResetPassword;
 
-        private sealed record RegisterResponse(Guid Id);
-
         private sealed record LoginResponse(string AccessToken, string RefreshToken);
-
-        private async Task<(Guid Id, string Email)> RegisterUserAsync()
-        {
-            var email = $"reset-{Guid.NewGuid():N}@example.com";
-
-            var response = await _client.PostAsJsonAsync(_registerEndpoint,
-                new { email, displayName = "Reset Password User", password = "P@ssword1234" });
-
-            Assert.Equal(HttpStatusCode.Created, response.StatusCode);
-            var result = await response.Content.ReadFromJsonAsync<RegisterResponse>();
-
-            return (result!.Id, email);
-        }
-
-        private async Task ConfirmEmailAsync(Guid userId, string email)
-        {
-            using var scope = factory.Services.CreateScope();
-            var db = scope.ServiceProvider.GetRequiredService<TeamManagerDbContext>();
-            var tokenService = scope.ServiceProvider.GetRequiredService<IEmailConfirmationTokenService>();
-
-            var confirmationMessage = await db.OutboxMessages.AsNoTracking()
-                .SingleAsync(o => o.Type == "EmailConfirmationEmail" && o.Payload.Contains(email));
-
-            using var payload = JsonDocument.Parse(confirmationMessage.Payload);
-            var rawToken = payload.RootElement.GetProperty("Token").GetString();
-
-            var user = await db.Users.SingleAsync(u => u.Id == userId);
-            user.ConfirmEmail(tokenService.HashToken(rawToken!));
-            await db.SaveChangesAsync(CancellationToken.None);
-        }
-
-        private async Task<(Guid UserId, string Email)> RegisterAndConfirmUserAsync()
-        {
-            var (userId, email) = await RegisterUserAsync();
-            await ConfirmEmailAsync(userId, email);
-            return (userId, email);
-        }
 
         private async Task<string> RequestPasswordResetTokenAsync(string email)
         {
@@ -86,12 +47,7 @@ namespace TeamManager.IntegrationTest.Authentication
         [Fact]
         public async Task ResetPassword_WithValidToken_ResetsPasswordRevokesSessionsAndNotifies()
         {
-            var (userId, email) = await RegisterAndConfirmUserAsync();
-
-            var loginBefore = await _client.PostAsJsonAsync(_loginEndpoint,
-                new { email, password = "P@ssword1234" });
-
-            Assert.Equal(HttpStatusCode.OK, loginBefore.StatusCode);
+            var (userId, email, _) = await _authenticatedUser.CreateConfirmedUserAsync();
 
             var token = await RequestPasswordResetTokenAsync(email);
 
@@ -131,7 +87,7 @@ namespace TeamManager.IntegrationTest.Authentication
         [Fact]
         public async Task ResetPassword_WithInvalidToken_Returns403()
         {
-            var (_, email) = await RegisterAndConfirmUserAsync();
+            var (_, email) = await _authenticatedUser.RegisterAndConfirmUserAsync();
 
             var response = await ResetPasswordAsync(email, "invalid-token-value");
 
@@ -149,7 +105,7 @@ namespace TeamManager.IntegrationTest.Authentication
         [Fact]
         public async Task ResetPassword_WithExpiredToken_Returns403()
         {
-            var (userId, email) = await RegisterAndConfirmUserAsync();
+            var (userId, email) = await _authenticatedUser.RegisterAndConfirmUserAsync();
             var token = await RequestPasswordResetTokenAsync(email);
 
             using (var scope = factory.Services.CreateScope())
@@ -167,7 +123,7 @@ namespace TeamManager.IntegrationTest.Authentication
         [Fact]
         public async Task ResetPassword_WithUnconfirmedEmail_Returns403()
         {
-            var (_, email) = await RegisterUserAsync();
+            var (_, email) = await _authenticatedUser.RegisterUserAsync();
 
             var response = await ResetPasswordAsync(email, "some-token");
 
@@ -177,7 +133,7 @@ namespace TeamManager.IntegrationTest.Authentication
         [Fact]
         public async Task ResetPassword_TokenIsSingleUse()
         {
-            var (userId, email) = await RegisterAndConfirmUserAsync();
+            var (userId, email) = await _authenticatedUser.RegisterAndConfirmUserAsync();
             var token = await RequestPasswordResetTokenAsync(email);
 
             var first = await ResetPasswordAsync(email, token);
@@ -199,7 +155,7 @@ namespace TeamManager.IntegrationTest.Authentication
         [Fact]
         public async Task ResetPassword_WithMismatchedPasswords_Returns400WithFieldErrors()
         {
-            var (_, email) = await RegisterAndConfirmUserAsync();
+            var (_, email) = await _authenticatedUser.RegisterAndConfirmUserAsync();
             var token = await RequestPasswordResetTokenAsync(email);
 
             var response = await _client.PostAsJsonAsync(_resetPasswordEndpoint,
@@ -216,7 +172,7 @@ namespace TeamManager.IntegrationTest.Authentication
         [Fact]
         public async Task ResetPassword_WithSoftDeletedUser_Returns403()
         {
-            var (userId, email) = await RegisterAndConfirmUserAsync();
+            var (userId, email) = await _authenticatedUser.RegisterAndConfirmUserAsync();
             var token = await RequestPasswordResetTokenAsync(email);
 
             using (var scope = factory.Services.CreateScope())

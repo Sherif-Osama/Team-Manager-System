@@ -6,6 +6,7 @@ using System.Net.Http.Json;
 using System.Text.Json;
 using TeamManager.Infrastructure.Persistence;
 using TeamManager.IntegrationTest.Authentication.Configuration;
+using TeamManager.IntegrationTest.Common;
 
 namespace TeamManager.IntegrationTest.Authentication
 {
@@ -13,34 +14,7 @@ namespace TeamManager.IntegrationTest.Authentication
     public sealed class LogoutIntegrationTests(AuthenticationFixture factory)
     {
         private readonly HttpClient _client = factory.CreateClient();
-
-        private readonly string _registerEndpoint = AuthenticationEndpoints.Register;
-        private readonly string _loginEndpoint = AuthenticationEndpoints.Login;
-        private sealed record RegisterResponse(Guid Id);
-
-        private sealed record LoginResponse(string AccessToken, string RefreshToken);
-
-        private async Task<(Guid Id, string Email)> RegisterUserAsync()
-        {
-            var email = $"logout-{Guid.NewGuid():N}@example.com";
-
-            var response = await _client.PostAsJsonAsync(_registerEndpoint,
-                new { email, displayName = "Logout Test User", password = "P@ssword1234" });
-
-            Assert.Equal(HttpStatusCode.Created, response.StatusCode);
-            var result = await response.Content.ReadFromJsonAsync<RegisterResponse>();
-
-            return (result!.Id, email);
-        }
-
-        private async Task<LoginResponse> LoginAsync(string email)
-        {
-            var response = await _client.PostAsJsonAsync(_loginEndpoint,
-                new { email, password = "P@ssword1234" });
-
-            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-            return (await response.Content.ReadFromJsonAsync<LoginResponse>())!;
-        }
+        private readonly AuthenticatedUser _authenticatedUser = new AuthenticatedUser(factory);
 
         private static HttpRequestMessage CreateLogoutRequest(string refreshToken, string? accessToken = null)
         {
@@ -58,8 +32,8 @@ namespace TeamManager.IntegrationTest.Authentication
         [Fact]
         public async Task Logout_WithValidToken_RevokesRefreshToken()
         {
-            var (userId, email) = await RegisterUserAsync();
-            var login = await LoginAsync(email);
+            var (userId, email) = await _authenticatedUser.RegisterUserAsync();
+            var login = await _authenticatedUser.LoginAsync(email);
 
             var response = await _client.SendAsync(CreateLogoutRequest(login.RefreshToken, login.AccessToken));
 
@@ -82,8 +56,8 @@ namespace TeamManager.IntegrationTest.Authentication
         [Fact]
         public async Task Logout_WithUnknownToken_Returns204WithoutChanges()
         {
-            var (userId, email) = await RegisterUserAsync();
-            var login = await LoginAsync(email);
+            var (userId, email) = await _authenticatedUser.RegisterUserAsync();
+            var login = await _authenticatedUser.LoginAsync(email);
 
             var response = await _client.SendAsync(CreateLogoutRequest("not-a-real-token-value", login.AccessToken));
 
@@ -100,8 +74,8 @@ namespace TeamManager.IntegrationTest.Authentication
         [Fact]
         public async Task Logout_WithAlreadyRevokedToken_IsIdempotent()
         {
-            var (userId, email) = await RegisterUserAsync();
-            var login = await LoginAsync(email);
+            var (userId, email) = await _authenticatedUser.RegisterUserAsync();
+            var login = await _authenticatedUser.LoginAsync(email);
 
             var first = await _client.SendAsync(CreateLogoutRequest(login.RefreshToken, login.AccessToken));
             var second = await _client.SendAsync(CreateLogoutRequest(login.RefreshToken, login.AccessToken));
@@ -119,8 +93,8 @@ namespace TeamManager.IntegrationTest.Authentication
         [Fact]
         public async Task Logout_WithoutAccessToken_Returns401()
         {
-            var (userId, email) = await RegisterUserAsync();
-            var login = await LoginAsync(email);
+            var (userId, email) = await _authenticatedUser.RegisterUserAsync();
+            var login = await _authenticatedUser.LoginAsync(email);
 
             var response = await _client.SendAsync(CreateLogoutRequest(login.RefreshToken));
 
@@ -135,8 +109,8 @@ namespace TeamManager.IntegrationTest.Authentication
         [Fact]
         public async Task Logout_WithInvalidPayload_Returns400WithFieldErrors()
         {
-            var (_, email) = await RegisterUserAsync();
-            var login = await LoginAsync(email);
+            var (_, email) = await _authenticatedUser.RegisterUserAsync();
+            var login = await _authenticatedUser.LoginAsync(email);
 
             var response = await _client.SendAsync(CreateLogoutRequest("", login.AccessToken));
 
@@ -151,9 +125,9 @@ namespace TeamManager.IntegrationTest.Authentication
         [Fact]
         public async Task Logout_DoesNotRevokeOtherSessionTokens()
         {
-            var (userId, email) = await RegisterUserAsync();
-            var firstSession = await LoginAsync(email);
-            var secondSession = await LoginAsync(email);
+            var (userId, email) = await _authenticatedUser.RegisterUserAsync();
+            var firstSession = await _authenticatedUser.LoginAsync(email);
+            var secondSession = await _authenticatedUser.LoginAsync(email);
 
             var logout = await _client.SendAsync(CreateLogoutRequest(firstSession.RefreshToken, firstSession.AccessToken));
 
