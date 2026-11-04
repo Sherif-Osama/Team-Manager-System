@@ -65,6 +65,10 @@ namespace TeamManager.IntegrationTest.Projects.Configuration
             await db.SaveChangesAsync(CancellationToken.None);
         }
 
+        public async Task<HttpResponseMessage> GetProjectByNameAsync(string name, string? accessToken = null)
+            => await RequestAsync(HttpMethod.Get,
+                $"{ProjectEndpoints.ProjectByName}?name={Uri.EscapeDataString(name)}", accessToken);
+
         public async Task<HttpResponseMessage> ChangeProjectStatusAsync(Guid projectId, ProjectStatus status, string accessToken)
             => await RequestAsync(HttpMethod.Put, ProjectEndpoints.ProjectStatus(projectId), accessToken, new { status });
 
