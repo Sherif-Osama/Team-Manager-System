@@ -1,7 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using System.Net;
-using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text.Json;
 using TeamManager.Domain.Enums;
@@ -15,42 +14,12 @@ namespace TeamManager.IntegrationTest.Projects.ProjectsController
     [Collection("Projects")]
     public sealed class DeleteProjectIntegrationTests(ProjectsFixture factory)
     {
-        private readonly HttpClient _client = factory.CreateClient();
         private readonly ProjectTestHelpers _helpers = new(factory);
         private readonly TeamTestHelpers _teamHelpers = new(factory);
         private readonly AuthenticatedUser _authenticatedUser = new(factory);
 
         private async Task<HttpResponseMessage> DeleteAsync(Guid projectId, string? accessToken = null)
-        {
-            var request = new HttpRequestMessage(HttpMethod.Delete, ProjectEndpoints.Project(projectId));
-
-            if (accessToken is not null)
-                request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
-
-            return await _client.SendAsync(request);
-        }
-
-        private async Task<long> CreateTaskAsync(Guid projectId, string title, string accessToken)
-        {
-            var response = await _client.SendAsync(new HttpRequestMessage(HttpMethod.Post,
-                ProjectEndpoints.CreateTask(projectId))
-            {
-                Content = JsonContent.Create(new { title, priority = TaskPriority.Medium }),
-                Headers = { Authorization = new AuthenticationHeaderValue("Bearer", accessToken) }
-            });
-
-            Assert.Equal(HttpStatusCode.Created, response.StatusCode);
-            return await response.Content.ReadFromJsonAsync<long>();
-        }
-
-        private async Task<HttpResponseMessage> ChangeTaskStatusAsync(long taskId, TaskItemStatus status, string accessToken)
-        {
-            return await _client.SendAsync(new HttpRequestMessage(HttpMethod.Put, ProjectEndpoints.TaskStatus(taskId))
-            {
-                Content = JsonContent.Create(new { status }),
-                Headers = { Authorization = new AuthenticationHeaderValue("Bearer", accessToken) }
-            });
-        }
+            => await _helpers.RequestAsync(HttpMethod.Delete, ProjectEndpoints.Project(projectId), accessToken);
 
         private async Task<DateTime?> GetDeletedAtUtcAsync(Guid projectId)
         {
@@ -85,11 +54,7 @@ namespace TeamManager.IntegrationTest.Projects.ProjectsController
 
             Assert.Equal(HttpStatusCode.NoContent, (await DeleteAsync(projectId, ownerToken)).StatusCode);
 
-            var getResponse = await _client.SendAsync(new HttpRequestMessage(HttpMethod.Get,
-                ProjectEndpoints.Project(projectId))
-            {
-                Headers = { Authorization = new AuthenticationHeaderValue("Bearer", ownerToken) }
-            });
+            var getResponse = await _helpers.RequestAsync(HttpMethod.Get, ProjectEndpoints.Project(projectId), ownerToken);
 
             Assert.Equal(HttpStatusCode.NotFound, getResponse.StatusCode);
         }
@@ -114,7 +79,7 @@ namespace TeamManager.IntegrationTest.Projects.ProjectsController
             var (_, _, ownerToken) = await _authenticatedUser.CreateConfirmedUserAsync("delete-active");
             var (_, projectId) = await _helpers.CreateProjectAsync("Blocked By Task", ownerToken);
 
-            await CreateTaskAsync(projectId, "Open Task", ownerToken);
+            await _helpers.CreateTaskAsync(projectId, "Open Task", ownerToken);
 
             var response = await DeleteAsync(projectId, ownerToken);
 
@@ -128,10 +93,10 @@ namespace TeamManager.IntegrationTest.Projects.ProjectsController
             var (_, _, ownerToken) = await _authenticatedUser.CreateConfirmedUserAsync("delete-done");
             var (_, projectId) = await _helpers.CreateProjectAsync("Blocked By Done Task", ownerToken);
 
-            var taskId = await CreateTaskAsync(projectId, "Finished Task", ownerToken);
+            var taskId = await _helpers.CreateTaskAsync(projectId, "Finished Task", ownerToken);
 
             foreach (var status in new[] { TaskItemStatus.InProgress, TaskItemStatus.InReview, TaskItemStatus.Done })
-                Assert.Equal(HttpStatusCode.NoContent, (await ChangeTaskStatusAsync(taskId, status, ownerToken)).StatusCode);
+                Assert.Equal(HttpStatusCode.NoContent, (await _helpers.ChangeTaskStatusAsync(taskId, status, ownerToken)).StatusCode);
 
             var response = await DeleteAsync(projectId, ownerToken);
 
@@ -145,16 +110,13 @@ namespace TeamManager.IntegrationTest.Projects.ProjectsController
             var (_, _, ownerToken) = await _authenticatedUser.CreateConfirmedUserAsync("delete-inactive");
             var (_, projectId) = await _helpers.CreateProjectAsync("Only Inactive Tasks", ownerToken);
 
-            var cancelledTaskId = await CreateTaskAsync(projectId, "Cancelled Task", ownerToken);
-            var deletedTaskId = await CreateTaskAsync(projectId, "Deleted Task", ownerToken);
+            var cancelledTaskId = await _helpers.CreateTaskAsync(projectId, "Cancelled Task", ownerToken);
+            var deletedTaskId = await _helpers.CreateTaskAsync(projectId, "Deleted Task", ownerToken);
 
             Assert.Equal(HttpStatusCode.NoContent,
-                (await ChangeTaskStatusAsync(cancelledTaskId, TaskItemStatus.Cancelled, ownerToken)).StatusCode);
-            Assert.Equal(HttpStatusCode.NoContent,
-                (await _client.SendAsync(new HttpRequestMessage(HttpMethod.Delete, ProjectEndpoints.Task(deletedTaskId))
-                {
-                    Headers = { Authorization = new AuthenticationHeaderValue("Bearer", ownerToken) }
-                })).StatusCode);
+                (await _helpers.ChangeTaskStatusAsync(cancelledTaskId, TaskItemStatus.Cancelled, ownerToken)).StatusCode);
+
+            await _helpers.DeleteTaskAsync(deletedTaskId, ownerToken);
 
             var response = await DeleteAsync(projectId, ownerToken);
 
@@ -203,11 +165,8 @@ namespace TeamManager.IntegrationTest.Projects.ProjectsController
                 await db.SaveChangesAsync(CancellationToken.None);
             }
 
-            var transfer = await _client.SendAsync(new HttpRequestMessage(HttpMethod.Put, TeamEndpoints.TeamOwner(teamId))
-            {
-                Content = JsonContent.Create(new { newOwnerUserId = teamOwnerId }),
-                Headers = { Authorization = new AuthenticationHeaderValue("Bearer", ownerToken) }
-            });
+            var transfer = await _helpers.RequestAsync(HttpMethod.Put, TeamEndpoints.TeamOwner(teamId), ownerToken,
+                new { newOwnerUserId = teamOwnerId });
 
             Assert.Equal(HttpStatusCode.NoContent, transfer.StatusCode);
 
