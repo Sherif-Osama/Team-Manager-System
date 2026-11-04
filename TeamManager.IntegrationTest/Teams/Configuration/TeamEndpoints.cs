@@ -6,7 +6,6 @@ namespace TeamManager.IntegrationTest.Teams.Configuration
         public const string TeamsByName = "/api/teams/by-name";
         public const string AcceptInvitation = "/api/teaminvitations/accept";
         public const string RejectInvitation = "/api/teaminvitations/reject";
-        public const string InvitationsByEmail = "/api/teaminvitations/by-email";
         public const string MyInvitations = "/api/teaminvitations/my";
 
         public static string Team(Guid teamId) => $"/api/teams/{teamId}";

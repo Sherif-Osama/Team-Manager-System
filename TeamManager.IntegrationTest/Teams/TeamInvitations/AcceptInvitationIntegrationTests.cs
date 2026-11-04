@@ -155,8 +155,7 @@ namespace TeamManager.IntegrationTest.Teams.TeamInvitations
             using (var scope = factory.Services.CreateScope())
             {
                 var db = scope.ServiceProvider.GetRequiredService<TeamManagerDbContext>();
-                await db.Database.ExecuteSqlInterpolatedAsync(
-                    $"UPDATE TeamInvitations SET ExpiresAtUtc = {DateTime.UtcNow.AddMinutes(-5)} WHERE TeamInvitationId = {invitationId}");
+                await db.TeamInvitations.Where(i => i.Id == invitationId).ExecuteUpdateAsync(i => i.SetProperty(i => i.ExpiresAtUtc, DateTime.UtcNow.AddMinutes(-5)));
             }
 
             var response = await AcceptAsync(token, login.AccessToken);
