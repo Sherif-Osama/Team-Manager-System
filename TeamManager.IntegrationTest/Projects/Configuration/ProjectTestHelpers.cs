@@ -23,10 +23,10 @@ namespace TeamManager.IntegrationTest.Projects.Configuration
             return await _client.SendAsync(request);
         }
 
-        public async Task<(Guid TeamId, Guid ProjectId)> CreateProjectAsync(string name, string ownerToken)
+        public async Task<(Guid TeamId, Guid ProjectId)> CreateProjectAsync(string name, string ownerToken, DateOnly? startDate = null, DateOnly? dueDate = null)
         {
             var teamId = await _teamHelpers.CreateTeamAsync($"Team {Guid.NewGuid():N}", null, ownerToken);
-            var response = await CreateProjectRequestAsync(teamId, new { name, description = (string?)null }, ownerToken);
+            var response = await CreateProjectRequestAsync(teamId, new { name, description = (string?)null, startDate, dueDate }, ownerToken);
 
             Assert.Equal(HttpStatusCode.Created, response.StatusCode);
             return (teamId, await response.Content.ReadFromJsonAsync<Guid>());

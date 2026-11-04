@@ -20,17 +20,6 @@ namespace TeamManager.IntegrationTest.Projects.ProjectsController
         private readonly TeamTestHelpers _teamHelpers = new(factory);
         private readonly AuthenticatedUser _authenticatedUser = new(factory);
 
-        private async Task<(Guid TeamId, Guid ProjectId)> CreateProjectAsync(string name, string ownerToken,
-            DateOnly? startDate = null, DateOnly? dueDate = null)
-        {
-            var teamId = await _teamHelpers.CreateTeamAsync($"Team {Guid.NewGuid():N}", null, ownerToken);
-            var response = await _helpers.CreateProjectRequestAsync(teamId,
-                new { name, description = (string?)null, startDate, dueDate }, ownerToken);
-
-            Assert.Equal(HttpStatusCode.Created, response.StatusCode);
-            return (teamId, await response.Content.ReadFromJsonAsync<Guid>());
-        }
-
         private async Task<HttpResponseMessage> ScheduleAsync(Guid projectId, DateOnly? startDate, DateOnly? dueDate,
             string? accessToken = null)
         {
@@ -49,7 +38,7 @@ namespace TeamManager.IntegrationTest.Projects.ProjectsController
         public async Task ScheduleProject_AsOwner_SchedulesProject()
         {
             var (_, _, ownerToken) = await _authenticatedUser.CreateConfirmedUserAsync("sched-owner");
-            var (_, projectId) = await CreateProjectAsync("Schedule Me", ownerToken);
+            var (_, projectId) = await _helpers.CreateProjectAsync("Schedule Me", ownerToken);
 
             var startDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(2));
             var dueDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(10));
@@ -73,7 +62,7 @@ namespace TeamManager.IntegrationTest.Projects.ProjectsController
             var (_, _, ownerToken) = await _authenticatedUser.CreateConfirmedUserAsync("sched-null");
             var startDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(3));
             var dueDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(12));
-            var (_, projectId) = await CreateProjectAsync("Keep Schedule", ownerToken, startDate, dueDate);
+            var (_, projectId) = await _helpers.CreateProjectAsync("Keep Schedule", ownerToken, startDate, dueDate);
 
             var response = await ScheduleAsync(projectId, null, null, ownerToken);
 
@@ -152,7 +141,7 @@ namespace TeamManager.IntegrationTest.Projects.ProjectsController
         public async Task ScheduleProject_WithInvalidPayload_Returns400WithFieldErrors()
         {
             var (_, _, ownerToken) = await _authenticatedUser.CreateConfirmedUserAsync("sched-invalid");
-            var (_, projectId) = await CreateProjectAsync("Invalid Schedule", ownerToken);
+            var (_, projectId) = await _helpers.CreateProjectAsync("Invalid Schedule", ownerToken);
 
             var pastDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(-1));
             var pastStart = await ScheduleAsync(projectId, pastDate, null, ownerToken);
@@ -181,7 +170,7 @@ namespace TeamManager.IntegrationTest.Projects.ProjectsController
 
             var projectStart = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(5));
             var projectDue = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(20));
-            var (_, projectId) = await CreateProjectAsync("Conflict Schedule", ownerToken, projectStart, projectDue);
+            var (_, projectId) = await _helpers.CreateProjectAsync("Conflict Schedule", ownerToken, projectStart, projectDue);
 
             var taskResponse = await _client.SendAsync(new HttpRequestMessage(HttpMethod.Post,
                 ProjectEndpoints.CreateTask(projectId))
