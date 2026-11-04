@@ -13,6 +13,8 @@ namespace TeamManager.IntegrationTest.Common
 {
     public sealed class AuthenticatedUser(TeamManagerApiFactory factory)
     {
+        public const string DefaultDisplayName = "User";
+
         private readonly HttpClient _client = factory.CreateClient();
         public sealed record RegisterResponse(Guid Id);
         public sealed record LoginResponse(string AccessToken, string RefreshToken);
@@ -22,7 +24,7 @@ namespace TeamManager.IntegrationTest.Common
             var email = $"{emailPrefix}-{Guid.NewGuid():N}@example.com";
 
             var response = await _client.PostAsJsonAsync(AuthenticationEndpoints.Register,
-                new { email, displayName = "User", password });
+                new { email, displayName = DefaultDisplayName, password });
 
             Assert.Equal(HttpStatusCode.Created, response.StatusCode);
             var result = await response.Content.ReadFromJsonAsync<RegisterResponse>();
@@ -33,7 +35,7 @@ namespace TeamManager.IntegrationTest.Common
         public async Task<(Guid Id, string Email)> RegisterUserWithEmailAsync(string email, string password = "P@ssword1234")
         {
             var response = await _client.PostAsJsonAsync(AuthenticationEndpoints.Register,
-                new { email, displayName = "User", password });
+                new { email, displayName = DefaultDisplayName, password });
 
             Assert.Equal(HttpStatusCode.Created, response.StatusCode);
             var result = await response.Content.ReadFromJsonAsync<RegisterResponse>();

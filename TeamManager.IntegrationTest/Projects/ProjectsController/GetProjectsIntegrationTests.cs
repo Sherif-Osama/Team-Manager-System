@@ -1,10 +1,7 @@
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
 using System.Net;
 using System.Net.Http.Json;
 using System.Text.Json;
 using TeamManager.Domain.Enums;
-using TeamManager.Infrastructure.Persistence;
 using TeamManager.IntegrationTest.Common;
 using TeamManager.IntegrationTest.Projects.Configuration;
 using TeamManager.IntegrationTest.Teams.Configuration;
@@ -14,17 +11,9 @@ namespace TeamManager.IntegrationTest.Projects.ProjectsController
     [Collection("Projects")]
     public sealed class GetProjectsIntegrationTests(ProjectsFixture factory)
     {
-        private const string RegisteredDisplayName = "User";
-
         private readonly ProjectTestHelpers _helpers = new(factory);
         private readonly TeamTestHelpers _teamHelpers = new(factory);
         private readonly AuthenticatedUser _authenticatedUser = new(factory);
-
-        private sealed record ProjectListItemDto(Guid Id, Guid TeamId, string ProjectName, string TeamName, string? Description,
-            ProjectStatus Status, DateOnly? StartDate, DateOnly? DueDate, Guid OwnerUserId, string OwnerName,
-            Guid CreatedBy, string CreatorName, int MembersCount, int TasksCount, DateTime CreatedAtUtc, DateTime? UpdatedAtUtc);
-
-        private sealed record GetProjectsResponseDto(IReadOnlyList<ProjectListItemDto> Projects, int TotalCount, int Page, int PageSize);
 
         private async Task<HttpResponseMessage> GetProjectsAsync(string? accessToken, string query = "")
             => await _helpers.RequestAsync(HttpMethod.Get, $"{ProjectEndpoints.Projects}{query}", accessToken);
@@ -234,18 +223,8 @@ namespace TeamManager.IntegrationTest.Projects.ProjectsController
             var droppedTaskId = await _helpers.CreateTaskAsync(projectId, "Dropped Task", ownerToken);
             await _helpers.DeleteTaskAsync(droppedTaskId, ownerToken);
 
-            using (var scope = factory.Services.CreateScope())
-            {
-                var db = scope.ServiceProvider.GetRequiredService<TeamManagerDbContext>();
-                var project = await db.Projects.SingleAsync(p => p.Id == projectId);
-
-                project.AddMember(memberId, ProjectRole.Member);
-                await db.SaveChangesAsync(CancellationToken.None);
-
-                var member = project.Members.Single(m => m.UserId == memberId);
-                project.RemoveMember(member.Id, ownerId);
-                await db.SaveChangesAsync(CancellationToken.None);
-            }
+            await _helpers.AddProjectMemberAsync(projectId, memberId, ProjectRole.Member);
+            await _helpers.RemoveProjectMemberAsync(projectId, memberId, ownerId);
 
             var result = await GetProjectsResultAsync(adminToken, $"?search={marker}");
 
@@ -260,8 +239,8 @@ namespace TeamManager.IntegrationTest.Projects.ProjectsController
             Assert.Equal(dueDate, item.DueDate);
             Assert.Equal(ownerId, item.OwnerUserId);
             Assert.Equal(ownerId, item.CreatedBy);
-            Assert.Equal(RegisteredDisplayName, item.OwnerName);
-            Assert.Equal(RegisteredDisplayName, item.CreatorName);
+            Assert.Equal(AuthenticatedUser.DefaultDisplayName, item.OwnerName);
+            Assert.Equal(AuthenticatedUser.DefaultDisplayName, item.CreatorName);
             Assert.Equal(1, item.MembersCount);
             Assert.Equal(1, item.TasksCount);
         }

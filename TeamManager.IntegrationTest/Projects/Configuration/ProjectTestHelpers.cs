@@ -1,7 +1,10 @@
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using TeamManager.Domain.Enums;
+using TeamManager.Infrastructure.Persistence;
 using TeamManager.IntegrationTest.Infrastructure;
 using TeamManager.IntegrationTest.Teams.Configuration;
 
@@ -29,13 +32,37 @@ namespace TeamManager.IntegrationTest.Projects.Configuration
             => await RequestAsync(HttpMethod.Post, ProjectEndpoints.CreateProject(teamId), accessToken, body);
 
         public async Task<(Guid TeamId, Guid ProjectId)> CreateProjectAsync(string name, string ownerToken,
-            DateOnly? startDate = null, DateOnly? dueDate = null, string? description = null)
+            DateOnly? startDate = null, DateOnly? dueDate = null, string? description = null, Guid? teamId = null)
         {
-            var teamId = await _teamHelpers.CreateTeamAsync($"Team {Guid.NewGuid():N}", null, ownerToken);
-            var response = await CreateProjectRequestAsync(teamId, new { name, description, startDate, dueDate }, ownerToken);
+            var resolvedTeamId = teamId ?? await _teamHelpers.CreateTeamAsync($"Team {Guid.NewGuid():N}", null, ownerToken);
+            var response = await CreateProjectRequestAsync(resolvedTeamId, new { name, description, startDate, dueDate }, ownerToken);
 
             Assert.Equal(HttpStatusCode.Created, response.StatusCode);
-            return (teamId, await response.Content.ReadFromJsonAsync<Guid>());
+            return (resolvedTeamId, await response.Content.ReadFromJsonAsync<Guid>());
+        }
+
+        public async Task AddProjectMemberAsync(Guid projectId, Guid userId, ProjectRole role)
+        {
+            using var scope = factory.Services.CreateScope();
+            var db = scope.ServiceProvider.GetRequiredService<TeamManagerDbContext>();
+
+            var project = await db.Projects.Include(p => p.Members).SingleAsync(p => p.Id == projectId);
+            project.AddMember(userId, role);
+
+            await db.SaveChangesAsync(CancellationToken.None);
+        }
+
+        public async Task RemoveProjectMemberAsync(Guid projectId, Guid userId, Guid removedBy)
+        {
+            using var scope = factory.Services.CreateScope();
+            var db = scope.ServiceProvider.GetRequiredService<TeamManagerDbContext>();
+
+            var project = await db.Projects.Include(p => p.Members).SingleAsync(p => p.Id == projectId);
+            var member = project.Members.Single(m => m.UserId == userId && m.Status == ProjectMemberStatus.Active);
+
+            project.RemoveMember(member.Id, removedBy);
+
+            await db.SaveChangesAsync(CancellationToken.None);
         }
 
         public async Task<HttpResponseMessage> ChangeProjectStatusAsync(Guid projectId, ProjectStatus status, string accessToken)
