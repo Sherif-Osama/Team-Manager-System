@@ -98,17 +98,6 @@ namespace TeamManager.Infrastructure.Persistence.Repositories
             p.DeletedAtUtc == null && p.Status != ProjectStatus.Completed, cancellationToken);
         }
 
-        public async Task<ProjectAuthorizationInfo?> GetAuthorizationInfoAsync(Guid projectId, Guid userId, ProjectRole[] requiredRoles,
-            CancellationToken cancellationToken)
-        {
-            return await context.Projects.AsNoTracking().Where(p => p.Id == projectId && p.DeletedAtUtc == null)
-                .Select(p => new ProjectAuthorizationInfo(true, p.Members.Any(m => m.UserId == userId &&
-                m.Status == ProjectMemberStatus.Active && m.User.IsActive
-                && requiredRoles.Contains(m.ProjectRole)), p.Team.Members.Any(tm => tm.UserId == userId &&
-                tm.Status == TeamMemberStatus.Active && tm.Team.DeletedAtUtc == null && tm.User.IsActive &&
-                tm.TeamRole == TeamRole.Owner))).FirstOrDefaultAsync(cancellationToken);
-        }
-
         public Task<ProjectMembershipInfo?> GetMembershipInfoAsync(Guid projectId, Guid userId,
             CancellationToken cancellationToken)
         {

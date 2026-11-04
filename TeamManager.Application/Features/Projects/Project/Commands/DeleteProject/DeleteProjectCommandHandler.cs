@@ -1,13 +1,11 @@
 using MediatR;
-using TeamManager.Application.Abstractions.Caching;
 using TeamManager.Application.Abstractions.Persistence;
-using TeamManager.Application.Common.Caching;
 using TeamManager.Application.Common.Exceptions.ProjectExceptions;
 
 namespace TeamManager.Application.Features.Projects.Project.Commands.DeleteProject
 {
     public sealed class DeleteProjectCommandHandler(IProjectRepository projectRepository, ITaskRepository taskRepository,
-        IUnitOfWork unitOfWork, ICacheService cacheService) : IRequestHandler<DeleteProjectCommand>
+        IUnitOfWork unitOfWork) : IRequestHandler<DeleteProjectCommand>
     {
         public async Task Handle(DeleteProjectCommand request, CancellationToken cancellationToken)
         {
@@ -25,9 +23,6 @@ namespace TeamManager.Application.Features.Projects.Project.Commands.DeleteProje
 
                 project.SoftDelete();
             }, cancellationToken);
-
-            // SoftDelete raises no domain events, so invalidate its authorization cache after commit.
-            await cacheService.RemoveByTagAsync(CacheTags.ProjectAuthorization(request.ProjectId), cancellationToken);
         }
     }
 }

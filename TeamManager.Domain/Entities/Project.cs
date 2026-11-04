@@ -186,6 +186,7 @@ namespace TeamManager.Domain.Entities
         {
             EnsureNotDeleted("Project is already deleted");
             DeletedAtUtc = DateTime.UtcNow;
+            AddDomainEvent(new ProjectDeletedDomainEvent(Id));
         }
 
         public ProjectMember AddMember(Guid userId, ProjectRole role, Guid? addedBy = null)

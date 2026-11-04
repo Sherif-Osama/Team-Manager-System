@@ -18,7 +18,7 @@ public sealed class DeleteProjectCommandHandlerTests
 
     public DeleteProjectCommandHandlerTests()
     {
-        _sut = new(_projectRepository.Object, _taskRepository.Object, _unitOfWork.Object, _cacheService.Object);
+        _sut = new(_projectRepository.Object, _taskRepository.Object, _unitOfWork.Object);
         _unitOfWork.Setup(x => x.ExecuteInSerializableTransactionAsync(
                 It.IsAny<Func<CancellationToken, Task>>(), It.IsAny<CancellationToken>()))
             .Returns<Func<CancellationToken, Task>, CancellationToken>((action, ct) => action(ct));
@@ -71,7 +71,5 @@ public sealed class DeleteProjectCommandHandlerTests
         Assert.NotNull(project.DeletedAtUtc);
         _unitOfWork.Verify(x => x.ExecuteInSerializableTransactionAsync(
             It.IsAny<Func<CancellationToken, Task>>(), It.IsAny<CancellationToken>()), Times.Once);
-        _cacheService.Verify(x => x.RemoveByTagAsync($"teammanager:auth:project:{_projectId:N}",
-            It.IsAny<CancellationToken>()), Times.Once);
     }
 }
