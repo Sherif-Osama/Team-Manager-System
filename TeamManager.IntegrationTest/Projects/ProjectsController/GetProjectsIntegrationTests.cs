@@ -1,6 +1,5 @@
 using System.Net;
 using System.Net.Http.Json;
-using System.Text.Json;
 using TeamManager.Domain.Enums;
 using TeamManager.IntegrationTest.Common;
 using TeamManager.IntegrationTest.Projects.Configuration;
@@ -25,16 +24,6 @@ namespace TeamManager.IntegrationTest.Projects.ProjectsController
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
             return (await response.Content.ReadFromJsonAsync<GetProjectsResponseDto>())!;
-        }
-
-        private static async Task AssertFieldErrorAsync(HttpResponseMessage response, string fieldName)
-        {
-            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
-
-            var body = await response.Content.ReadFromJsonAsync<JsonElement>();
-
-            Assert.True(body.TryGetProperty("errors", out var errors));
-            Assert.Contains(errors.EnumerateObject(), property => property.Name.EndsWith(fieldName, StringComparison.OrdinalIgnoreCase));
         }
 
         [Fact]
@@ -251,10 +240,10 @@ namespace TeamManager.IntegrationTest.Projects.ProjectsController
             var (_, adminToken) = await _authenticatedUser.CreateAdminAsync("getprojects-paging-admin");
 
             var zeroPage = await GetProjectsAsync(adminToken, "?page=0");
-            await AssertFieldErrorAsync(zeroPage, "Page");
+            await ValidationAssertions.AssertFieldErrorAsync(zeroPage, "Page");
 
             var oversizedPage = await GetProjectsAsync(adminToken, "?pageSize=101");
-            await AssertFieldErrorAsync(oversizedPage, "PageSize");
+            await ValidationAssertions.AssertFieldErrorAsync(oversizedPage, "PageSize");
         }
 
         [Fact]
@@ -264,7 +253,7 @@ namespace TeamManager.IntegrationTest.Projects.ProjectsController
 
             var response = await GetProjectsAsync(adminToken, $"?status={(int)ProjectStatus.Archived + 1}");
 
-            await AssertFieldErrorAsync(response, "Status");
+            await ValidationAssertions.AssertFieldErrorAsync(response, "Status");
         }
 
         [Fact]
@@ -274,7 +263,7 @@ namespace TeamManager.IntegrationTest.Projects.ProjectsController
 
             var response = await GetProjectsAsync(adminToken, $"?search={new string('x', 151)}");
 
-            await AssertFieldErrorAsync(response, "Search");
+            await ValidationAssertions.AssertFieldErrorAsync(response, "Search");
         }
     }
 }

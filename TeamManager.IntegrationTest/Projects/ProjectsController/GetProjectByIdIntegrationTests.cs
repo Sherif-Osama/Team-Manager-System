@@ -1,6 +1,5 @@
 using System.Net;
 using System.Net.Http.Json;
-using System.Text.Json;
 using TeamManager.Domain.Enums;
 using TeamManager.IntegrationTest.Common;
 using TeamManager.IntegrationTest.Projects.Configuration;
@@ -187,11 +186,7 @@ namespace TeamManager.IntegrationTest.Projects.ProjectsController
 
             var response = await GetProjectAsync(Guid.Empty, ownerToken);
 
-            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
-
-            var body = await response.Content.ReadFromJsonAsync<JsonElement>();
-            Assert.True(body.TryGetProperty("errors", out var errors));
-            Assert.True(errors.TryGetProperty("ProjectId", out _));
+            await ValidationAssertions.AssertFieldErrorAsync(response, "ProjectId");
         }
 
         [Fact]
