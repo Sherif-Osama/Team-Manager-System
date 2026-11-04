@@ -35,11 +35,20 @@ namespace TeamManager.IntegrationTest.Infrastructure
                         ["Jwt:Key"] = "test-only-signing-key-at-least-32-characters!",
                         ["Jwt:Issuer"] = "TeamManager.Tests",
                         ["Jwt:Audience"] = "TeamManager.Tests",
-                        ["RateLimiting:Global:PerIpLimit"] = "10000",
-                        ["RateLimiting:Authentication:Register:PermitLimit"] = "1000",
-                        ["RateLimiting:Authentication:Login:PermitLimit"] = "1000",
-                        ["RateLimiting:Authentication:ForgotPassword:PermitLimit"] = "1000",
-                        ["RateLimiting:Authentication:ResetPassword:PermitLimit"] = "1000"
+                        ["RateLimiting:Global:PerIpLimit"] = "100000",
+                        ["RateLimiting:Global:PerIpWindowSeconds"] = "6",
+                        ["RateLimiting:Global:PerUserLimit"] = "100000",
+                        ["RateLimiting:Global:PerUserWindowSeconds"] = "6",
+                        ["RateLimiting:Authentication:Register:PermitLimit"] = "100000",
+                        ["RateLimiting:Authentication:Register:WindowSeconds"] = "6",
+                        ["RateLimiting:Authentication:Login:PermitLimit"] = "100000",
+                        ["RateLimiting:Authentication:Login:WindowSeconds"] = "6",
+                        ["RateLimiting:Authentication:Refresh:PermitLimit"] = "100000",
+                        ["RateLimiting:Authentication:Refresh:WindowSeconds"] = "6",
+                        ["RateLimiting:Authentication:ForgotPassword:PermitLimit"] = "100000",
+                        ["RateLimiting:Authentication:ForgotPassword:WindowSeconds"] = "6",
+                        ["RateLimiting:Authentication:ResetPassword:PermitLimit"] = "100000",
+                        ["RateLimiting:Authentication:ResetPassword:WindowSeconds"] = "6"
                     });
             });
 
