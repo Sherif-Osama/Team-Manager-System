@@ -208,12 +208,14 @@ namespace TeamManager.IntegrationTest.Projects.ProjectsController
 
             var projectId = await create.Content.ReadFromJsonAsync<Guid>();
 
+            Assert.True((await _teamHelpers.AddMemberAsync(teamId, memberId, TeamRole.Member, ownerToken)).IsSuccessStatusCode);
+            var membershipId = await _helpers.AddProjectMemberAsync(projectId, memberId, ProjectRole.Member, ownerToken);
+
             await _helpers.CreateTaskAsync(projectId, "Kept Task", ownerToken);
             var droppedTaskId = await _helpers.CreateTaskAsync(projectId, "Dropped Task", ownerToken);
             await _helpers.DeleteTaskAsync(droppedTaskId, ownerToken);
 
-            await _helpers.AddProjectMemberAsync(projectId, memberId, ProjectRole.Member);
-            await _helpers.RemoveProjectMemberAsync(projectId, memberId, ownerId);
+            await _helpers.RemoveProjectMemberAsync(projectId, membershipId, ownerToken);
 
             var result = await GetProjectsResultAsync(adminToken, $"?search={marker}");
 

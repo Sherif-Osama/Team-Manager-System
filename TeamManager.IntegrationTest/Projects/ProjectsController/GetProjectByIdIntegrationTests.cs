@@ -1,5 +1,4 @@
 using System.Net;
-using System.Net.Http.Json;
 using TeamManager.Domain.Enums;
 using TeamManager.IntegrationTest.Common;
 using TeamManager.IntegrationTest.Projects.Configuration;
@@ -13,18 +12,6 @@ namespace TeamManager.IntegrationTest.Projects.ProjectsController
         private readonly ProjectTestHelpers _helpers = new(factory);
         private readonly TeamTestHelpers _teamHelpers = new(factory);
         private readonly AuthenticatedUser _authenticatedUser = new(factory);
-
-        private async Task<HttpResponseMessage> GetProjectAsync(Guid projectId, string? accessToken = null)
-            => await _helpers.RequestAsync(HttpMethod.Get, ProjectEndpoints.Project(projectId), accessToken);
-
-        private async Task<ProjectResponseDto> GetProjectResultAsync(Guid projectId, string accessToken)
-        {
-            var response = await GetProjectAsync(projectId, accessToken);
-
-            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-
-            return (await response.Content.ReadFromJsonAsync<ProjectResponseDto>())!;
-        }
 
         [Fact]
         public async Task GetProjectById_AsOwner_ReturnsProjectWithJoinedNames()
@@ -42,7 +29,7 @@ namespace TeamManager.IntegrationTest.Projects.ProjectsController
             var (_, projectId) = await _helpers.CreateProjectAsync($"{marker} Detail", ownerToken, startDate, dueDate,
                 "Project detail", teamId);
 
-            var project = await GetProjectResultAsync(projectId, ownerToken);
+            var project = await _helpers.GetProjectResultAsync(projectId, ownerToken);
 
             Assert.Equal(projectId, project.Id);
             Assert.Equal(teamId, project.TeamId);
@@ -64,13 +51,14 @@ namespace TeamManager.IntegrationTest.Projects.ProjectsController
         [Fact]
         public async Task GetProjectById_ExcludesRemovedMembersAndCancelledOrDeletedTasksFromCounts()
         {
-            var (ownerId, _, ownerToken) = await _authenticatedUser.CreateConfirmedUserAsync("getbyid-counts-owner");
+            var (_, _, ownerToken) = await _authenticatedUser.CreateConfirmedUserAsync("getbyid-counts-owner");
             var (memberId, _, _) = await _authenticatedUser.CreateConfirmedUserAsync("getbyid-counts-member");
 
             var marker = $"p{Guid.NewGuid():N}";
-            var (_, projectId) = await _helpers.CreateProjectAsync($"{marker} Counts", ownerToken);
+            var (teamId, projectId) = await _helpers.CreateProjectAsync($"{marker} Counts", ownerToken);
 
-            await _helpers.AddProjectMemberAsync(projectId, memberId, ProjectRole.Member);
+            Assert.True((await _teamHelpers.AddMemberAsync(teamId, memberId, TeamRole.Member, ownerToken)).IsSuccessStatusCode);
+            var membershipId = await _helpers.AddProjectMemberAsync(projectId, memberId, ProjectRole.Member, ownerToken);
 
             await _helpers.CreateTaskAsync(projectId, "Open Task", ownerToken);
             var cancelledTaskId = await _helpers.CreateTaskAsync(projectId, "Cancelled Task", ownerToken);
@@ -80,9 +68,9 @@ namespace TeamManager.IntegrationTest.Projects.ProjectsController
                 (await _helpers.ChangeTaskStatusAsync(cancelledTaskId, TaskItemStatus.Cancelled, ownerToken)).StatusCode);
             await _helpers.DeleteTaskAsync(deletedTaskId, ownerToken);
 
-            await _helpers.RemoveProjectMemberAsync(projectId, memberId, ownerId);
+            await _helpers.RemoveProjectMemberAsync(projectId, membershipId, ownerToken);
 
-            var project = await GetProjectResultAsync(projectId, ownerToken);
+            var project = await _helpers.GetProjectResultAsync(projectId, ownerToken);
 
             Assert.Equal(1, project.MembersCount);
             Assert.Equal(1, project.TasksCount);
@@ -95,11 +83,12 @@ namespace TeamManager.IntegrationTest.Projects.ProjectsController
             var (memberId, _, memberToken) = await _authenticatedUser.CreateConfirmedUserAsync("getbyid-member");
 
             var marker = $"p{Guid.NewGuid():N}";
-            var (_, projectId) = await _helpers.CreateProjectAsync($"{marker} Shared", ownerToken);
+            var (teamId, projectId) = await _helpers.CreateProjectAsync($"{marker} Shared", ownerToken);
 
-            await _helpers.AddProjectMemberAsync(projectId, memberId, ProjectRole.Member);
+            Assert.True((await _teamHelpers.AddMemberAsync(teamId, memberId, TeamRole.Member, ownerToken)).IsSuccessStatusCode);
+            await _helpers.AddProjectMemberAsync(projectId, memberId, ProjectRole.Member, ownerToken);
 
-            var project = await GetProjectResultAsync(projectId, memberToken);
+            var project = await _helpers.GetProjectResultAsync(projectId, memberToken);
 
             Assert.Equal(projectId, project.Id);
             Assert.Equal(2, project.MembersCount);
@@ -122,7 +111,7 @@ namespace TeamManager.IntegrationTest.Projects.ProjectsController
 
             Assert.Equal(HttpStatusCode.NoContent, transfer.StatusCode);
 
-            var project = await GetProjectResultAsync(projectId, teamOwnerToken);
+            var project = await _helpers.GetProjectResultAsync(projectId, teamOwnerToken);
 
             Assert.Equal(projectId, project.Id);
         }
@@ -140,7 +129,7 @@ namespace TeamManager.IntegrationTest.Projects.ProjectsController
 
             var (_, projectId) = await _helpers.CreateProjectAsync($"{marker} Private", ownerToken, teamId: teamId);
 
-            var response = await GetProjectAsync(projectId, memberToken);
+            var response = await _helpers.GetProjectAsync(projectId, memberToken);
 
             Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
         }
@@ -153,7 +142,7 @@ namespace TeamManager.IntegrationTest.Projects.ProjectsController
 
             var (_, projectId) = await _helpers.CreateProjectAsync($"Outsider {Guid.NewGuid():N}", ownerToken);
 
-            var response = await GetProjectAsync(projectId, outsiderToken);
+            var response = await _helpers.GetProjectAsync(projectId, outsiderToken);
 
             Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
         }
@@ -164,7 +153,7 @@ namespace TeamManager.IntegrationTest.Projects.ProjectsController
             var (_, _, ownerToken) = await _authenticatedUser.CreateConfirmedUserAsync("getbyid-notoken");
             var (_, projectId) = await _helpers.CreateProjectAsync($"No Token {Guid.NewGuid():N}", ownerToken);
 
-            var response = await GetProjectAsync(projectId);
+            var response = await _helpers.GetProjectAsync(projectId);
 
             Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
         }
@@ -174,7 +163,7 @@ namespace TeamManager.IntegrationTest.Projects.ProjectsController
         {
             var (_, _, ownerToken) = await _authenticatedUser.CreateConfirmedUserAsync("getbyid-unknown");
 
-            var response = await GetProjectAsync(Guid.NewGuid(), ownerToken);
+            var response = await _helpers.GetProjectAsync(Guid.NewGuid(), ownerToken);
 
             Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
         }
@@ -184,7 +173,7 @@ namespace TeamManager.IntegrationTest.Projects.ProjectsController
         {
             var (_, _, ownerToken) = await _authenticatedUser.CreateConfirmedUserAsync("getbyid-empty");
 
-            var response = await GetProjectAsync(Guid.Empty, ownerToken);
+            var response = await _helpers.GetProjectAsync(Guid.Empty, ownerToken);
 
             await ValidationAssertions.AssertFieldErrorAsync(response, "ProjectId");
         }
@@ -192,20 +181,21 @@ namespace TeamManager.IntegrationTest.Projects.ProjectsController
         [Fact]
         public async Task GetProjectById_AfterMembershipIsRevoked_DropsCachedAccess()
         {
-            var (ownerId, _, ownerToken) = await _authenticatedUser.CreateConfirmedUserAsync("getbyid-revoke-owner");
+            var (_, _, ownerToken) = await _authenticatedUser.CreateConfirmedUserAsync("getbyid-revoke-owner");
             var (memberId, _, memberToken) = await _authenticatedUser.CreateConfirmedUserAsync("getbyid-revoke-member");
 
             var marker = $"p{Guid.NewGuid():N}";
-            var (_, projectId) = await _helpers.CreateProjectAsync($"{marker} Revoked", ownerToken);
+            var (teamId, projectId) = await _helpers.CreateProjectAsync($"{marker} Revoked", ownerToken);
 
-            await _helpers.AddProjectMemberAsync(projectId, memberId, ProjectRole.Member);
+            Assert.True((await _teamHelpers.AddMemberAsync(teamId, memberId, TeamRole.Member, ownerToken)).IsSuccessStatusCode);
+            var membershipId = await _helpers.AddProjectMemberAsync(projectId, memberId, ProjectRole.Member, ownerToken);
 
             // The first read caches the membership, so the 403 below proves the removal evicted it.
-            Assert.Equal(HttpStatusCode.OK, (await GetProjectAsync(projectId, memberToken)).StatusCode);
+            Assert.Equal(HttpStatusCode.OK, (await _helpers.GetProjectAsync(projectId, memberToken)).StatusCode);
 
-            await _helpers.RemoveProjectMemberAsync(projectId, memberId, ownerId);
+            await _helpers.RemoveProjectMemberAsync(projectId, membershipId, ownerToken);
 
-            var response = await GetProjectAsync(projectId, memberToken);
+            var response = await _helpers.GetProjectAsync(projectId, memberToken);
 
             Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
         }

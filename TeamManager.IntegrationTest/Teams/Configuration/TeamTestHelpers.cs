@@ -10,6 +10,7 @@ namespace TeamManager.IntegrationTest.Teams.Configuration
     {
         private readonly HttpClient _client = factory.CreateClient();
         private sealed record CreateTeamResponse(Guid Id);
+        private sealed record AddedMemberResponse(long Id);
 
         public async Task<Guid> CreateTeamAsync(string name, string? description, string accessToken)
         {
@@ -67,6 +68,14 @@ namespace TeamManager.IntegrationTest.Teams.Configuration
                 request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
 
             return await _client.SendAsync(request);
+        }
+
+        public async Task<long> AddMemberReturningIdAsync(Guid teamId, Guid userId, TeamRole role, string accessToken)
+        {
+            var response = await AddMemberAsync(teamId, userId, role, accessToken);
+
+            Assert.Equal(HttpStatusCode.Created, response.StatusCode);
+            return (await response.Content.ReadFromJsonAsync<AddedMemberResponse>())!.Id;
         }
 
         public async Task<HttpResponseMessage> RemoveMemberAsync(Guid teamId, long memberId, string? accessToken = null)

@@ -173,15 +173,16 @@ namespace TeamManager.IntegrationTest.Projects.ProjectsController
         [Fact]
         public async Task GetProjectByName_CountsExcludeRemovedMembersAndDeletedTasksOnly()
         {
-            var (ownerId, _, ownerToken) = await _authenticatedUser.CreateConfirmedUserAsync("getbyname-counts-owner");
+            var (_, _, ownerToken) = await _authenticatedUser.CreateConfirmedUserAsync("getbyname-counts-owner");
             var (memberId, _, _) = await _authenticatedUser.CreateConfirmedUserAsync("getbyname-counts-member");
             var (_, adminToken) = await _authenticatedUser.CreateAdminAsync("getbyname-counts-admin");
 
             var marker = $"p{Guid.NewGuid():N}";
             var projectName = $"{marker} Counts";
-            var (_, projectId) = await _helpers.CreateProjectAsync(projectName, ownerToken);
+            var (teamId, projectId) = await _helpers.CreateProjectAsync(projectName, ownerToken);
 
-            await _helpers.AddProjectMemberAsync(projectId, memberId, ProjectRole.Member);
+            Assert.True((await _teamHelpers.AddMemberAsync(teamId, memberId, TeamRole.Member, ownerToken)).IsSuccessStatusCode);
+            var membershipId = await _helpers.AddProjectMemberAsync(projectId, memberId, ProjectRole.Member, ownerToken);
 
             await _helpers.CreateTaskAsync(projectId, "Open Task", ownerToken);
             var cancelledTaskId = await _helpers.CreateTaskAsync(projectId, "Cancelled Task", ownerToken);
@@ -191,7 +192,7 @@ namespace TeamManager.IntegrationTest.Projects.ProjectsController
                 (await _helpers.ChangeTaskStatusAsync(cancelledTaskId, TaskItemStatus.Cancelled, ownerToken)).StatusCode);
             await _helpers.DeleteTaskAsync(deletedTaskId, ownerToken);
 
-            await _helpers.RemoveProjectMemberAsync(projectId, memberId, ownerId);
+            await _helpers.RemoveProjectMemberAsync(projectId, membershipId, ownerToken);
 
             var project = await GetProjectByNameResultAsync(projectName, adminToken);
 
@@ -208,8 +209,6 @@ namespace TeamManager.IntegrationTest.Projects.ProjectsController
             var marker = $"p{Guid.NewGuid():N}";
             var sharedName = $"{marker} Duplicated";
 
-            // The unique index is (TeamId, Name), so the same name is legal in two teams and the handler
-            // filters by name alone, which leaves the winner undefined by SQL ordering.
             var (_, firstId) = await _helpers.CreateProjectAsync(sharedName, ownerToken);
             var (_, secondId) = await _helpers.CreateProjectAsync(sharedName, ownerToken);
 
