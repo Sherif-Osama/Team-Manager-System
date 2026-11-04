@@ -27,7 +27,7 @@ namespace TeamManager.IntegrationTest.Projects.ProjectsController
             var (ownerId, _, ownerToken) = await _authenticatedUser.CreateConfirmedUserAsync("proj-owner");
             var teamId = await _teamHelpers.CreateTeamAsync($"Team {Guid.NewGuid():N}", null, ownerToken);
 
-            var response = await _helpers.CreateProjectAsync(teamId, ProjectBody("My Project", "A description"), ownerToken);
+            var response = await _helpers.CreateProjectRequestAsync(teamId, ProjectBody("My Project", "A description"), ownerToken);
 
             Assert.Equal(HttpStatusCode.Created, response.StatusCode);
             var projectId = await response.Content.ReadFromJsonAsync<Guid>();
@@ -66,7 +66,7 @@ namespace TeamManager.IntegrationTest.Projects.ProjectsController
                 await db.SaveChangesAsync(CancellationToken.None);
             }
 
-            var response = await _helpers.CreateProjectAsync(teamId, ProjectBody("Admin Project"), adminToken);
+            var response = await _helpers.CreateProjectRequestAsync(teamId, ProjectBody("Admin Project"), adminToken);
 
             Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
         }
@@ -87,7 +87,7 @@ namespace TeamManager.IntegrationTest.Projects.ProjectsController
                 await db.SaveChangesAsync(CancellationToken.None);
             }
 
-            var response = await _helpers.CreateProjectAsync(teamId, ProjectBody("Member Project"), memberToken);
+            var response = await _helpers.CreateProjectRequestAsync(teamId, ProjectBody("Member Project"), memberToken);
 
             Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
         }
@@ -98,7 +98,7 @@ namespace TeamManager.IntegrationTest.Projects.ProjectsController
             var (_, _, ownerToken) = await _authenticatedUser.CreateConfirmedUserAsync("proj-notoken");
             var teamId = await _teamHelpers.CreateTeamAsync($"Team {Guid.NewGuid():N}", null, ownerToken);
 
-            var response = await _helpers.CreateProjectAsync(teamId, ProjectBody("No Token Project"));
+            var response = await _helpers.CreateProjectRequestAsync(teamId, ProjectBody("No Token Project"));
 
             Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
         }
@@ -109,11 +109,11 @@ namespace TeamManager.IntegrationTest.Projects.ProjectsController
             var (_, _, ownerToken) = await _authenticatedUser.CreateConfirmedUserAsync("proj-dup");
             var teamId = await _teamHelpers.CreateTeamAsync($"Team {Guid.NewGuid():N}", null, ownerToken);
 
-            var first = await _helpers.CreateProjectAsync(teamId, ProjectBody("Duplicate Project"), ownerToken);
+            var first = await _helpers.CreateProjectRequestAsync(teamId, ProjectBody("Duplicate Project"), ownerToken);
 
             Assert.Equal(HttpStatusCode.Created, first.StatusCode);
 
-            var second = await _helpers.CreateProjectAsync(teamId, ProjectBody("duplicate project"), ownerToken);
+            var second = await _helpers.CreateProjectRequestAsync(teamId, ProjectBody("duplicate project"), ownerToken);
 
             Assert.Equal(HttpStatusCode.Conflict, second.StatusCode);
 
@@ -131,11 +131,11 @@ namespace TeamManager.IntegrationTest.Projects.ProjectsController
             var team1 = await _teamHelpers.CreateTeamAsync("Team 1", null, ownerToken);
             var team2 = await _teamHelpers.CreateTeamAsync("Team 2", null, ownerToken);
 
-            var first = await _helpers.CreateProjectAsync(team1, ProjectBody("Shared Name"), ownerToken);
+            var first = await _helpers.CreateProjectRequestAsync(team1, ProjectBody("Shared Name"), ownerToken);
 
             Assert.Equal(HttpStatusCode.Created, first.StatusCode);
 
-            var second = await _helpers.CreateProjectAsync(team2, ProjectBody("Shared Name"), ownerToken);
+            var second = await _helpers.CreateProjectRequestAsync(team2, ProjectBody("Shared Name"), ownerToken);
 
             Assert.Equal(HttpStatusCode.Created, second.StatusCode);
         }
@@ -149,7 +149,7 @@ namespace TeamManager.IntegrationTest.Projects.ProjectsController
             var startDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(1));
             var dueDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(5));
 
-            var response = await _helpers.CreateProjectAsync(teamId,
+            var response = await _helpers.CreateProjectRequestAsync(teamId,
                 ProjectBody("Scheduled Project", null, startDate, dueDate), ownerToken);
 
             Assert.Equal(HttpStatusCode.Created, response.StatusCode);
@@ -170,7 +170,7 @@ namespace TeamManager.IntegrationTest.Projects.ProjectsController
             var (_, _, ownerToken) = await _authenticatedUser.CreateConfirmedUserAsync("proj-invalid");
             var teamId = await _teamHelpers.CreateTeamAsync($"Team {Guid.NewGuid():N}", null, ownerToken);
 
-            var missingName = await _helpers.CreateProjectAsync(teamId, ProjectBody(""), ownerToken);
+            var missingName = await _helpers.CreateProjectRequestAsync(teamId, ProjectBody(""), ownerToken);
 
             Assert.Equal(HttpStatusCode.BadRequest, missingName.StatusCode);
 
@@ -179,7 +179,7 @@ namespace TeamManager.IntegrationTest.Projects.ProjectsController
             Assert.True(nameErrors.TryGetProperty("Name", out _));
 
             var pastDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(-1));
-            var pastStart = await _helpers.CreateProjectAsync(teamId,
+            var pastStart = await _helpers.CreateProjectRequestAsync(teamId,
                 ProjectBody("Past Project", null, pastDate), ownerToken);
 
             Assert.Equal(HttpStatusCode.BadRequest, pastStart.StatusCode);
@@ -190,7 +190,7 @@ namespace TeamManager.IntegrationTest.Projects.ProjectsController
 
             var start = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(10));
             var due = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(5));
-            var inverted = await _helpers.CreateProjectAsync(teamId,
+            var inverted = await _helpers.CreateProjectRequestAsync(teamId,
                 ProjectBody("Inverted Project", null, start, due), ownerToken);
 
             Assert.Equal(HttpStatusCode.BadRequest, inverted.StatusCode);
@@ -207,7 +207,7 @@ namespace TeamManager.IntegrationTest.Projects.ProjectsController
             var teamId = await _teamHelpers.CreateTeamAsync($"Team {Guid.NewGuid():N}", null, ownerToken);
 
             var responses = await Task.WhenAll(Enumerable.Range(0, 2).Select(_ =>
-                _helpers.CreateProjectAsync(teamId, ProjectBody("Racing Project"), ownerToken)));
+                _helpers.CreateProjectRequestAsync(teamId, ProjectBody("Racing Project"), ownerToken)));
 
             var statuses = responses.Select(r => r.StatusCode).OrderBy(code => code).ToArray();
 

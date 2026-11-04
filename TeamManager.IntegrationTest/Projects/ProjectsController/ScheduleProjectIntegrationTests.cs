@@ -24,7 +24,7 @@ namespace TeamManager.IntegrationTest.Projects.ProjectsController
             DateOnly? startDate = null, DateOnly? dueDate = null)
         {
             var teamId = await _teamHelpers.CreateTeamAsync($"Team {Guid.NewGuid():N}", null, ownerToken);
-            var response = await _helpers.CreateProjectAsync(teamId,
+            var response = await _helpers.CreateProjectRequestAsync(teamId,
                 new { name, description = (string?)null, startDate, dueDate }, ownerToken);
 
             Assert.Equal(HttpStatusCode.Created, response.StatusCode);
@@ -95,7 +95,7 @@ namespace TeamManager.IntegrationTest.Projects.ProjectsController
             var (memberId, _, memberToken) = await _authenticatedUser.CreateConfirmedUserAsync("sched-member");
 
             var teamId = await _teamHelpers.CreateTeamAsync($"Team {Guid.NewGuid():N}", null, ownerToken);
-            var create = await _helpers.CreateProjectAsync(teamId, new { name = "Member Schedule", description = (string?)null }, ownerToken);
+            var create = await _helpers.CreateProjectRequestAsync(teamId, new { name = "Member Schedule", description = (string?)null }, ownerToken);
             var projectId = await create.Content.ReadFromJsonAsync<Guid>();
 
             using (var scope = factory.Services.CreateScope())
@@ -117,7 +117,7 @@ namespace TeamManager.IntegrationTest.Projects.ProjectsController
         {
             var (_, _, ownerToken) = await _authenticatedUser.CreateConfirmedUserAsync("sched-owner");
             var (_, _, outsiderToken) = await _authenticatedUser.CreateConfirmedUserAsync("sched-outsider");
-            var (_, projectId) = await CreateProjectAsync("Outsider Schedule", ownerToken);
+            var (_, projectId) = await _helpers.CreateProjectAsync("Outsider Schedule", ownerToken);
 
             var response = await ScheduleAsync(projectId,
                 DateOnly.FromDateTime(DateTime.UtcNow.AddDays(1)), DateOnly.FromDateTime(DateTime.UtcNow.AddDays(5)), outsiderToken);
@@ -129,7 +129,7 @@ namespace TeamManager.IntegrationTest.Projects.ProjectsController
         public async Task ScheduleProject_WithoutAccessToken_Returns401()
         {
             var (_, _, ownerToken) = await _authenticatedUser.CreateConfirmedUserAsync("sched-notoken");
-            var (_, projectId) = await CreateProjectAsync("No Token Schedule", ownerToken);
+            var (_, projectId) = await _helpers.CreateProjectAsync("No Token Schedule", ownerToken);
 
             var response = await ScheduleAsync(projectId,
                 DateOnly.FromDateTime(DateTime.UtcNow.AddDays(1)), DateOnly.FromDateTime(DateTime.UtcNow.AddDays(5)));

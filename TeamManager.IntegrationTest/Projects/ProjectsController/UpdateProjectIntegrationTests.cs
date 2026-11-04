@@ -20,15 +20,6 @@ namespace TeamManager.IntegrationTest.Projects.ProjectsController
         private readonly TeamTestHelpers _teamHelpers = new(factory);
         private readonly AuthenticatedUser _authenticatedUser = new(factory);
 
-        private async Task<(Guid TeamId, Guid ProjectId)> CreateProjectAsync(string name, string ownerToken)
-        {
-            var teamId = await _teamHelpers.CreateTeamAsync($"Team {Guid.NewGuid():N}", null, ownerToken);
-            var response = await _helpers.CreateProjectAsync(teamId, new { name, description = (string?)null }, ownerToken);
-
-            Assert.Equal(HttpStatusCode.Created, response.StatusCode);
-            return (teamId, await response.Content.ReadFromJsonAsync<Guid>());
-        }
-
         private async Task<HttpResponseMessage> UpdateProjectAsync(Guid projectId, string name, string? description,
             string? accessToken = null)
         {
@@ -47,7 +38,7 @@ namespace TeamManager.IntegrationTest.Projects.ProjectsController
         public async Task UpdateProject_AsOwner_UpdatesNameAndDescription()
         {
             var (_, _, ownerToken) = await _authenticatedUser.CreateConfirmedUserAsync("upd-owner");
-            var (_, projectId) = await CreateProjectAsync("Original Project", ownerToken);
+            var (_, projectId) = await _helpers.CreateProjectAsync("Original Project", ownerToken);
 
             var response = await UpdateProjectAsync(projectId, "Updated Project", "Updated Description", ownerToken);
 
@@ -69,7 +60,7 @@ namespace TeamManager.IntegrationTest.Projects.ProjectsController
             var (memberId, _, memberToken) = await _authenticatedUser.CreateConfirmedUserAsync("upd-member");
 
             var teamId = await _teamHelpers.CreateTeamAsync($"Team {Guid.NewGuid():N}", null, ownerToken);
-            var create = await _helpers.CreateProjectAsync(teamId, new { name = "Member Project", description = (string?)null }, ownerToken);
+            var create = await _helpers.CreateProjectRequestAsync(teamId, new { name = "Member Project", description = (string?)null }, ownerToken);
             var projectId = await create.Content.ReadFromJsonAsync<Guid>();
 
             using (var scope = factory.Services.CreateScope())
@@ -90,7 +81,7 @@ namespace TeamManager.IntegrationTest.Projects.ProjectsController
         {
             var (_, _, ownerToken) = await _authenticatedUser.CreateConfirmedUserAsync("upd-owner");
             var (_, _, outsiderToken) = await _authenticatedUser.CreateConfirmedUserAsync("upd-outsider");
-            var (_, projectId) = await CreateProjectAsync("Hidden Project", ownerToken);
+            var (_, projectId) = await _helpers.CreateProjectAsync("Hidden Project", ownerToken);
 
             var response = await UpdateProjectAsync(projectId, "Stolen", null, outsiderToken);
 
@@ -101,7 +92,7 @@ namespace TeamManager.IntegrationTest.Projects.ProjectsController
         public async Task UpdateProject_WithoutAccessToken_Returns401()
         {
             var (_, _, ownerToken) = await _authenticatedUser.CreateConfirmedUserAsync("upd-notoken");
-            var (_, projectId) = await CreateProjectAsync("No Token Project", ownerToken);
+            var (_, projectId) = await _helpers.CreateProjectAsync("No Token Project", ownerToken);
 
             var response = await UpdateProjectAsync(projectId, "No Token", null);
 
@@ -125,8 +116,8 @@ namespace TeamManager.IntegrationTest.Projects.ProjectsController
 
             var teamId = await _teamHelpers.CreateTeamAsync($"Team {Guid.NewGuid():N}", null, ownerToken);
 
-            var first = await _helpers.CreateProjectAsync(teamId, new { name = "Existing Project", description = (string?)null }, ownerToken);
-            var second = await _helpers.CreateProjectAsync(teamId, new { name = "Rename Target", description = (string?)null }, ownerToken);
+            var first = await _helpers.CreateProjectRequestAsync(teamId, new { name = "Existing Project", description = (string?)null }, ownerToken);
+            var second = await _helpers.CreateProjectRequestAsync(teamId, new { name = "Rename Target", description = (string?)null }, ownerToken);
             var targetId = await second.Content.ReadFromJsonAsync<Guid>();
 
             Assert.Equal(HttpStatusCode.Created, first.StatusCode);
@@ -144,8 +135,8 @@ namespace TeamManager.IntegrationTest.Projects.ProjectsController
             var team1 = await _teamHelpers.CreateTeamAsync($"Team {Guid.NewGuid():N}", null, ownerToken);
             var team2 = await _teamHelpers.CreateTeamAsync($"Team {Guid.NewGuid():N}", null, ownerToken);
 
-            await _helpers.CreateProjectAsync(team1, new { name = "Shared Name", description = (string?)null }, ownerToken);
-            var second = await _helpers.CreateProjectAsync(team2, new { name = "Other Name", description = (string?)null }, ownerToken);
+            await _helpers.CreateProjectRequestAsync(team1, new { name = "Shared Name", description = (string?)null }, ownerToken);
+            var second = await _helpers.CreateProjectRequestAsync(team2, new { name = "Other Name", description = (string?)null }, ownerToken);
             var targetId = await second.Content.ReadFromJsonAsync<Guid>();
 
             var response = await UpdateProjectAsync(targetId, "Shared Name", null, ownerToken);
@@ -157,7 +148,7 @@ namespace TeamManager.IntegrationTest.Projects.ProjectsController
         public async Task UpdateProject_WithInvalidPayload_Returns400WithFieldErrors()
         {
             var (_, _, ownerToken) = await _authenticatedUser.CreateConfirmedUserAsync("upd-invalid");
-            var (_, projectId) = await CreateProjectAsync("Validation Project", ownerToken);
+            var (_, projectId) = await _helpers.CreateProjectAsync("Validation Project", ownerToken);
 
             var response = await UpdateProjectAsync(projectId, "", null, ownerToken);
 
