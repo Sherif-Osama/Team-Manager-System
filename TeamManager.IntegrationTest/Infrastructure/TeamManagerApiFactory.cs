@@ -17,6 +17,16 @@ namespace TeamManager.IntegrationTest.Infrastructure
             "mcr.microsoft.com/mssql/server:2022-CU14-ubuntu-22.04").WithName(ContainerName)
             .WithPassword("Test_password!123").WithDatabase("TeamManager_Test").Build();
 
+        static TeamManagerApiFactory()
+        {
+            // AddApiRateLimiting captures the global limits while services are registered, before this
+            // class's configuration sources are applied, so only environment variables reach it.
+            Environment.SetEnvironmentVariable("RateLimiting__Global__PerIpLimit", "1000000");
+            Environment.SetEnvironmentVariable("RateLimiting__Global__PerIpWindowSeconds", "6");
+            Environment.SetEnvironmentVariable("RateLimiting__Global__PerUserLimit", "1000000");
+            Environment.SetEnvironmentVariable("RateLimiting__Global__PerUserWindowSeconds", "6");
+        }
+
         protected override void ConfigureClient(HttpClient client)
         {
             base.ConfigureClient(client);
@@ -35,10 +45,6 @@ namespace TeamManager.IntegrationTest.Infrastructure
                         ["Jwt:Key"] = "test-only-signing-key-at-least-32-characters!",
                         ["Jwt:Issuer"] = "TeamManager.Tests",
                         ["Jwt:Audience"] = "TeamManager.Tests",
-                        ["RateLimiting:Global:PerIpLimit"] = "100000",
-                        ["RateLimiting:Global:PerIpWindowSeconds"] = "6",
-                        ["RateLimiting:Global:PerUserLimit"] = "100000",
-                        ["RateLimiting:Global:PerUserWindowSeconds"] = "6",
                         ["RateLimiting:Authentication:Register:PermitLimit"] = "100000",
                         ["RateLimiting:Authentication:Register:WindowSeconds"] = "6",
                         ["RateLimiting:Authentication:Login:PermitLimit"] = "100000",
