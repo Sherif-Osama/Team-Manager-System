@@ -160,11 +160,60 @@ namespace TeamManager.IntegrationTest.Projects.Configuration
         public async Task<HttpResponseMessage> ChangeTaskPriorityRequestAsync(long taskId, object body, string? accessToken = null)
             => await RequestAsync(HttpMethod.Put, ProjectEndpoints.TaskPriority(taskId), accessToken, body);
 
-        public async Task DeleteTaskAsync(long taskId, string accessToken)
+        public async Task<HttpResponseMessage> AssignTaskRequestAsync(long taskId, object body, string? accessToken = null)
+            => await RequestAsync(HttpMethod.Put, ProjectEndpoints.TaskAssignee(taskId), accessToken, body);
+
+        public async Task AssignTaskAsync(long taskId, Guid userId, string accessToken)
         {
-            var response = await RequestAsync(HttpMethod.Delete, ProjectEndpoints.Task(taskId), accessToken);
+            var response = await AssignTaskRequestAsync(taskId, new { userId }, accessToken);
 
             Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
+        }
+
+        public async Task<HttpResponseMessage> UnassignTaskRequestAsync(long taskId, string? accessToken = null)
+            => await RequestAsync(HttpMethod.Delete, ProjectEndpoints.TaskAssignee(taskId), accessToken);
+
+        public async Task UnassignTaskAsync(long taskId, string accessToken)
+        {
+            var response = await UnassignTaskRequestAsync(taskId, accessToken);
+
+            Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
+        }
+
+        public async Task<HttpResponseMessage> DeleteTaskRequestAsync(long taskId, string? accessToken = null)
+            => await RequestAsync(HttpMethod.Delete, ProjectEndpoints.Task(taskId), accessToken);
+
+        public async Task DeleteTaskAsync(long taskId, string accessToken)
+        {
+            var response = await DeleteTaskRequestAsync(taskId, accessToken);
+
+            Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
+        }
+
+        public async Task<HttpResponseMessage> GetMyTasksAsync(string? accessToken = null, string? query = null)
+            => await RequestAsync(HttpMethod.Get,
+                query is null ? ProjectEndpoints.MyTasks : $"{ProjectEndpoints.MyTasks}?{query}", accessToken);
+
+        public async Task<GetMyTasksResponseDto> GetMyTasksResultAsync(string accessToken, string? query = null)
+        {
+            var response = await GetMyTasksAsync(accessToken, query);
+
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+            return (await response.Content.ReadFromJsonAsync<GetMyTasksResponseDto>())!;
+        }
+
+        public async Task<HttpResponseMessage> GetTeamTasksAsync(Guid teamId, string? accessToken = null, string? query = null)
+            => await RequestAsync(HttpMethod.Get,
+                query is null ? ProjectEndpoints.TeamTasks(teamId) : $"{ProjectEndpoints.TeamTasks(teamId)}?{query}", accessToken);
+
+        public async Task<GetTeamTasksResponseDto> GetTeamTasksResultAsync(Guid teamId, string accessToken, string? query = null)
+        {
+            var response = await GetTeamTasksAsync(teamId, accessToken, query);
+
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+            return (await response.Content.ReadFromJsonAsync<GetTeamTasksResponseDto>())!;
         }
 
         public async Task<(Guid ProjectId, Guid UserId, string OwnerToken)> CreateProjectWithTeamMemberAsync(string prefix)
