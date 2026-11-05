@@ -10,6 +10,8 @@ namespace TeamManager.IntegrationTest.Projects.Configuration
         public static string CreateTask(Guid projectId) => $"/api/projects/{projectId}/tasks";
         public static string Task(long taskId) => $"/api/tasks/{taskId}";
         public static string TaskStatus(long taskId) => $"/api/tasks/{taskId}/status";
+        public static string TaskSchedule(long taskId) => $"/api/tasks/{taskId}/schedule";
+        public static string TaskPriority(long taskId) => $"/api/tasks/{taskId}/priority";
         public static string Project(Guid projectId) => $"/api/projects/{projectId}";
         public static string ProjectSchedule(Guid projectId) => $"/api/projects/{projectId}/schedule";
         public static string ProjectStatus(Guid projectId) => $"/api/projects/{projectId}/status";

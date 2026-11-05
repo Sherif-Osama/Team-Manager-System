@@ -145,8 +145,20 @@ namespace TeamManager.IntegrationTest.Projects.Configuration
             return (await response.Content.ReadFromJsonAsync<GetTaskResponseDto>())!;
         }
 
+        public async Task<HttpResponseMessage> UpdateTaskRequestAsync(long taskId, object body, string? accessToken = null)
+            => await RequestAsync(HttpMethod.Put, ProjectEndpoints.Task(taskId), accessToken, body);
+
+        public async Task<HttpResponseMessage> ChangeTaskStatusRequestAsync(long taskId, object body, string? accessToken = null)
+            => await RequestAsync(HttpMethod.Put, ProjectEndpoints.TaskStatus(taskId), accessToken, body);
+
         public async Task<HttpResponseMessage> ChangeTaskStatusAsync(long taskId, TaskItemStatus status, string accessToken)
-            => await RequestAsync(HttpMethod.Put, ProjectEndpoints.TaskStatus(taskId), accessToken, new { status });
+            => await ChangeTaskStatusRequestAsync(taskId, new { status }, accessToken);
+
+        public async Task<HttpResponseMessage> RescheduleTaskRequestAsync(long taskId, object body, string? accessToken = null)
+            => await RequestAsync(HttpMethod.Put, ProjectEndpoints.TaskSchedule(taskId), accessToken, body);
+
+        public async Task<HttpResponseMessage> ChangeTaskPriorityRequestAsync(long taskId, object body, string? accessToken = null)
+            => await RequestAsync(HttpMethod.Put, ProjectEndpoints.TaskPriority(taskId), accessToken, body);
 
         public async Task DeleteTaskAsync(long taskId, string accessToken)
         {
