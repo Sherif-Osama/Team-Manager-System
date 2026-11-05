@@ -216,5 +216,64 @@ namespace TeamManager.IntegrationTest.Tasks.TasksController
 
             await ValidationAssertions.AssertFieldErrorAsync(response, "Status");
         }
+
+        [Fact]
+        public async Task ChangeTaskStatus_ToDone_WithAnOpenDependency_Returns409AndKeepsTheStatus()
+        {
+            var (_, projectId, ownerToken) = await CreateOwnedProjectAsync("taskstatus-depopen");
+
+            var blockerId = await _helpers.CreateTaskAsync(projectId, "Blocking predecessor", ownerToken);
+            var taskId = await _helpers.CreateTaskAsync(projectId, "Dependent task", ownerToken);
+
+            await _helpers.AddTaskDependencyAsync(taskId, blockerId, ownerToken);
+            await _helpers.MoveTaskThroughWorkflowAsync(taskId, ownerToken);
+
+            var response = await _helpers.ChangeTaskStatusAsync(taskId, TaskItemStatus.Done, ownerToken);
+
+            await ProblemDetailsAssertions.AssertDetailAsync(response, HttpStatusCode.Conflict, "Blocking predecessor");
+
+            var task = await _helpers.GetTaskResultAsync(taskId, ownerToken);
+
+            Assert.Equal(TaskItemStatus.InReview, task.Status);
+            Assert.Null(task.CompletedAtUtc);
+        }
+
+        [Fact]
+        public async Task ChangeTaskStatus_ToDone_WhenTheDependencyIsDone_Returns204()
+        {
+            var (_, projectId, ownerToken) = await CreateOwnedProjectAsync("taskstatus-depdone");
+
+            var blockerId = await _helpers.CreateTaskAsync(projectId, "Finished predecessor", ownerToken);
+            var taskId = await _helpers.CreateTaskAsync(projectId, "Dependent task", ownerToken);
+
+            await _helpers.AddTaskDependencyAsync(taskId, blockerId, ownerToken);
+
+            await _helpers.CompleteTaskAsync(blockerId, ownerToken);
+            await _helpers.MoveTaskThroughWorkflowAsync(taskId, ownerToken);
+
+            var response = await _helpers.ChangeTaskStatusAsync(taskId, TaskItemStatus.Done, ownerToken);
+
+            Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
+        }
+
+        [Fact]
+        public async Task ChangeTaskStatus_ToDone_WhenTheDependencyIsCancelled_Returns204()
+        {
+            var (_, projectId, ownerToken) = await CreateOwnedProjectAsync("taskstatus-depcancelled");
+
+            var blockerId = await _helpers.CreateTaskAsync(projectId, "Cancelled predecessor", ownerToken);
+            var taskId = await _helpers.CreateTaskAsync(projectId, "Dependent task", ownerToken);
+
+            await _helpers.AddTaskDependencyAsync(taskId, blockerId, ownerToken);
+
+            Assert.Equal(HttpStatusCode.NoContent,
+                (await _helpers.ChangeTaskStatusAsync(blockerId, TaskItemStatus.Cancelled, ownerToken)).StatusCode);
+
+            await _helpers.MoveTaskThroughWorkflowAsync(taskId, ownerToken);
+
+            var response = await _helpers.ChangeTaskStatusAsync(taskId, TaskItemStatus.Done, ownerToken);
+
+            Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
+        }
     }
 }

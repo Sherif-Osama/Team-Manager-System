@@ -125,9 +125,11 @@ namespace TeamManager.IntegrationTest.Projects.Configuration
         public async Task<HttpResponseMessage> CreateTaskRequestAsync(Guid projectId, object body, string? accessToken = null)
             => await RequestAsync(HttpMethod.Post, ProjectEndpoints.CreateTask(projectId), accessToken, body);
 
-        public async Task<long> CreateTaskAsync(Guid projectId, string title, string accessToken)
+        public async Task<long> CreateTaskAsync(Guid projectId, string title, string accessToken,
+            DateOnly? startDate = null, DateOnly? dueDate = null)
         {
-            var response = await CreateTaskRequestAsync(projectId, new { title, priority = TaskPriority.Medium }, accessToken);
+            var response = await CreateTaskRequestAsync(projectId,
+                new { title, priority = TaskPriority.Medium, startDate, dueDate }, accessToken);
 
             Assert.Equal(HttpStatusCode.Created, response.StatusCode);
             return await response.Content.ReadFromJsonAsync<long>();
@@ -153,6 +155,20 @@ namespace TeamManager.IntegrationTest.Projects.Configuration
 
         public async Task<HttpResponseMessage> ChangeTaskStatusAsync(long taskId, TaskItemStatus status, string accessToken)
             => await ChangeTaskStatusRequestAsync(taskId, new { status }, accessToken);
+
+        // The workflow only reaches InReview through InProgress, and only an Owner or Admin may go beyond it.
+        public async Task MoveTaskThroughWorkflowAsync(long taskId, string accessToken)
+        {
+            foreach (var status in new[] { TaskItemStatus.InProgress, TaskItemStatus.InReview })
+                Assert.Equal(HttpStatusCode.NoContent, (await ChangeTaskStatusAsync(taskId, status, accessToken)).StatusCode);
+        }
+
+        public async Task CompleteTaskAsync(long taskId, string accessToken)
+        {
+            await MoveTaskThroughWorkflowAsync(taskId, accessToken);
+
+            Assert.Equal(HttpStatusCode.NoContent, (await ChangeTaskStatusAsync(taskId, TaskItemStatus.Done, accessToken)).StatusCode);
+        }
 
         public async Task<HttpResponseMessage> RescheduleTaskRequestAsync(long taskId, object body, string? accessToken = null)
             => await RequestAsync(HttpMethod.Put, ProjectEndpoints.TaskSchedule(taskId), accessToken, body);
@@ -190,6 +206,42 @@ namespace TeamManager.IntegrationTest.Projects.Configuration
             Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
         }
 
+        public async Task<HttpResponseMessage> AddTaskDependencyRequestAsync(long taskId, object body, string? accessToken = null)
+            => await RequestAsync(HttpMethod.Post, ProjectEndpoints.TaskDependencies(taskId), accessToken, body);
+
+        public async Task<long> AddTaskDependencyAsync(long taskId, long dependsOnTaskId, string accessToken)
+        {
+            var response = await AddTaskDependencyRequestAsync(taskId, new { dependsOnTaskId }, accessToken);
+
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            return await response.Content.ReadFromJsonAsync<long>();
+        }
+
+        public async Task<HttpResponseMessage> DeleteTaskDependencyRequestAsync(long taskId, long dependencyId, string? accessToken = null)
+            => await RequestAsync(HttpMethod.Delete, ProjectEndpoints.TaskDependency(taskId, dependencyId), accessToken);
+
+        public async Task DeleteTaskDependencyAsync(long taskId, long dependencyId, string accessToken)
+        {
+            var response = await DeleteTaskDependencyRequestAsync(taskId, dependencyId, accessToken);
+
+            Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
+        }
+
+        public async Task<HttpResponseMessage> GetTaskDependenciesAsync(long taskId, string? accessToken = null, string? query = null)
+            => await RequestAsync(HttpMethod.Get,
+                query is null ? ProjectEndpoints.TaskDependencies(taskId) : $"{ProjectEndpoints.TaskDependencies(taskId)}?{query}",
+                accessToken);
+
+        public async Task<GetTaskDependenciesResponseDto> GetTaskDependenciesResultAsync(long taskId, string accessToken,
+            string? query = null)
+        {
+            var response = await GetTaskDependenciesAsync(taskId, accessToken, query);
+
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+            return (await response.Content.ReadFromJsonAsync<GetTaskDependenciesResponseDto>())!;
+        }
+
         public async Task<HttpResponseMessage> GetMyTasksAsync(string? accessToken = null, string? query = null)
             => await RequestAsync(HttpMethod.Get,
                 query is null ? ProjectEndpoints.MyTasks : $"{ProjectEndpoints.MyTasks}?{query}", accessToken);
@@ -214,6 +266,25 @@ namespace TeamManager.IntegrationTest.Projects.Configuration
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
             return (await response.Content.ReadFromJsonAsync<GetTeamTasksResponseDto>())!;
+        }
+
+        public async Task<(Guid TeamId, Guid ProjectId, string OwnerToken)> CreateOwnedProjectAsync(string prefix)
+        {
+            var (_, _, ownerToken) = await _authenticatedUser.CreateConfirmedUserAsync($"{prefix}-owner");
+            var (teamId, projectId) = await CreateProjectAsync($"Project {Guid.NewGuid():N}", ownerToken);
+
+            return (teamId, projectId, ownerToken);
+        }
+
+        public async Task<(Guid UserId, string Token)> AddProjectMemberAsNewUserAsync(Guid teamId, Guid projectId,
+            ProjectRole role, string displayName, string ownerToken)
+        {
+            var (userId, _, token) = await _authenticatedUser.CreateConfirmedUserAsync(displayName.Replace(' ', '-'), displayName);
+
+            Assert.True((await _teamHelpers.AddMemberAsync(teamId, userId, TeamRole.Member, ownerToken)).IsSuccessStatusCode);
+            await AddProjectMemberAsync(projectId, userId, role, ownerToken);
+
+            return (userId, token);
         }
 
         public async Task<(Guid ProjectId, Guid UserId, string OwnerToken)> CreateProjectWithTeamMemberAsync(string prefix)

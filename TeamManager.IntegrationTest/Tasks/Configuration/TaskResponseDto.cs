@@ -9,6 +9,13 @@ namespace TeamManager.IntegrationTest.Tasks.Configuration
 
     public sealed record TaskLabelResponseDto(long Id, string Name, string ColorHex);
 
+    public sealed record GetTaskDependenciesResponseDto(IReadOnlyList<TaskDependencyItemDto> Items, int TotalCount,
+        int Page, int PageSize);
+
+    public sealed record TaskDependencyItemDto(long DependencyId, long TaskId, long DependsOnTaskId, string DependsOnTaskTitle,
+        TaskItemStatus DependsOnTaskStatus, TaskPriority DependsOnTaskPriority, DateOnly? DependsOnTaskDueDate,
+        Guid CreatedBy, string CreatedByName, DateTime CreatedAtUtc);
+
     public sealed record GetMyTasksResponseDto(IReadOnlyList<GetMyTasksItemDto> Items, int TotalCount, int Page, int PageSize);
 
     public sealed record GetMyTasksItemDto(long Id, Guid ProjectId, Guid AssigneeUserId, string AssigneeUserName, string ProjectName,

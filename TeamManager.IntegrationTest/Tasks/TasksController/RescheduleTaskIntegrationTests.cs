@@ -32,6 +32,21 @@ namespace TeamManager.IntegrationTest.Tasks.TasksController
             return (userId, token);
         }
 
+        // The predecessor is dated in three days, the task that depends on it in five.
+        private async Task<(long PredecessorId, long DependentId, DateOnly PredecessorDueDate, DateOnly DependentDueDate)>
+            CreateDatedDependencyPairAsync(Guid projectId, string ownerToken)
+        {
+            var predecessorDueDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(3));
+            var predecessorId = await _helpers.CreateTaskAsync(projectId, "Predecessor", ownerToken, dueDate: predecessorDueDate);
+
+            var dependentDueDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(5));
+            var dependentId = await _helpers.CreateTaskAsync(projectId, "Early dependent", ownerToken, dueDate: dependentDueDate);
+
+            await _helpers.AddTaskDependencyAsync(dependentId, predecessorId, ownerToken);
+
+            return (predecessorId, dependentId, predecessorDueDate, dependentDueDate);
+        }
+
         [Fact]
         public async Task RescheduleTask_AsProjectOwner_StoresTheNewDates()
         {
@@ -186,6 +201,75 @@ namespace TeamManager.IntegrationTest.Tasks.TasksController
                 new { startDate, dueDate = startDate.AddDays(-1) }, ownerToken);
 
             await ValidationAssertions.AssertFieldErrorAsync(response, "DueDate");
+        }
+
+        [Fact]
+        public async Task RescheduleTask_WithDueDateAfterADependentsDueDate_Returns409AndKeepsTheDates()
+        {
+            var (_, projectId, ownerToken) = await CreateOwnedProjectAsync("reschedule-depblocked");
+            var (predecessorId, _, predecessorDueDate, dependentDueDate) =
+                await CreateDatedDependencyPairAsync(projectId, ownerToken);
+
+            var response = await _helpers.RescheduleTaskRequestAsync(predecessorId,
+                new { dueDate = dependentDueDate.AddDays(5) }, ownerToken);
+
+            await ProblemDetailsAssertions.AssertDetailAsync(response, HttpStatusCode.Conflict, "Early dependent");
+
+            var task = await _helpers.GetTaskResultAsync(predecessorId, ownerToken);
+
+            Assert.Equal(predecessorDueDate, task.DueDate);
+        }
+
+        [Fact]
+        public async Task RescheduleTask_WhenTheDependentIsCancelled_AllowsTheLaterDueDate()
+        {
+            var (_, projectId, ownerToken) = await CreateOwnedProjectAsync("reschedule-depcancelled");
+            var (predecessorId, dependentId, _, dependentDueDate) = await CreateDatedDependencyPairAsync(projectId, ownerToken);
+
+            Assert.Equal(HttpStatusCode.NoContent,
+                (await _helpers.ChangeTaskStatusAsync(dependentId, TaskItemStatus.Cancelled, ownerToken)).StatusCode);
+
+            var newDueDate = dependentDueDate.AddDays(5);
+
+            var response = await _helpers.RescheduleTaskRequestAsync(predecessorId, new { dueDate = newDueDate }, ownerToken);
+
+            Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
+
+            var task = await _helpers.GetTaskResultAsync(predecessorId, ownerToken);
+
+            Assert.Equal(newDueDate, task.DueDate);
+        }
+
+        [Fact]
+        public async Task RescheduleTask_WhenTheDependentIsDone_StillReturns409()
+        {
+            var (_, projectId, ownerToken) = await CreateOwnedProjectAsync("reschedule-depdone");
+            var (predecessorId, dependentId, _, dependentDueDate) = await CreateDatedDependencyPairAsync(projectId, ownerToken);
+
+            await _helpers.CompleteTaskAsync(predecessorId, ownerToken);
+            await _helpers.CompleteTaskAsync(dependentId, ownerToken);
+
+            var response = await _helpers.RescheduleTaskRequestAsync(predecessorId,
+                new { dueDate = dependentDueDate.AddDays(5) }, ownerToken);
+
+            await ProblemDetailsAssertions.AssertDetailAsync(response, HttpStatusCode.Conflict, "Early dependent");
+        }
+
+        [Fact]
+        public async Task RescheduleTask_WithoutDueDate_DoesNotCheckDependents()
+        {
+            var (_, projectId, ownerToken) = await CreateOwnedProjectAsync("reschedule-dependentsonlystart");
+            var (predecessorId, _, _, _) = await CreateDatedDependencyPairAsync(projectId, ownerToken);
+
+            var startDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(1));
+
+            var response = await _helpers.RescheduleTaskRequestAsync(predecessorId, new { startDate }, ownerToken);
+
+            Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
+
+            var task = await _helpers.GetTaskResultAsync(predecessorId, ownerToken);
+
+            Assert.Equal(startDate, task.StartDate);
         }
     }
 }

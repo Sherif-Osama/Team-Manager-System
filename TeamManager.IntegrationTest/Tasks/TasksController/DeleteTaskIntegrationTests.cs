@@ -147,5 +147,24 @@ namespace TeamManager.IntegrationTest.Tasks.TasksController
 
             Assert.Equal(HttpStatusCode.NoContent, delete.StatusCode);
         }
+
+        [Fact]
+        public async Task DeleteTask_RemovesTheDependencyRowsInBothDirections()
+        {
+            var (_, projectId, ownerToken) = await CreateOwnedProjectAsync("deletetask-dependency");
+
+            var predecessorId = await _helpers.CreateTaskAsync(projectId, "Predecessor", ownerToken);
+            var dependentId = await _helpers.CreateTaskAsync(projectId, "Dependent", ownerToken);
+
+            await _helpers.AddTaskDependencyAsync(dependentId, predecessorId, ownerToken);
+
+            await _helpers.DeleteTaskAsync(predecessorId, ownerToken);
+
+            var listed = await _helpers.GetTaskDependenciesResultAsync(dependentId, ownerToken);
+
+            Assert.Empty(listed.Items);
+
+            await _helpers.CompleteTaskAsync(dependentId, ownerToken);
+        }
     }
 }

@@ -13,6 +13,8 @@ namespace TeamManager.IntegrationTest.Projects.Configuration
         public static string TaskSchedule(long taskId) => $"/api/tasks/{taskId}/schedule";
         public static string TaskPriority(long taskId) => $"/api/tasks/{taskId}/priority";
         public static string TaskAssignee(long taskId) => $"/api/tasks/{taskId}/assignee";
+        public static string TaskDependencies(long taskId) => $"/api/tasks/{taskId}/dependencies";
+        public static string TaskDependency(long taskId, long dependencyId) => $"/api/tasks/{taskId}/dependencies/{dependencyId}";
         public const string MyTasks = "/api/tasks/my";
         public static string TeamTasks(Guid teamId) => $"/api/teams/{teamId}/tasks";
         public static string Project(Guid projectId) => $"/api/projects/{projectId}";
