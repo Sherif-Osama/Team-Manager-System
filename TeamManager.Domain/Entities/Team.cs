@@ -132,6 +132,8 @@ namespace TeamManager.Domain.Entities
 
             DeletedAtUtc = DateTime.UtcNow;
             IsActive = false;
+
+            AddDomainEvent(new TeamDeletedDomainEvent(Id));
         }
 
         public Label AddLabel(string name, string? colorHex = null)
