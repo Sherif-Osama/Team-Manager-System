@@ -15,6 +15,16 @@ namespace TeamManager.IntegrationTest.Projects.Configuration
         public static string TaskAssignee(long taskId) => $"/api/tasks/{taskId}/assignee";
         public static string TaskDependencies(long taskId) => $"/api/tasks/{taskId}/dependencies";
         public static string TaskDependency(long taskId, long dependencyId) => $"/api/tasks/{taskId}/dependencies/{dependencyId}";
+        public static string TaskChecklist(long taskId) => $"/api/tasks/{taskId}/checklist";
+        public static string TaskChecklistItem(long taskId, long itemId) => $"/api/tasks/{taskId}/checklist/{itemId}";
+        public static string TaskChecklistItemComplete(long taskId, long itemId) =>
+            $"{TaskChecklistItem(taskId, itemId)}/complete";
+        public static string TaskChecklistItemReopen(long taskId, long itemId) =>
+            $"{TaskChecklistItem(taskId, itemId)}/reopen";
+        public static string TaskComments(long taskId) => $"/api/tasks/{taskId}/comments";
+        public static string TaskComment(long taskId, long commentId) => $"/api/tasks/{taskId}/comments/{commentId}";
+        public const string MyComments = "/api/tasks/my-comments";
+        public const string MyMentions = "/api/tasks/my-mentions";
         public const string MyTasks = "/api/tasks/my";
         public static string TeamTasks(Guid teamId) => $"/api/teams/{teamId}/tasks";
         public static string Project(Guid projectId) => $"/api/projects/{projectId}";

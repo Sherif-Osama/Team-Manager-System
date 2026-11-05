@@ -242,6 +242,138 @@ namespace TeamManager.IntegrationTest.Projects.Configuration
             return (await response.Content.ReadFromJsonAsync<GetTaskDependenciesResponseDto>())!;
         }
 
+        public async Task<HttpResponseMessage> AddChecklistItemRequestAsync(long taskId, object body, string? accessToken = null)
+            => await RequestAsync(HttpMethod.Post, ProjectEndpoints.TaskChecklist(taskId), accessToken, body);
+
+        public async Task<long> AddChecklistItemAsync(long taskId, string content, string accessToken)
+        {
+            var response = await AddChecklistItemRequestAsync(taskId, new { content }, accessToken);
+
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            return await response.Content.ReadFromJsonAsync<long>();
+        }
+
+        public async Task<HttpResponseMessage> CompleteChecklistItemRequestAsync(long taskId, long itemId, string? accessToken = null)
+            => await RequestAsync(HttpMethod.Put, ProjectEndpoints.TaskChecklistItemComplete(taskId, itemId), accessToken);
+
+        public async Task CompleteChecklistItemAsync(long taskId, long itemId, string accessToken)
+        {
+            var response = await CompleteChecklistItemRequestAsync(taskId, itemId, accessToken);
+
+            Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
+        }
+
+        public async Task<HttpResponseMessage> ReopenChecklistItemRequestAsync(long taskId, long itemId, string? accessToken = null)
+            => await RequestAsync(HttpMethod.Put, ProjectEndpoints.TaskChecklistItemReopen(taskId, itemId), accessToken);
+
+        public async Task ReopenChecklistItemAsync(long taskId, long itemId, string accessToken)
+        {
+            var response = await ReopenChecklistItemRequestAsync(taskId, itemId, accessToken);
+
+            Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
+        }
+
+        public async Task<HttpResponseMessage> RemoveChecklistItemRequestAsync(long taskId, long itemId, string? accessToken = null)
+            => await RequestAsync(HttpMethod.Delete, ProjectEndpoints.TaskChecklistItem(taskId, itemId), accessToken);
+
+        public async Task RemoveChecklistItemAsync(long taskId, long itemId, string accessToken)
+        {
+            var response = await RemoveChecklistItemRequestAsync(taskId, itemId, accessToken);
+
+            Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
+        }
+
+        public async Task<HttpResponseMessage> GetTaskChecklistAsync(long taskId, string? accessToken = null, string? query = null)
+            => await RequestAsync(HttpMethod.Get,
+                query is null ? ProjectEndpoints.TaskChecklist(taskId) : $"{ProjectEndpoints.TaskChecklist(taskId)}?{query}",
+                accessToken);
+
+        public async Task<IReadOnlyList<TaskChecklistItemDto>> GetTaskChecklistResultAsync(long taskId, string accessToken,
+            string? query = null)
+        {
+            var response = await GetTaskChecklistAsync(taskId, accessToken, query);
+
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+            return (await response.Content.ReadFromJsonAsync<IReadOnlyList<TaskChecklistItemDto>>())!;
+        }
+
+        public async Task<HttpResponseMessage> AddTaskCommentRequestAsync(long taskId, object body, string? accessToken = null)
+            => await RequestAsync(HttpMethod.Post, ProjectEndpoints.TaskComments(taskId), accessToken, body);
+
+        public async Task<long> AddTaskCommentAsync(long taskId, string content, string accessToken,
+            IReadOnlyCollection<Guid>? mentionedUserIds = null)
+        {
+            var response = await AddTaskCommentRequestAsync(taskId, new { content, mentionedUserIds }, accessToken);
+
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            return await response.Content.ReadFromJsonAsync<long>();
+        }
+
+        public async Task<HttpResponseMessage> EditTaskCommentRequestAsync(long taskId, long commentId, object body,
+            string? accessToken = null)
+            => await RequestAsync(HttpMethod.Put, ProjectEndpoints.TaskComment(taskId, commentId), accessToken, body);
+
+        public async Task EditTaskCommentAsync(long taskId, long commentId, string content, string accessToken,
+            IReadOnlyCollection<Guid>? mentionedUserIds = null)
+        {
+            var response = await EditTaskCommentRequestAsync(taskId, commentId,
+                new { content, mentionedUserIds }, accessToken);
+
+            Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
+        }
+
+        public async Task<HttpResponseMessage> DeleteTaskCommentRequestAsync(long taskId, long commentId, string? accessToken = null)
+            => await RequestAsync(HttpMethod.Delete, ProjectEndpoints.TaskComment(taskId, commentId), accessToken);
+
+        public async Task DeleteTaskCommentAsync(long taskId, long commentId, string accessToken)
+        {
+            var response = await DeleteTaskCommentRequestAsync(taskId, commentId, accessToken);
+
+            Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
+        }
+
+        public async Task<HttpResponseMessage> GetTaskCommentsAsync(long taskId, string? accessToken = null, string? query = null)
+            => await RequestAsync(HttpMethod.Get,
+                query is null ? ProjectEndpoints.TaskComments(taskId) : $"{ProjectEndpoints.TaskComments(taskId)}?{query}",
+                accessToken);
+
+        public async Task<GetTaskCommentsResponseDto> GetTaskCommentsResultAsync(long taskId, string accessToken,
+            string? query = null)
+        {
+            var response = await GetTaskCommentsAsync(taskId, accessToken, query);
+
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+            return (await response.Content.ReadFromJsonAsync<GetTaskCommentsResponseDto>())!;
+        }
+
+        public async Task<HttpResponseMessage> GetMyCommentsAsync(string? accessToken = null, string? query = null)
+            => await RequestAsync(HttpMethod.Get,
+                query is null ? ProjectEndpoints.MyComments : $"{ProjectEndpoints.MyComments}?{query}", accessToken);
+
+        public async Task<GetMyCommentsResponseDto> GetMyCommentsResultAsync(string accessToken, string? query = null)
+        {
+            var response = await GetMyCommentsAsync(accessToken, query);
+
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+            return (await response.Content.ReadFromJsonAsync<GetMyCommentsResponseDto>())!;
+        }
+
+        public async Task<HttpResponseMessage> GetMyMentionsAsync(string? accessToken = null, string? query = null)
+            => await RequestAsync(HttpMethod.Get,
+                query is null ? ProjectEndpoints.MyMentions : $"{ProjectEndpoints.MyMentions}?{query}", accessToken);
+
+        public async Task<GetMyMentionsResponseDto> GetMyMentionsResultAsync(string accessToken, string? query = null)
+        {
+            var response = await GetMyMentionsAsync(accessToken, query);
+
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+            return (await response.Content.ReadFromJsonAsync<GetMyMentionsResponseDto>())!;
+        }
+
         public async Task<HttpResponseMessage> GetMyTasksAsync(string? accessToken = null, string? query = null)
             => await RequestAsync(HttpMethod.Get,
                 query is null ? ProjectEndpoints.MyTasks : $"{ProjectEndpoints.MyTasks}?{query}", accessToken);

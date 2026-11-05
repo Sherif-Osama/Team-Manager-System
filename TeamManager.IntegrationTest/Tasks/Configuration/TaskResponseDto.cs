@@ -16,6 +16,26 @@ namespace TeamManager.IntegrationTest.Tasks.Configuration
         TaskItemStatus DependsOnTaskStatus, TaskPriority DependsOnTaskPriority, DateOnly? DependsOnTaskDueDate,
         Guid CreatedBy, string CreatedByName, DateTime CreatedAtUtc);
 
+    public sealed record TaskChecklistItemDto(long Id, long TaskId, string Content, bool IsCompleted, short SortOrder,
+        DateTime? CompletedAtUtc, Guid? CompletedBy, string? CompletedByName, DateTime CreatedAtUtc);
+
+    public sealed record CommentMentionDto(Guid UserId, string UserName);
+
+    public sealed record GetTaskCommentsResponseDto(IReadOnlyList<TaskCommentItemDto> Items, int TotalCount, int Page, int PageSize);
+
+    public sealed record TaskCommentItemDto(long Id, Guid AuthorUserId, string AuthorUserName, string Content,
+        DateTime CreatedAtUtc, DateTime? UpdatedAtUtc, IReadOnlyList<CommentMentionDto> Mentions);
+
+    public sealed record GetMyCommentsResponseDto(IReadOnlyList<MyCommentItemDto> Items, int TotalCount, int Page, int PageSize);
+
+    public sealed record MyCommentItemDto(long Id, long TaskId, string TaskTitle, string Content, DateTime CreatedAtUtc,
+        DateTime? UpdatedAtUtc, IReadOnlyList<CommentMentionDto> Mentions);
+
+    public sealed record GetMyMentionsResponseDto(IReadOnlyList<MyMentionItemDto> Items, int TotalCount, int Page, int PageSize);
+
+    public sealed record MyMentionItemDto(long CommentId, long TaskId, string TaskTitle, Guid AuthorUserId, string AuthorUserName,
+        string Content, DateTime CreatedAtUtc, DateTime? UpdatedAtUtc);
+
     public sealed record GetMyTasksResponseDto(IReadOnlyList<GetMyTasksItemDto> Items, int TotalCount, int Page, int PageSize);
 
     public sealed record GetMyTasksItemDto(long Id, Guid ProjectId, Guid AssigneeUserId, string AssigneeUserName, string ProjectName,
