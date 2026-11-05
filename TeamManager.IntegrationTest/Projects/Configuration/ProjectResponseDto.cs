@@ -7,4 +7,10 @@ namespace TeamManager.IntegrationTest.Projects.Configuration
         Guid CreatedBy, string CreatorName, int MembersCount, int TasksCount, DateTime CreatedAtUtc, DateTime? UpdatedAtUtc);
 
     public sealed record GetProjectsResponseDto(IReadOnlyList<ProjectResponseDto> Projects, int TotalCount, int Page, int PageSize);
+
+    public sealed record ProjectMemberItemDto(Guid UserId, string DisplayName, ProjectRole ProjectRole, ProjectMemberStatus Status,
+        DateTime AddedAtUtc, Guid? AddedBy, string? AddedByName, DateTime? RemovedAtUtc, Guid? RemovedBy, string? RemovedByName);
+
+    public sealed record GetProjectMembersResponseDto(IReadOnlyList<ProjectMemberItemDto> Members, int TotalCount, int Page,
+        int PageSize);
 }

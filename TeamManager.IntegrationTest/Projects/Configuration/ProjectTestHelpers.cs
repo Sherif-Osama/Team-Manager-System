@@ -75,8 +75,22 @@ namespace TeamManager.IntegrationTest.Projects.Configuration
             Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
         }
 
-        // Membership ids are only exposed by the members listing endpoint, so the owner's row is read from
-        // the database until that endpoint has its own coverage.
+        public async Task<HttpResponseMessage> GetProjectMembersAsync(Guid projectId, string? accessToken = null, string? query = null)
+            => await RequestAsync(HttpMethod.Get,
+                query is null ? ProjectEndpoints.Members(projectId) : $"{ProjectEndpoints.Members(projectId)}?{query}", accessToken);
+
+        public async Task<GetProjectMembersResponseDto> GetProjectMembersResultAsync(Guid projectId, string accessToken,
+            string? query = null)
+        {
+            var response = await GetProjectMembersAsync(projectId, accessToken, query);
+
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+            return (await response.Content.ReadFromJsonAsync<GetProjectMembersResponseDto>())!;
+        }
+
+        // The members listing does not return the membership row id, so a mutation target is still read
+        // from the database.
         public async Task<long> GetProjectMemberIdAsync(Guid projectId, Guid userId)
         {
             using var scope = factory.Services.CreateScope();

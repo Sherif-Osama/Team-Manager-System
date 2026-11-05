@@ -19,12 +19,13 @@ namespace TeamManager.IntegrationTest.Common
         public sealed record RegisterResponse(Guid Id);
         public sealed record LoginResponse(string AccessToken, string RefreshToken);
 
-        public async Task<(Guid Id, string Email)> RegisterUserAsync(string emailPrefix = "User", string password = "P@ssword1234")
+        public async Task<(Guid Id, string Email)> RegisterUserAsync(string emailPrefix = "User", string password = "P@ssword1234",
+            string displayName = DefaultDisplayName)
         {
             var email = $"{emailPrefix}-{Guid.NewGuid():N}@example.com";
 
             var response = await _client.PostAsJsonAsync(AuthenticationEndpoints.Register,
-                new { email, displayName = DefaultDisplayName, password });
+                new { email, displayName, password });
 
             Assert.Equal(HttpStatusCode.Created, response.StatusCode);
             var result = await response.Content.ReadFromJsonAsync<RegisterResponse>();
@@ -69,9 +70,10 @@ namespace TeamManager.IntegrationTest.Common
             return (await response.Content.ReadFromJsonAsync<LoginResponse>())!;
         }
 
-        public async Task<(Guid Id, string Email, string AccessToken)> CreateConfirmedUserAsync(string emailPrefix = "User")
+        public async Task<(Guid Id, string Email, string AccessToken)> CreateConfirmedUserAsync(string emailPrefix = "User",
+            string displayName = DefaultDisplayName)
         {
-            var (userId, email) = await RegisterUserAsync(emailPrefix);
+            var (userId, email) = await RegisterUserAsync(emailPrefix, displayName: displayName);
             await ConfirmEmailAsync(userId, email);
             var login = await LoginAsync(email);
             return (userId, email, login.AccessToken);
