@@ -22,8 +22,7 @@ namespace TeamManager.Application.Features.Tasks.TaskComment.Queries.GetMyMentio
 
             var totalCount = await query.CountAsync(cancellationToken);
 
-            // UQ_CommentMentions_Comment_User keeps at most one mention row per user per comment, so the ordering key
-            // is that row's date.
+
             var mentions = await query.OrderByDescending(x => x.Mentions.Where(m => m.MentionedUserId == userId).Max(m => m.CreatedAtUtc))
                 .Skip((request.Page - 1) * request.PageSize).Take(request.PageSize)
                 .Select(x => new GetMyMentionsItem(x.Id, x.TaskId, x.Task.Title, x.AuthorUserId, x.Author.DisplayName, x.Content,
