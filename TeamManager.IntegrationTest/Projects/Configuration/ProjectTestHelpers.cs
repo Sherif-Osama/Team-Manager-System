@@ -7,6 +7,7 @@ using TeamManager.Domain.Enums;
 using TeamManager.Infrastructure.Persistence;
 using TeamManager.IntegrationTest.Common;
 using TeamManager.IntegrationTest.Infrastructure;
+using TeamManager.IntegrationTest.Tasks.Configuration;
 using TeamManager.IntegrationTest.Teams.Configuration;
 
 namespace TeamManager.IntegrationTest.Projects.Configuration
@@ -121,13 +122,27 @@ namespace TeamManager.IntegrationTest.Projects.Configuration
         public async Task<HttpResponseMessage> ChangeProjectStatusAsync(Guid projectId, ProjectStatus status, string accessToken)
             => await RequestAsync(HttpMethod.Put, ProjectEndpoints.ProjectStatus(projectId), accessToken, new { status });
 
+        public async Task<HttpResponseMessage> CreateTaskRequestAsync(Guid projectId, object body, string? accessToken = null)
+            => await RequestAsync(HttpMethod.Post, ProjectEndpoints.CreateTask(projectId), accessToken, body);
+
         public async Task<long> CreateTaskAsync(Guid projectId, string title, string accessToken)
         {
-            var response = await RequestAsync(HttpMethod.Post, ProjectEndpoints.CreateTask(projectId), accessToken,
-                new { title, priority = TaskPriority.Medium });
+            var response = await CreateTaskRequestAsync(projectId, new { title, priority = TaskPriority.Medium }, accessToken);
 
             Assert.Equal(HttpStatusCode.Created, response.StatusCode);
             return await response.Content.ReadFromJsonAsync<long>();
+        }
+
+        public async Task<HttpResponseMessage> GetTaskAsync(long taskId, string? accessToken = null)
+            => await RequestAsync(HttpMethod.Get, ProjectEndpoints.Task(taskId), accessToken);
+
+        public async Task<GetTaskResponseDto> GetTaskResultAsync(long taskId, string accessToken)
+        {
+            var response = await GetTaskAsync(taskId, accessToken);
+
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+            return (await response.Content.ReadFromJsonAsync<GetTaskResponseDto>())!;
         }
 
         public async Task<HttpResponseMessage> ChangeTaskStatusAsync(long taskId, TaskItemStatus status, string accessToken)
