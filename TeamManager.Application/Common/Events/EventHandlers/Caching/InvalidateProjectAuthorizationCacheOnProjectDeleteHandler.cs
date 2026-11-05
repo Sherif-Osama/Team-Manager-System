@@ -5,7 +5,7 @@ using TeamManager.Domain.Common.Events.Projects;
 
 namespace TeamManager.Application.Common.Events.EventHandlers.Caching
 {
-    public sealed class InvalidateProjectAuthorizationCacheOnProjectDelete(IPostCommitCacheInvalidationDispatcher dispatcher)
+    public sealed class InvalidateProjectAuthorizationCacheOnProjectDeleteHandler(IPostCommitCacheInvalidationDispatcher dispatcher)
         : INotificationHandler<DomainEventNotification<ProjectDeletedDomainEvent>>
     {
         public async Task Handle(DomainEventNotification<ProjectDeletedDomainEvent> notification, CancellationToken cancellationToken)
