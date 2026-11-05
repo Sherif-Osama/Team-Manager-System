@@ -13,22 +13,10 @@ namespace TeamManager.IntegrationTest.Projects.ProjectMembers
         private readonly TeamTestHelpers _teamHelpers = new(factory);
         private readonly AuthenticatedUser _authenticatedUser = new(factory);
 
-        private async Task<(Guid ProjectId, Guid UserId, string OwnerToken)> CreateProjectWithTeamMemberAsync(string prefix)
-        {
-            var (_, _, ownerToken) = await _authenticatedUser.CreateConfirmedUserAsync($"{prefix}-owner");
-            var (userId, _, _) = await _authenticatedUser.CreateConfirmedUserAsync($"{prefix}-target");
-
-            var (teamId, projectId) = await _helpers.CreateProjectAsync($"Roster {Guid.NewGuid():N}", ownerToken);
-
-            Assert.True((await _teamHelpers.AddMemberAsync(teamId, userId, TeamRole.Member, ownerToken)).IsSuccessStatusCode);
-
-            return (projectId, userId, ownerToken);
-        }
-
         [Fact]
         public async Task AddProjectMember_AsProjectOwner_ReturnsRowIdAndCountsTheMember()
         {
-            var (projectId, userId, ownerToken) = await CreateProjectWithTeamMemberAsync("addmember-owner");
+            var (projectId, userId, ownerToken) = await _helpers.CreateProjectWithTeamMemberAsync("addmember-owner");
 
             var memberRowId = await _helpers.AddProjectMemberAsync(projectId, userId, ProjectRole.Member, ownerToken);
 
@@ -127,7 +115,7 @@ namespace TeamManager.IntegrationTest.Projects.ProjectMembers
         [Fact]
         public async Task AddProjectMember_WithoutAccessToken_Returns401()
         {
-            var (projectId, userId, _) = await CreateProjectWithTeamMemberAsync("addmember-notoken");
+            var (projectId, userId, _) = await _helpers.CreateProjectWithTeamMemberAsync("addmember-notoken");
 
             var response = await _helpers.AddProjectMemberRequestAsync(projectId,
                 new { userId, projectRole = ProjectRole.Member });
@@ -149,7 +137,7 @@ namespace TeamManager.IntegrationTest.Projects.ProjectMembers
         [Fact]
         public async Task AddProjectMember_ForDeletedProject_Returns404()
         {
-            var (projectId, userId, ownerToken) = await CreateProjectWithTeamMemberAsync("addmember-deleted");
+            var (projectId, userId, ownerToken) = await _helpers.CreateProjectWithTeamMemberAsync("addmember-deleted");
 
             var delete = await _helpers.RequestAsync(HttpMethod.Delete, ProjectEndpoints.Project(projectId), ownerToken);
 
@@ -209,7 +197,7 @@ namespace TeamManager.IntegrationTest.Projects.ProjectMembers
         [Fact]
         public async Task AddProjectMember_ForAlreadyActiveMember_Returns400()
         {
-            var (projectId, userId, ownerToken) = await CreateProjectWithTeamMemberAsync("addmember-duplicate");
+            var (projectId, userId, ownerToken) = await _helpers.CreateProjectWithTeamMemberAsync("addmember-duplicate");
 
             await _helpers.AddProjectMemberAsync(projectId, userId, ProjectRole.Member, ownerToken);
 
@@ -222,7 +210,7 @@ namespace TeamManager.IntegrationTest.Projects.ProjectMembers
         [Fact]
         public async Task AddProjectMember_WithOwnerRole_Returns400()
         {
-            var (projectId, userId, ownerToken) = await CreateProjectWithTeamMemberAsync("addmember-ownerrole");
+            var (projectId, userId, ownerToken) = await _helpers.CreateProjectWithTeamMemberAsync("addmember-ownerrole");
 
             var response = await _helpers.AddProjectMemberRequestAsync(projectId,
                 new { userId, projectRole = ProjectRole.Owner }, ownerToken);
@@ -250,7 +238,7 @@ namespace TeamManager.IntegrationTest.Projects.ProjectMembers
         [Fact]
         public async Task AddProjectMember_ForPreviouslyRemovedUser_CreatesFreshMembership()
         {
-            var (projectId, userId, ownerToken) = await CreateProjectWithTeamMemberAsync("addmember-rejoin");
+            var (projectId, userId, ownerToken) = await _helpers.CreateProjectWithTeamMemberAsync("addmember-rejoin");
 
             var firstRowId = await _helpers.AddProjectMemberAsync(projectId, userId, ProjectRole.Member, ownerToken);
             await _helpers.RemoveProjectMemberAsync(projectId, firstRowId, ownerToken);

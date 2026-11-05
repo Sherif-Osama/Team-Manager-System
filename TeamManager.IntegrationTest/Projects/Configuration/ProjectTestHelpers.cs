@@ -5,6 +5,7 @@ using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using TeamManager.Domain.Enums;
 using TeamManager.Infrastructure.Persistence;
+using TeamManager.IntegrationTest.Common;
 using TeamManager.IntegrationTest.Infrastructure;
 using TeamManager.IntegrationTest.Teams.Configuration;
 
@@ -14,6 +15,7 @@ namespace TeamManager.IntegrationTest.Projects.Configuration
     {
         private readonly HttpClient _client = factory.CreateClient();
         private readonly TeamTestHelpers _teamHelpers = new(factory);
+        private readonly AuthenticatedUser _authenticatedUser = new(factory);
 
         public async Task<HttpResponseMessage> RequestAsync(HttpMethod method, string url, string? accessToken = null, object? body = null)
         {
@@ -111,6 +113,18 @@ namespace TeamManager.IntegrationTest.Projects.Configuration
             var response = await RequestAsync(HttpMethod.Delete, ProjectEndpoints.Task(taskId), accessToken);
 
             Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
+        }
+
+        public async Task<(Guid ProjectId, Guid UserId, string OwnerToken)> CreateProjectWithTeamMemberAsync(string prefix)
+        {
+            var (_, _, ownerToken) = await _authenticatedUser.CreateConfirmedUserAsync($"{prefix}-owner");
+            var (userId, _, _) = await _authenticatedUser.CreateConfirmedUserAsync($"{prefix}-target");
+
+            var (teamId, projectId) = await CreateProjectAsync($"Roster {Guid.NewGuid():N}", ownerToken);
+
+            Assert.True((await _teamHelpers.AddMemberAsync(teamId, userId, TeamRole.Member, ownerToken)).IsSuccessStatusCode);
+
+            return (projectId, userId, ownerToken);
         }
     }
 }
