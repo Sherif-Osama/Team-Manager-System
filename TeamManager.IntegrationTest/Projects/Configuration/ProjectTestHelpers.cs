@@ -64,6 +64,17 @@ namespace TeamManager.IntegrationTest.Projects.Configuration
             Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
         }
 
+        public async Task<HttpResponseMessage> ChangeMemberRoleRequestAsync(Guid projectId, long memberId, object role,
+            string? accessToken = null)
+            => await RequestAsync(HttpMethod.Put, ProjectEndpoints.MemberRole(projectId, memberId), accessToken, role);
+
+        public async Task ChangeMemberRoleAsync(Guid projectId, long memberId, ProjectRole role, string accessToken)
+        {
+            var response = await ChangeMemberRoleRequestAsync(projectId, memberId, role, accessToken);
+
+            Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
+        }
+
         // Membership ids are only exposed by the members listing endpoint, so the owner's row is read from
         // the database until that endpoint has its own coverage.
         public async Task<long> GetProjectMemberIdAsync(Guid projectId, Guid userId)
