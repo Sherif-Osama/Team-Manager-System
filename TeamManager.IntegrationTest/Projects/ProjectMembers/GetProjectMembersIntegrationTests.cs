@@ -98,7 +98,6 @@ namespace TeamManager.IntegrationTest.Projects.ProjectMembers
 
             var roster = await _helpers.GetProjectMembersResultAsync(projectId, teamOwnerToken);
 
-            // The team owner is not on the project roster, yet the IsTeamOwner bypass still lets them read it.
             Assert.Equal(1, roster.TotalCount);
             Assert.DoesNotContain(roster.Members, m => m.UserId == teamOwnerId);
         }
@@ -251,7 +250,6 @@ namespace TeamManager.IntegrationTest.Projects.ProjectMembers
 
             Assert.Equal(2, padded.TotalCount);
 
-            // A whitespace-only term never reaches the predicate, so the whole roster comes back.
             var blank = await _helpers.GetProjectMembersResultAsync(projectId, ownerToken, "search=%20%20");
 
             Assert.Equal(4, blank.TotalCount);
@@ -264,7 +262,6 @@ namespace TeamManager.IntegrationTest.Projects.ProjectMembers
             await AddMemberToProjectAsync(teamId, projectId, ProjectRole.Member, "Roster Alpha", ownerToken);
             await AddMemberToProjectAsync(teamId, projectId, ProjectRole.Viewer, "Ops Gamma", ownerToken);
 
-            // EF escapes LIKE wildcards inside the Contains parameter, so % and _ are literals, not patterns.
             var percent = await _helpers.GetProjectMembersResultAsync(projectId, ownerToken, "search=%25");
 
             Assert.Empty(percent.Members);
