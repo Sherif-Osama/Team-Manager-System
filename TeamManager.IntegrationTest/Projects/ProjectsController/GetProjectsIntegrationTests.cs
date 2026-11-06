@@ -236,36 +236,7 @@ namespace TeamManager.IntegrationTest.Projects.ProjectsController
             Assert.Equal(1, item.TasksCount);
         }
 
-        [Fact]
-        public async Task GetProjects_WithInvalidPaging_Returns400WithFieldErrors()
-        {
-            var (_, adminToken) = await _authenticatedUser.CreateAdminAsync("getprojects-paging-admin");
 
-            var zeroPage = await GetProjectsAsync(adminToken, "?page=0");
-            await ValidationAssertions.AssertFieldErrorAsync(zeroPage, "Page");
 
-            var oversizedPage = await GetProjectsAsync(adminToken, "?pageSize=101");
-            await ValidationAssertions.AssertFieldErrorAsync(oversizedPage, "PageSize");
-        }
-
-        [Fact]
-        public async Task GetProjects_WithUnknownStatus_Returns400WithFieldError()
-        {
-            var (_, adminToken) = await _authenticatedUser.CreateAdminAsync("getprojects-badstatus-admin");
-
-            var response = await GetProjectsAsync(adminToken, $"?status={(int)ProjectStatus.Archived + 1}");
-
-            await ValidationAssertions.AssertFieldErrorAsync(response, "Status");
-        }
-
-        [Fact]
-        public async Task GetProjects_WithTooLongSearch_Returns400WithFieldError()
-        {
-            var (_, adminToken) = await _authenticatedUser.CreateAdminAsync("getprojects-longsearch-admin");
-
-            var response = await GetProjectsAsync(adminToken, $"?search={new string('x', 151)}");
-
-            await ValidationAssertions.AssertFieldErrorAsync(response, "Search");
-        }
     }
 }

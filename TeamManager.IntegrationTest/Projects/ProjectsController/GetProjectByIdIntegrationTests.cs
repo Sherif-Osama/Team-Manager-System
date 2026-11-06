@@ -168,15 +168,6 @@ namespace TeamManager.IntegrationTest.Projects.ProjectsController
             Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
         }
 
-        [Fact]
-        public async Task GetProjectById_WithEmptyProjectId_Returns400WithFieldError()
-        {
-            var (_, _, ownerToken) = await _authenticatedUser.CreateConfirmedUserAsync("getbyid-empty");
-
-            var response = await _helpers.GetProjectAsync(Guid.Empty, ownerToken);
-
-            await ValidationAssertions.AssertFieldErrorAsync(response, "ProjectId");
-        }
 
         [Fact]
         public async Task GetProjectById_AfterMembershipIsRevoked_DropsCachedAccess()

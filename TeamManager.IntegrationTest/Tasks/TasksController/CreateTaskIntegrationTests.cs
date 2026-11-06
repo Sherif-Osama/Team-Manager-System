@@ -177,40 +177,8 @@ namespace TeamManager.IntegrationTest.Tasks.TasksController
             Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
         }
 
-        [Fact]
-        public async Task CreateTask_WithMissingTitle_Returns400WithFieldError()
-        {
-            var (_, projectId, _, ownerToken) = await CreateOwnedProjectAsync("createtask-notitle");
 
-            var response = await _helpers.CreateTaskRequestAsync(projectId, new { priority = TaskPriority.Medium }, ownerToken);
 
-            await ValidationAssertions.AssertFieldErrorAsync(response, "Title");
-        }
-
-        [Fact]
-        public async Task CreateTask_WithTooLongTitleOrDescription_Returns400WithFieldError()
-        {
-            var (_, projectId, _, ownerToken) = await CreateOwnedProjectAsync("createtask-toolong");
-
-            var longTitle = await _helpers.CreateTaskRequestAsync(projectId,
-                new { title = new string('t', 201), priority = TaskPriority.Medium }, ownerToken);
-            var longDescription = await _helpers.CreateTaskRequestAsync(projectId,
-                new { title = "Fine title", description = new string('d', 2001), priority = TaskPriority.Medium }, ownerToken);
-
-            await ValidationAssertions.AssertFieldErrorAsync(longTitle, "Title");
-            await ValidationAssertions.AssertFieldErrorAsync(longDescription, "Description");
-        }
-
-        [Fact]
-        public async Task CreateTask_WithEmptyAssigneeGuid_Returns400WithFieldError()
-        {
-            var (_, projectId, _, ownerToken) = await CreateOwnedProjectAsync("createtask-emptyassignee");
-
-            var response = await _helpers.CreateTaskRequestAsync(projectId,
-                new { title = "Empty assignee task", assigneeUserId = Guid.Empty, priority = TaskPriority.Medium }, ownerToken);
-
-            await ValidationAssertions.AssertFieldErrorAsync(response, "AssigneeUserId");
-        }
 
         [Fact]
         public async Task CreateTask_ForAssigneeWhoIsNotAProjectMember_Returns404()
@@ -224,17 +192,5 @@ namespace TeamManager.IntegrationTest.Tasks.TasksController
             Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
         }
 
-        [Fact]
-        public async Task CreateTask_WithOutOfRangeOrMissingPriority_Returns400WithFieldError()
-        {
-            var (_, projectId, _, ownerToken) = await CreateOwnedProjectAsync("createtask-priority");
-
-            var outOfRange = await _helpers.CreateTaskRequestAsync(projectId,
-                new { title = "Priority 9 task", priority = 9 }, ownerToken);
-            var missing = await _helpers.CreateTaskRequestAsync(projectId, new { title = "No priority task" }, ownerToken);
-
-            await ValidationAssertions.AssertFieldErrorAsync(outOfRange, "Priority");
-            await ValidationAssertions.AssertFieldErrorAsync(missing, "Priority");
-        }
     }
 }

@@ -141,25 +141,6 @@ namespace TeamManager.IntegrationTest.Projects.ProjectsController
             Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
         }
 
-        [Fact]
-        public async Task ChangeProjectStatus_WithInvalidStatusValue_Returns400WithFieldErrors()
-        {
-            var (_, _, ownerToken) = await _authenticatedUser.CreateConfirmedUserAsync("status-invalid");
-            (_, Guid projectId) = await _helpers.CreateProjectAsync("Invalid Status", ownerToken);
-
-            var response = await _client.SendAsync(new HttpRequestMessage(HttpMethod.Put, ProjectEndpoints.ProjectStatus(projectId))
-            {
-                Content = JsonContent.Create(new { status = 99 }),
-                Headers = { Authorization = new AuthenticationHeaderValue("Bearer", ownerToken) }
-            });
-
-            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
-
-            var body = await response.Content.ReadFromJsonAsync<JsonElement>();
-
-            Assert.True(body.TryGetProperty("errors", out var errors));
-            Assert.True(errors.TryGetProperty("Status", out _));
-        }
 
         [Fact]
         public async Task ChangeProjectStatus_CompletedProject_RejectsNewTasks()

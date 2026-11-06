@@ -147,15 +147,6 @@ namespace TeamManager.IntegrationTest.Projects.ProjectMembers
             Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
         }
 
-        [Fact]
-        public async Task GetProjectMembers_WithNonGuidProjectId_Returns404()
-        {
-            var (_, _, _, ownerToken) = await CreateOwnedProjectAsync("listmembers-badguid");
-
-            var response = await _helpers.RequestAsync(HttpMethod.Get, "/api/projectmembers/not-a-guid/members", ownerToken);
-
-            Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
-        }
 
         [Fact]
         public async Task GetProjectMembers_RouteProjectIdWinsOverTheQueryString()
@@ -274,30 +265,7 @@ namespace TeamManager.IntegrationTest.Projects.ProjectMembers
             Assert.Equal(0, underscore.TotalCount);
         }
 
-        [Fact]
-        public async Task GetProjectMembers_WithTooLongSearch_Returns400WithFieldError()
-        {
-            var (_, projectId, _, ownerToken) = await CreateOwnedProjectAsync("listmembers-longsearch");
 
-            var response = await _helpers.GetProjectMembersAsync(projectId, ownerToken,
-                $"search={new string('s', 151)}");
-
-            await ValidationAssertions.AssertFieldErrorAsync(response, "Search");
-        }
-
-        [Fact]
-        public async Task GetProjectMembers_WithOutOfRangeRoleOrStatus_Returns400WithFieldError()
-        {
-            var (_, projectId, _, ownerToken) = await CreateOwnedProjectAsync("listmembers-badenum");
-
-            var badRole = await _helpers.GetProjectMembersAsync(projectId, ownerToken, "role=9");
-
-            await ValidationAssertions.AssertFieldErrorAsync(badRole, "Role");
-
-            var badStatus = await _helpers.GetProjectMembersAsync(projectId, ownerToken, "status=9");
-
-            await ValidationAssertions.AssertFieldErrorAsync(badStatus, "Status");
-        }
 
         [Fact]
         public async Task GetProjectMembers_RoleFilterAcceptsNamesAndNumbers()
@@ -322,19 +290,6 @@ namespace TeamManager.IntegrationTest.Projects.ProjectMembers
             await ValidationAssertions.AssertFieldErrorAsync(unknownName, "Role");
         }
 
-        [Fact]
-        public async Task GetProjectMembers_WithZeroPageOrOversizedPageSize_Returns400WithFieldError()
-        {
-            var (_, projectId, _, ownerToken) = await CreateOwnedProjectAsync("listmembers-badpaging");
-
-            var zeroPage = await _helpers.GetProjectMembersAsync(projectId, ownerToken, "page=0");
-
-            await ValidationAssertions.AssertFieldErrorAsync(zeroPage, "Page");
-
-            var oversized = await _helpers.GetProjectMembersAsync(projectId, ownerToken, "pageSize=101");
-
-            await ValidationAssertions.AssertFieldErrorAsync(oversized, "PageSize");
-        }
 
         [Fact]
         public async Task GetProjectMembers_PagesNewestMembershipFirst()

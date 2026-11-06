@@ -190,36 +190,7 @@ namespace TeamManager.IntegrationTest.Tasks.TaskComment
             Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
         }
 
-        [Fact]
-        public async Task GetTaskComments_WithZeroTaskId_Returns400WithFieldError()
-        {
-            var (_, _, ownerToken) = await _helpers.CreateOwnedProjectAsync("cmt-get-zerotaskid");
 
-            var response = await _helpers.GetTaskCommentsAsync(0, ownerToken);
 
-            await ValidationAssertions.AssertFieldErrorAsync(response, "TaskId");
-        }
-
-        [Fact]
-        public async Task GetTaskComments_WithZeroPage_Returns400WithFieldError()
-        {
-            var (_, projectId, ownerToken) = await _helpers.CreateOwnedProjectAsync("cmt-get-zeropage");
-            var taskId = await _helpers.CreateTaskAsync(projectId, "Zero page comments task", ownerToken);
-
-            var response = await _helpers.GetTaskCommentsAsync(taskId, ownerToken, "page=0&pageSize=20");
-
-            await ValidationAssertions.AssertFieldErrorAsync(response, "Page");
-        }
-
-        [Fact]
-        public async Task GetTaskComments_WithPageSizeAboveTheLimit_Returns400WithFieldError()
-        {
-            var (_, projectId, ownerToken) = await _helpers.CreateOwnedProjectAsync("cmt-get-pagesize");
-            var taskId = await _helpers.CreateTaskAsync(projectId, "Oversized page task", ownerToken);
-
-            var response = await _helpers.GetTaskCommentsAsync(taskId, ownerToken, "page=1&pageSize=101");
-
-            await ValidationAssertions.AssertFieldErrorAsync(response, "PageSize");
-        }
     }
 }

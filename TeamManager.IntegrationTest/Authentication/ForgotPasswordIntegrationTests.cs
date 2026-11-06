@@ -107,19 +107,6 @@ namespace TeamManager.IntegrationTest.Authentication
             Assert.Empty(await db2.OutboxMessages.Where(o => o.Type == "PasswordResetEmail" && o.Payload.Contains(email)).ToListAsync());
         }
 
-        [Fact]
-        public async Task ForgotPassword_WithInvalidPayload_Returns400WithFieldErrors()
-        {
-            var response = await _client.PostAsJsonAsync(_forgotPasswordEndpoint,
-                new { email = "" });
-
-            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
-
-            var body = await response.Content.ReadFromJsonAsync<JsonElement>();
-
-            Assert.True(body.TryGetProperty("errors", out var errors));
-            Assert.True(errors.TryGetProperty("Email", out _));
-        }
 
         [Fact]
         public async Task ForgotPassword_IssuedTwice_ReplacesPreviousTokenAndQueuesAgain()

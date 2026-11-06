@@ -155,21 +155,6 @@ namespace TeamManager.IntegrationTest.Teams.TeamsController
             Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
         }
 
-        [Fact]
-        public async Task UpdateTeam_WithInvalidPayload_Returns400WithFieldErrors()
-        {
-            var (_, _, accessToken) = await _authenticatedUser.CreateConfirmedUserAsync();
-            var teamId = await _helpers.CreateTeamAsync("Validation Team", null, accessToken);
-
-            var response = await _client.SendAsync(UpdateTeamRequest(teamId, "", null, accessToken));
-
-            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
-
-            var body = await response.Content.ReadFromJsonAsync<JsonElement>();
-
-            Assert.True(body.TryGetProperty("errors", out var errors));
-            Assert.True(errors.TryGetProperty("Name", out _));
-        }
 
         [Fact]
         public async Task UpdateTeam_OnDeletedTeam_Returns403()

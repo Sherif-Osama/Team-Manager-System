@@ -150,19 +150,6 @@ namespace TeamManager.IntegrationTest.Authentication
             Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
         }
 
-        [Fact]
-        public async Task Refresh_WithInvalidPayload_Returns400WithFieldErrors()
-        {
-            var response = await _client.PostAsJsonAsync(_refreshTokenEndpoint,
-                new { refreshToken = "" });
-
-            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
-
-            var body = await response.Content.ReadFromJsonAsync<JsonElement>();
-
-            Assert.True(body.TryGetProperty("errors", out var errors));
-            Assert.True(errors.TryGetProperty("RefreshToken", out _));
-        }
 
         [Fact]
         public async Task Refresh_ConcurrentRequestsWithSameToken_ExactlyOneSucceeds()

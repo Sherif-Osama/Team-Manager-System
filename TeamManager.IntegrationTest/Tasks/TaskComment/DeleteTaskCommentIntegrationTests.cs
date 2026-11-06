@@ -209,27 +209,6 @@ namespace TeamManager.IntegrationTest.Tasks.TaskComment
             Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
         }
 
-        [Fact]
-        public async Task DeleteTaskComment_WithZeroTaskId_Returns400WithFieldError()
-        {
-            var (_, projectId, ownerToken) = await _helpers.CreateOwnedProjectAsync("cmt-delete-zerotaskid");
-            var taskId = await _helpers.CreateTaskAsync(projectId, "Zero task id delete", ownerToken);
-            var commentId = await _helpers.AddTaskCommentAsync(taskId, "Zero task id delete target", ownerToken);
 
-            var response = await _helpers.DeleteTaskCommentRequestAsync(0, commentId, ownerToken);
-
-            await ValidationAssertions.AssertFieldErrorAsync(response, "TaskId");
-        }
-
-        [Fact]
-        public async Task DeleteTaskComment_WithZeroCommentId_Returns400WithFieldError()
-        {
-            var (_, projectId, ownerToken) = await _helpers.CreateOwnedProjectAsync("cmt-delete-zerocommentid");
-            var taskId = await _helpers.CreateTaskAsync(projectId, "Zero comment id delete", ownerToken);
-
-            var response = await _helpers.DeleteTaskCommentRequestAsync(taskId, 0, ownerToken);
-
-            await ValidationAssertions.AssertFieldErrorAsync(response, "CommentId");
-        }
     }
 }

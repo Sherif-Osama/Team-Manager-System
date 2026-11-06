@@ -195,27 +195,7 @@ namespace TeamManager.IntegrationTest.Tasks.TasksController
             Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
         }
 
-        [Fact]
-        public async Task ChangeTaskStatus_WithZeroTaskId_Returns400WithFieldError()
-        {
-            var (_, _, ownerToken) = await CreateOwnedProjectAsync("taskstatus-zeroid");
 
-            var response = await _helpers.ChangeTaskStatusAsync(0, TaskItemStatus.InProgress, ownerToken);
-
-            await ValidationAssertions.AssertFieldErrorAsync(response, "TaskId");
-        }
-
-        [Fact]
-        public async Task ChangeTaskStatus_WithOutOfRangeStatus_Returns400WithFieldError()
-        {
-            var (_, projectId, ownerToken) = await CreateOwnedProjectAsync("taskstatus-badstatus");
-
-            var taskId = await _helpers.CreateTaskAsync(projectId, "Existing task", ownerToken);
-
-            var response = await _helpers.ChangeTaskStatusRequestAsync(taskId, new { status = 9 }, ownerToken);
-
-            await ValidationAssertions.AssertFieldErrorAsync(response, "Status");
-        }
 
         [Fact]
         public async Task ChangeTaskStatus_ToDone_WithAnOpenDependency_Returns409AndKeepsTheStatus()

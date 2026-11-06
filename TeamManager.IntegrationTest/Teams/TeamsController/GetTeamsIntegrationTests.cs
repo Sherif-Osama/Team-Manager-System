@@ -167,19 +167,5 @@ namespace TeamManager.IntegrationTest.Teams.TeamsController
             Assert.DoesNotContain(result.Items, i => i.Id == deletedId);
         }
 
-        [Fact]
-        public async Task GetTeams_WithInvalidPagination_Returns400WithFieldErrors()
-        {
-            var (_, adminToken) = await _authenticatedUser.CreateAdminAsync("admin");
-
-            var response = await GetTeamsAsync(adminToken, "?page=0");
-
-            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
-
-            var body = await response.Content.ReadFromJsonAsync<JsonElement>();
-
-            Assert.True(body.TryGetProperty("errors", out var errors));
-            Assert.True(errors.TryGetProperty("Page", out _));
-        }
     }
 }

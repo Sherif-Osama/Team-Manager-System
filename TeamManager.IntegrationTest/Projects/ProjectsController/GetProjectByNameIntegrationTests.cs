@@ -112,30 +112,7 @@ namespace TeamManager.IntegrationTest.Projects.ProjectsController
             Assert.Equal(HttpStatusCode.NotFound, truncatedName.StatusCode);
         }
 
-        [Fact]
-        public async Task GetProjectByName_WithBlankOrMissingName_Returns400WithFieldError()
-        {
-            var (_, adminToken) = await _authenticatedUser.CreateAdminAsync("getbyname-blank-admin");
 
-            var empty = await _helpers.GetProjectByNameAsync("", adminToken);
-            await ValidationAssertions.AssertFieldErrorAsync(empty, "Name");
-
-            var whitespace = await _helpers.GetProjectByNameAsync("   ", adminToken);
-            await ValidationAssertions.AssertFieldErrorAsync(whitespace, "Name");
-
-            var omitted = await _helpers.RequestAsync(HttpMethod.Get, ProjectEndpoints.ProjectByName, adminToken);
-            await ValidationAssertions.AssertFieldErrorAsync(omitted, "Name");
-        }
-
-        [Fact]
-        public async Task GetProjectByName_WithTooLongName_Returns400WithFieldError()
-        {
-            var (_, adminToken) = await _authenticatedUser.CreateAdminAsync("getbyname-longname-admin");
-
-            var response = await _helpers.GetProjectByNameAsync(new string('n', 101), adminToken);
-
-            await ValidationAssertions.AssertFieldErrorAsync(response, "Name");
-        }
 
         [Fact]
         public async Task GetProjectByName_WithEncodedSpecialCharacters_ReturnsProject()

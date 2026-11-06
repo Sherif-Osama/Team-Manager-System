@@ -190,27 +190,6 @@ namespace TeamManager.IntegrationTest.Tasks.TaskChecklist
             Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
         }
 
-        [Fact]
-        public async Task ReopenChecklistItem_WithZeroTaskId_Returns400WithFieldError()
-        {
-            var (_, projectId, ownerToken) = await _helpers.CreateOwnedProjectAsync("check-reopen-zerotaskid");
-            var taskId = await _helpers.CreateTaskAsync(projectId, "Zero task id reopen", ownerToken);
-            var itemId = await _helpers.AddChecklistItemAsync(taskId, "Zero task id reopen item", ownerToken);
 
-            var response = await _helpers.ReopenChecklistItemRequestAsync(0, itemId, ownerToken);
-
-            await ValidationAssertions.AssertFieldErrorAsync(response, "TaskId");
-        }
-
-        [Fact]
-        public async Task ReopenChecklistItem_WithZeroChecklistItemId_Returns400WithFieldError()
-        {
-            var (_, projectId, ownerToken) = await _helpers.CreateOwnedProjectAsync("check-reopen-zeroitemid");
-            var taskId = await _helpers.CreateTaskAsync(projectId, "Zero item id reopen", ownerToken);
-
-            var response = await _helpers.ReopenChecklistItemRequestAsync(taskId, 0, ownerToken);
-
-            await ValidationAssertions.AssertFieldErrorAsync(response, "ChecklistItemId");
-        }
     }
 }

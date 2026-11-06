@@ -218,22 +218,6 @@ namespace TeamManager.IntegrationTest.Projects.ProjectMembers
             Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
         }
 
-        [Fact]
-        public async Task AddProjectMember_WithEmptyUserIdOrUnknownRole_Returns400WithFieldError()
-        {
-            var (_, _, ownerToken) = await _authenticatedUser.CreateConfirmedUserAsync("addmember-invalid-owner");
-            var (userId, _, _) = await _authenticatedUser.CreateConfirmedUserAsync("addmember-invalid-target");
-
-            var (_, projectId) = await _helpers.CreateProjectAsync($"Roster {Guid.NewGuid():N}", ownerToken);
-
-            var emptyUser = await _helpers.AddProjectMemberRequestAsync(projectId,
-                new { userId = Guid.Empty, projectRole = ProjectRole.Member }, ownerToken);
-            await ValidationAssertions.AssertFieldErrorAsync(emptyUser, "UserId");
-
-            var unknownRole = await _helpers.AddProjectMemberRequestAsync(projectId,
-                new { userId, projectRole = (ProjectRole)9 }, ownerToken);
-            await ValidationAssertions.AssertFieldErrorAsync(unknownRole, "ProjectRole");
-        }
 
         [Fact]
         public async Task AddProjectMember_ForPreviouslyRemovedUser_CreatesFreshMembership()

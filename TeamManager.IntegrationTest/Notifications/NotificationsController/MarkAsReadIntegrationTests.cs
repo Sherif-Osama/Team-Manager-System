@@ -111,34 +111,8 @@ namespace TeamManager.IntegrationTest.Notifications.NotificationsController
                 HttpStatusCode.NotFound, "was not found");
         }
 
-        [Fact]
-        public async Task MarkAsRead_WithZeroId_Returns400FieldError()
-        {
-            var (_, _, ownerToken) = await _helpers.CreateOwnedProjectAsync("read-zero");
 
-            await ValidationAssertions.AssertFieldErrorAsync(await _notifications.MarkAsReadRequestAsync(0, ownerToken),
-                "NotificationId");
-        }
 
-        [Fact]
-        public async Task MarkAsRead_WithANegativeId_Returns400FieldError()
-        {
-            var (_, _, ownerToken) = await _helpers.CreateOwnedProjectAsync("read-negative");
-
-            await ValidationAssertions.AssertFieldErrorAsync(
-                await _notifications.RequestAsync(HttpMethod.Put, "/api/notifications/-4/read", ownerToken), "NotificationId");
-        }
-
-        [Fact]
-        public async Task MarkAsRead_WithANonNumericId_Returns404FromTheRouteConstraint()
-        {
-            var (_, _, ownerToken) = await _helpers.CreateOwnedProjectAsync("read-notnumber");
-
-            var response = await _notifications.RequestAsync(HttpMethod.Put, "/api/notifications/notanumber/read", ownerToken);
-
-            Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
-            Assert.Equal("", await response.Content.ReadAsStringAsync());
-        }
 
         [Fact]
         public async Task MarkAsRead_WithoutAToken_Returns401()

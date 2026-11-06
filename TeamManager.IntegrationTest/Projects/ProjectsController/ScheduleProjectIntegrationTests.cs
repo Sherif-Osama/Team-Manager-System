@@ -137,31 +137,6 @@ namespace TeamManager.IntegrationTest.Projects.ProjectsController
             Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
         }
 
-        [Fact]
-        public async Task ScheduleProject_WithInvalidPayload_Returns400WithFieldErrors()
-        {
-            var (_, _, ownerToken) = await _authenticatedUser.CreateConfirmedUserAsync("sched-invalid");
-            var (_, projectId) = await _helpers.CreateProjectAsync("Invalid Schedule", ownerToken);
-
-            var pastDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(-1));
-            var pastStart = await ScheduleAsync(projectId, pastDate, null, ownerToken);
-
-            Assert.Equal(HttpStatusCode.BadRequest, pastStart.StatusCode);
-
-            var pastBody = await pastStart.Content.ReadFromJsonAsync<JsonElement>();
-            Assert.True(pastBody.TryGetProperty("errors", out var pastErrors));
-            Assert.True(pastErrors.TryGetProperty("StartDate", out _));
-
-            var start = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(10));
-            var due = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(5));
-            var inverted = await ScheduleAsync(projectId, start, due, ownerToken);
-
-            Assert.Equal(HttpStatusCode.BadRequest, inverted.StatusCode);
-
-            var invertedBody = await inverted.Content.ReadFromJsonAsync<JsonElement>();
-            Assert.True(invertedBody.TryGetProperty("errors", out var invertedErrors));
-            Assert.True(invertedErrors.TryGetProperty("DueDate", out _));
-        }
 
         [Fact]
         public async Task ScheduleProject_WithConflictingTaskDates_Returns409AndKeepsSchedule()

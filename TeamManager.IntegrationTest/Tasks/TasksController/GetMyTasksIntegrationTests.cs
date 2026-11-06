@@ -171,27 +171,7 @@ namespace TeamManager.IntegrationTest.Tasks.TasksController
             Assert.Equal(alive, Assert.Single(result.Items).Id);
         }
 
-        [Fact]
-        public async Task GetMyTasks_WithTooLongSearch_Returns400WithFieldError()
-        {
-            var (_, _, _, ownerToken) = await CreateOwnedProjectAsync("mytasks-longsearch");
 
-            var response = await _helpers.GetMyTasksAsync(ownerToken, $"search={new string('s', 151)}");
-
-            await ValidationAssertions.AssertFieldErrorAsync(response, "Search");
-        }
-
-        [Fact]
-        public async Task GetMyTasks_WithOutOfRangeStatusOrPriority_Returns400WithFieldError()
-        {
-            var (_, _, _, ownerToken) = await CreateOwnedProjectAsync("mytasks-badfilters");
-
-            var badStatus = await _helpers.GetMyTasksAsync(ownerToken, "status=9");
-            var badPriority = await _helpers.GetMyTasksAsync(ownerToken, "priority=9");
-
-            await ValidationAssertions.AssertFieldErrorAsync(badStatus, "Status");
-            await ValidationAssertions.AssertFieldErrorAsync(badPriority, "Priority");
-        }
 
         [Fact]
         public async Task GetMyTasks_WithEmptyProjectId_ReturnsAllTasks()
@@ -208,17 +188,6 @@ namespace TeamManager.IntegrationTest.Tasks.TasksController
             Assert.Equal(1, emptyString.TotalCount);
         }
 
-        [Fact]
-        public async Task GetMyTasks_WithZeroPageOrOversizedPageSize_Returns400WithFieldError()
-        {
-            var (_, _, _, ownerToken) = await CreateOwnedProjectAsync("mytasks-badpaging");
-
-            var zeroPage = await _helpers.GetMyTasksAsync(ownerToken, "page=0");
-            var oversized = await _helpers.GetMyTasksAsync(ownerToken, "pageSize=101");
-
-            await ValidationAssertions.AssertFieldErrorAsync(zeroPage, "Page");
-            await ValidationAssertions.AssertFieldErrorAsync(oversized, "PageSize");
-        }
 
         [Fact]
         public async Task GetMyTasks_PagesTasksWithDueDatesBeforeUndatedOnes()

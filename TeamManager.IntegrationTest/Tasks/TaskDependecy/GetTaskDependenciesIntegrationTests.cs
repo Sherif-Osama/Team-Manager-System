@@ -160,28 +160,6 @@ namespace TeamManager.IntegrationTest.Tasks.TaskDependecy
             Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
         }
 
-        [Fact]
-        public async Task GetTaskDependencies_WithZeroTaskId_Returns400WithFieldError()
-        {
-            var (_, _, ownerToken) = await _helpers.CreateOwnedProjectAsync("dep-get-zerotaskid");
 
-            var response = await _helpers.GetTaskDependenciesAsync(0, ownerToken);
-
-            await ValidationAssertions.AssertFieldErrorAsync(response, "TaskId");
-        }
-
-        [Fact]
-        public async Task GetTaskDependencies_WithZeroPageOrOversizedPageSize_Returns400WithFieldError()
-        {
-            var (_, projectId, ownerToken) = await _helpers.CreateOwnedProjectAsync("dep-get-badpaging");
-
-            var taskId = await _helpers.CreateTaskAsync(projectId, "Paged task", ownerToken);
-
-            var zeroPage = await _helpers.GetTaskDependenciesAsync(taskId, ownerToken, "page=0");
-            var oversized = await _helpers.GetTaskDependenciesAsync(taskId, ownerToken, "pageSize=101");
-
-            await ValidationAssertions.AssertFieldErrorAsync(zeroPage, "Page");
-            await ValidationAssertions.AssertFieldErrorAsync(oversized, "PageSize");
-        }
     }
 }

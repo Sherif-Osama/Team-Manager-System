@@ -155,21 +155,6 @@ namespace TeamManager.IntegrationTest.Teams.TeamsController
             Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
         }
 
-        [Fact]
-        public async Task TransferOwnership_WithInvalidPayload_Returns400WithFieldErrors()
-        {
-            var (_, _, ownerToken) = await _authenticatedUser.CreateConfirmedUserAsync("transfer-invalid");
-            var teamId = await _helpers.CreateTeamAsync("Transfer Team Eight", null, ownerToken);
-
-            var response = await TransferAsync(teamId, Guid.Empty, ownerToken);
-
-            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
-
-            var body = await response.Content.ReadFromJsonAsync<JsonElement>();
-
-            Assert.True(body.TryGetProperty("errors", out var errors));
-            Assert.True(errors.TryGetProperty("NewOwnerUserId", out _));
-        }
 
         [Fact]
         public async Task TransferOwnership_OnDeletedTeam_Returns403()

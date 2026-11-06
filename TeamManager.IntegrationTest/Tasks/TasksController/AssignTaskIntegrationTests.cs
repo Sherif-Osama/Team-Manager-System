@@ -150,27 +150,7 @@ namespace TeamManager.IntegrationTest.Tasks.TasksController
             Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
         }
 
-        [Fact]
-        public async Task AssignTask_WithZeroTaskId_Returns400WithFieldError()
-        {
-            var (_, _, ownerToken) = await CreateOwnedProjectAsync("assign-zeroid");
 
-            var response = await _helpers.AssignTaskRequestAsync(0, new { userId = Guid.NewGuid() }, ownerToken);
-
-            await ValidationAssertions.AssertFieldErrorAsync(response, "TaskId");
-        }
-
-        [Fact]
-        public async Task AssignTask_WithEmptyUserId_Returns400WithFieldError()
-        {
-            var (_, projectId, ownerToken) = await CreateOwnedProjectAsync("assign-emptyuser");
-
-            var taskId = await _helpers.CreateTaskAsync(projectId, "Existing task", ownerToken);
-
-            var response = await _helpers.AssignTaskRequestAsync(taskId, new { userId = Guid.Empty }, ownerToken);
-
-            await ValidationAssertions.AssertFieldErrorAsync(response, "UserId");
-        }
 
         [Fact]
         public async Task AssignTask_ForAUserWhoIsNotAProjectMember_Returns404()

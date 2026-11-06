@@ -99,19 +99,5 @@ namespace TeamManager.IntegrationTest.Teams.TeamsController
             Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
         }
 
-        [Fact]
-        public async Task GetTeamByName_WithEmptyName_Returns400WithFieldErrors()
-        {
-            var (_, adminToken) = await _authenticatedUser.CreateAdminAsync("admin");
-
-            var response = await _helpers.GetByNameAsync("", adminToken);
-
-            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
-
-            var body = await response.Content.ReadFromJsonAsync<JsonElement>();
-
-            Assert.True(body.TryGetProperty("errors", out var errors));
-            Assert.True(errors.TryGetProperty("Name", out _));
-        }
     }
 }

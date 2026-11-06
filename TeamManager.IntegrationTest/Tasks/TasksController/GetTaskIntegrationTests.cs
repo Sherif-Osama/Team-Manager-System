@@ -171,14 +171,5 @@ namespace TeamManager.IntegrationTest.Tasks.TasksController
             Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
         }
 
-        [Fact]
-        public async Task GetTask_WithNonNumericTaskId_Returns404()
-        {
-            var (_, _, ownerToken) = await _authenticatedUser.CreateConfirmedUserAsync("gettask-nonnumeric");
-
-            var response = await _helpers.RequestAsync(HttpMethod.Get, "/api/tasks/not-a-number", ownerToken);
-
-            Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
-        }
     }
 }

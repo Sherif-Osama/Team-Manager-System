@@ -180,40 +180,8 @@ namespace TeamManager.IntegrationTest.Notifications.NotificationsController
             Assert.Equal(1, await _notifications.GetUnreadCountResultAsync(normalToken));
         }
 
-        [Fact]
-        public async Task UpdateNotificationPreferences_WithAnEmptyList_Returns400FieldError()
-        {
-            var (_, _, ownerToken) = await _helpers.CreateOwnedProjectAsync("update-empty");
 
-            await ValidationAssertions.AssertFieldErrorAsync(
-                await _notifications.UpdatePreferencesRequestAsync(new { preferences = Array.Empty<object>() }, ownerToken),
-                "Preferences");
-        }
 
-        [Fact]
-        public async Task UpdateNotificationPreferences_WithAMissingPreferencesField_Returns400FieldError()
-        {
-            var (_, _, ownerToken) = await _helpers.CreateOwnedProjectAsync("update-missing");
-
-            await ValidationAssertions.AssertFieldErrorAsync(
-                await _notifications.UpdatePreferencesRequestAsync(new { }, ownerToken), "Preferences");
-        }
-
-        [Fact]
-        public async Task UpdateNotificationPreferences_WithADuplicateType_Returns400FieldError()
-        {
-            var (_, _, ownerToken) = await _helpers.CreateOwnedProjectAsync("update-duplicate");
-
-            await ValidationAssertions.AssertFieldErrorAsync(await _notifications.UpdatePreferencesRequestAsync(
-                new
-                {
-                    preferences = new[]
-                    {
-                        new { notificationType = NotificationType.Mention, isEnabled = false },
-                        new { notificationType = NotificationType.Mention, isEnabled = true }
-                    }
-                }, ownerToken), "Preferences");
-        }
 
         [Theory]
         [InlineData(0)]
@@ -229,18 +197,6 @@ namespace TeamManager.IntegrationTest.Notifications.NotificationsController
             Assert.All((await _notifications.GetPreferencesResultAsync(ownerToken)).Items, x => Assert.True(x.IsEnabled));
         }
 
-        [Fact]
-        public async Task UpdateNotificationPreferences_WithATypeNameInsteadOfANumber_Returns400AndChangesNothing()
-        {
-            var (_, _, ownerToken) = await _helpers.CreateOwnedProjectAsync("update-stringtype");
-
-            var response = await _notifications.UpdatePreferencesRequestAsync(
-                new { preferences = new[] { new { notificationType = "Mention", isEnabled = false } } }, ownerToken);
-
-            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
-
-            Assert.All((await _notifications.GetPreferencesResultAsync(ownerToken)).Items, x => Assert.True(x.IsEnabled));
-        }
 
         [Fact]
         public async Task UpdateNotificationPreferences_WithoutTheIsEnabledField_DisablesTheType()

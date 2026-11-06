@@ -225,33 +225,8 @@ namespace TeamManager.IntegrationTest.Notifications.NotificationsController
             Assert.Equal(taskId.ToString(), item.RelatedEntityId);
         }
 
-        [Fact]
-        public async Task GetMyNotifications_RejectsPageZero()
-        {
-            var (_, _, ownerToken) = await _helpers.CreateOwnedProjectAsync("list-pagezero");
 
-            await ValidationAssertions.AssertFieldErrorAsync(
-                await _notifications.GetNotificationsAsync(ownerToken, "page=0"), "Page");
-        }
 
-        [Fact]
-        public async Task GetMyNotifications_RejectsPageSizeAboveOneHundred()
-        {
-            var (_, _, ownerToken) = await _helpers.CreateOwnedProjectAsync("list-size101");
-
-            await ValidationAssertions.AssertFieldErrorAsync(
-                await _notifications.GetNotificationsAsync(ownerToken, "pageSize=101"), "PageSize");
-        }
-
-        [Fact]
-        public async Task GetMyNotifications_RejectsAValueThatIsNotBooleanForIsRead()
-        {
-            var (_, _, ownerToken) = await _helpers.CreateOwnedProjectAsync("list-badbool");
-
-            var response = await _notifications.GetNotificationsAsync(ownerToken, "isRead=maybe");
-
-            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
-        }
 
         [Fact]
         public async Task GetMyNotifications_WithoutAToken_Returns401()

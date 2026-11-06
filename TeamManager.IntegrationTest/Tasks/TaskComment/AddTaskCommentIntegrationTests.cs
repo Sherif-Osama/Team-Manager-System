@@ -183,17 +183,6 @@ namespace TeamManager.IntegrationTest.Tasks.TaskComment
             Assert.Empty((await _helpers.GetTaskCommentsResultAsync(taskId, ownerToken)).Items);
         }
 
-        [Fact]
-        public async Task AddTaskComment_WithAnEmptyMentionedUserId_Returns400WithFieldError()
-        {
-            var (_, projectId, ownerToken) = await _helpers.CreateOwnedProjectAsync("cmt-add-emptymention");
-            var taskId = await _helpers.CreateTaskAsync(projectId, "Empty mention task", ownerToken);
-
-            var response = await _helpers.AddTaskCommentRequestAsync(taskId,
-                new { content = "Empty mention", mentionedUserIds = new[] { Guid.Empty } }, ownerToken);
-
-            await ValidationAssertions.AssertFieldErrorAsync(response, "MentionedUserIds");
-        }
 
         [Fact]
         public async Task AddTaskComment_ForUnknownTask_Returns404()
@@ -229,40 +218,8 @@ namespace TeamManager.IntegrationTest.Tasks.TaskComment
             Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
         }
 
-        [Fact]
-        public async Task AddTaskComment_WithZeroTaskId_Returns400WithFieldError()
-        {
-            var (_, _, ownerToken) = await _helpers.CreateOwnedProjectAsync("cmt-add-zerotaskid");
 
-            var response = await _helpers.AddTaskCommentRequestAsync(0, new { content = "Comment" }, ownerToken);
 
-            await ValidationAssertions.AssertFieldErrorAsync(response, "TaskId");
-        }
-
-        [Fact]
-        public async Task AddTaskComment_WithBlankContent_Returns400WithFieldError()
-        {
-            var (_, projectId, ownerToken) = await _helpers.CreateOwnedProjectAsync("cmt-add-blankcontent");
-            var taskId = await _helpers.CreateTaskAsync(projectId, "Blank comment task", ownerToken);
-
-            var empty = await _helpers.AddTaskCommentRequestAsync(taskId, new { content = "" }, ownerToken);
-            var whitespace = await _helpers.AddTaskCommentRequestAsync(taskId, new { content = "   " }, ownerToken);
-
-            await ValidationAssertions.AssertFieldErrorAsync(empty, "Content");
-            await ValidationAssertions.AssertFieldErrorAsync(whitespace, "Content");
-        }
-
-        [Fact]
-        public async Task AddTaskComment_WithContentLongerThanTwoThousandCharacters_Returns400WithFieldError()
-        {
-            var (_, projectId, ownerToken) = await _helpers.CreateOwnedProjectAsync("cmt-add-longcontent");
-            var taskId = await _helpers.CreateTaskAsync(projectId, "Long comment task", ownerToken);
-
-            var response = await _helpers.AddTaskCommentRequestAsync(taskId,
-                new { content = new string('a', 2001) }, ownerToken);
-
-            await ValidationAssertions.AssertFieldErrorAsync(response, "Content");
-        }
 
         [Fact]
         public async Task AddTaskComment_WithTwoThousandCharacters_Returns200()

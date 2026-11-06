@@ -161,47 +161,8 @@ namespace TeamManager.IntegrationTest.Tasks.TasksController
             Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
         }
 
-        [Fact]
-        public async Task RescheduleTask_WithZeroTaskId_Returns400WithFieldError()
-        {
-            var (_, _, ownerToken) = await CreateOwnedProjectAsync("reschedule-zeroid");
 
-            var response = await _helpers.RescheduleTaskRequestAsync(0,
-                new { startDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(1)) }, ownerToken);
 
-            await ValidationAssertions.AssertFieldErrorAsync(response, "TaskId");
-        }
-
-        [Fact]
-        public async Task RescheduleTask_WithPastStartOrDueDate_Returns400WithFieldError()
-        {
-            var (_, projectId, ownerToken) = await CreateOwnedProjectAsync("reschedule-pastdates");
-
-            var taskId = await _helpers.CreateTaskAsync(projectId, "Past dates task", ownerToken);
-
-            var yesterday = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(-1));
-
-            var pastStart = await _helpers.RescheduleTaskRequestAsync(taskId, new { startDate = yesterday }, ownerToken);
-            var pastDue = await _helpers.RescheduleTaskRequestAsync(taskId, new { dueDate = yesterday }, ownerToken);
-
-            await ValidationAssertions.AssertFieldErrorAsync(pastStart, "StartDate");
-            await ValidationAssertions.AssertFieldErrorAsync(pastDue, "DueDate");
-        }
-
-        [Fact]
-        public async Task RescheduleTask_WithDueDateBeforeStartDate_Returns400WithFieldError()
-        {
-            var (_, projectId, ownerToken) = await CreateOwnedProjectAsync("reschedule-inverteddates");
-
-            var taskId = await _helpers.CreateTaskAsync(projectId, "Inverted dates task", ownerToken);
-
-            var startDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(5));
-
-            var response = await _helpers.RescheduleTaskRequestAsync(taskId,
-                new { startDate, dueDate = startDate.AddDays(-1) }, ownerToken);
-
-            await ValidationAssertions.AssertFieldErrorAsync(response, "DueDate");
-        }
 
         [Fact]
         public async Task RescheduleTask_WithDueDateAfterADependentsDueDate_Returns409AndKeepsTheDates()

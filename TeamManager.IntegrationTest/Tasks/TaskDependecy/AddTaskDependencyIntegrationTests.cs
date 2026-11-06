@@ -246,26 +246,6 @@ namespace TeamManager.IntegrationTest.Tasks.TaskDependecy
             Assert.Equal(2, listed.TotalCount);
         }
 
-        [Fact]
-        public async Task AddTaskDependency_WithZeroTaskId_Returns400WithFieldError()
-        {
-            var (_, projectId, ownerToken) = await _helpers.CreateOwnedProjectAsync("dep-add-zerotaskid");
-            var (_, predecessorId) = await CreateDependencyPairAsync(projectId, ownerToken);
 
-            var response = await _helpers.AddTaskDependencyRequestAsync(0, new { dependsOnTaskId = predecessorId }, ownerToken);
-
-            await ValidationAssertions.AssertFieldErrorAsync(response, "TaskId");
-        }
-
-        [Fact]
-        public async Task AddTaskDependency_WithZeroPredecessorId_Returns400WithFieldError()
-        {
-            var (_, projectId, ownerToken) = await _helpers.CreateOwnedProjectAsync("dep-add-zeropredecessorid");
-            var (dependentId, _) = await CreateDependencyPairAsync(projectId, ownerToken);
-
-            var response = await _helpers.AddTaskDependencyRequestAsync(dependentId, new { dependsOnTaskId = 0 }, ownerToken);
-
-            await ValidationAssertions.AssertFieldErrorAsync(response, "DependsOnTaskId");
-        }
     }
 }

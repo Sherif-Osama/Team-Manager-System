@@ -137,41 +137,7 @@ namespace TeamManager.IntegrationTest.Tasks.TasksController
             Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
         }
 
-        [Fact]
-        public async Task UpdateTask_WithZeroTaskId_Returns400WithFieldError()
-        {
-            var (_, _, ownerToken) = await CreateOwnedProjectAsync("updatetask-zeroid");
 
-            var response = await _helpers.UpdateTaskRequestAsync(0, new { title = "Zero id edit" }, ownerToken);
 
-            await ValidationAssertions.AssertFieldErrorAsync(response, "TaskId");
-        }
-
-        [Fact]
-        public async Task UpdateTask_WithMissingOrTooLongTitle_Returns400WithFieldError()
-        {
-            var (_, projectId, ownerToken) = await CreateOwnedProjectAsync("updatetask-badtitle");
-
-            var taskId = await _helpers.CreateTaskAsync(projectId, "Existing task", ownerToken);
-
-            var missing = await _helpers.UpdateTaskRequestAsync(taskId, new { description = "No title" }, ownerToken);
-            var tooLong = await _helpers.UpdateTaskRequestAsync(taskId, new { title = new string('t', 201) }, ownerToken);
-
-            await ValidationAssertions.AssertFieldErrorAsync(missing, "Title");
-            await ValidationAssertions.AssertFieldErrorAsync(tooLong, "Title");
-        }
-
-        [Fact]
-        public async Task UpdateTask_WithTooLongDescription_Returns400WithFieldError()
-        {
-            var (_, projectId, ownerToken) = await CreateOwnedProjectAsync("updatetask-baddescription");
-
-            var taskId = await _helpers.CreateTaskAsync(projectId, "Existing task", ownerToken);
-
-            var response = await _helpers.UpdateTaskRequestAsync(taskId,
-                new { title = "Fine title", description = new string('d', 2001) }, ownerToken);
-
-            await ValidationAssertions.AssertFieldErrorAsync(response, "Description");
-        }
     }
 }

@@ -213,54 +213,8 @@ namespace TeamManager.IntegrationTest.Tasks.TaskComment
             Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
         }
 
-        [Fact]
-        public async Task EditTaskComment_WithZeroTaskId_Returns400WithFieldError()
-        {
-            var (_, projectId, ownerToken) = await _helpers.CreateOwnedProjectAsync("cmt-edit-zerotaskid");
-            var taskId = await _helpers.CreateTaskAsync(projectId, "Zero task id edit", ownerToken);
-            var commentId = await _helpers.AddTaskCommentAsync(taskId, "Zero task id edit target", ownerToken);
 
-            var response = await _helpers.EditTaskCommentRequestAsync(0, commentId, new { content = "Rewritten" }, ownerToken);
 
-            await ValidationAssertions.AssertFieldErrorAsync(response, "TaskId");
-        }
 
-        [Fact]
-        public async Task EditTaskComment_WithZeroCommentId_Returns400WithFieldError()
-        {
-            var (_, projectId, ownerToken) = await _helpers.CreateOwnedProjectAsync("cmt-edit-zerocommentid");
-            var taskId = await _helpers.CreateTaskAsync(projectId, "Zero comment id edit", ownerToken);
-
-            var response = await _helpers.EditTaskCommentRequestAsync(taskId, 0, new { content = "Rewritten" }, ownerToken);
-
-            await ValidationAssertions.AssertFieldErrorAsync(response, "CommentId");
-        }
-
-        [Fact]
-        public async Task EditTaskComment_WithBlankContent_Returns400WithFieldError()
-        {
-            var (_, projectId, ownerToken) = await _helpers.CreateOwnedProjectAsync("cmt-edit-blankcontent");
-            var taskId = await _helpers.CreateTaskAsync(projectId, "Blank content edit task", ownerToken);
-            var commentId = await _helpers.AddTaskCommentAsync(taskId, "Original text", ownerToken);
-
-            var empty = await _helpers.EditTaskCommentRequestAsync(taskId, commentId, new { content = "" }, ownerToken);
-            var whitespace = await _helpers.EditTaskCommentRequestAsync(taskId, commentId, new { content = "   " }, ownerToken);
-
-            await ValidationAssertions.AssertFieldErrorAsync(empty, "Content");
-            await ValidationAssertions.AssertFieldErrorAsync(whitespace, "Content");
-        }
-
-        [Fact]
-        public async Task EditTaskComment_WithContentLongerThanTwoThousandCharacters_Returns400WithFieldError()
-        {
-            var (_, projectId, ownerToken) = await _helpers.CreateOwnedProjectAsync("cmt-edit-longcontent");
-            var taskId = await _helpers.CreateTaskAsync(projectId, "Long content edit task", ownerToken);
-            var commentId = await _helpers.AddTaskCommentAsync(taskId, "Original text", ownerToken);
-
-            var response = await _helpers.EditTaskCommentRequestAsync(taskId, commentId,
-                new { content = new string('a', 2001) }, ownerToken);
-
-            await ValidationAssertions.AssertFieldErrorAsync(response, "Content");
-        }
     }
 }

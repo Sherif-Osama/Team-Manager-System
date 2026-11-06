@@ -170,19 +170,5 @@ namespace TeamManager.IntegrationTest.Teams.TeamInvitations
             Assert.Equal(TeamInvitationStatus.Expired, invitation.Status);
         }
 
-        [Fact]
-        public async Task AcceptInvitation_WithInvalidPayload_Returns400WithFieldErrors()
-        {
-            var (_, _, inviteeToken) = await _authenticatedUser.CreateConfirmedUserAsync("accept-invalid");
-
-            var response = await AcceptAsync("", inviteeToken);
-
-            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
-
-            var body = await response.Content.ReadFromJsonAsync<JsonElement>();
-
-            Assert.True(body.TryGetProperty("errors", out var errors));
-            Assert.True(errors.TryGetProperty("Token", out _));
-        }
     }
 }

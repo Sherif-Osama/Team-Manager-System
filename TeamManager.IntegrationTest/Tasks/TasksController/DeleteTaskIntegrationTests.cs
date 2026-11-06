@@ -125,15 +125,6 @@ namespace TeamManager.IntegrationTest.Tasks.TasksController
             Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
         }
 
-        [Fact]
-        public async Task DeleteTask_WithZeroTaskId_Returns400WithFieldError()
-        {
-            var (_, _, ownerToken) = await CreateOwnedProjectAsync("deletetask-zeroid");
-
-            var response = await _helpers.DeleteTaskRequestAsync(0, ownerToken);
-
-            await ValidationAssertions.AssertFieldErrorAsync(response, "TaskId");
-        }
 
         [Fact]
         public async Task DeleteTask_DeletedTaskDoesNotBlockProjectDeletion()

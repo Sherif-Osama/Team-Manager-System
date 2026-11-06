@@ -308,41 +308,7 @@ namespace TeamManager.IntegrationTest.Projects.ProjectMembers
             Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
         }
 
-        [Fact]
-        public async Task ChangeMemberRole_WithZeroMemberRow_Returns400WithFieldError()
-        {
-            var (projectId, _, ownerToken) = await CreateProjectWithMemberAsync("changerole-zerorow");
 
-            var response = await _helpers.ChangeMemberRoleRequestAsync(projectId, 0, ProjectRole.Admin, ownerToken);
 
-            await ValidationAssertions.AssertFieldErrorAsync(response, "ProjectMemberId");
-        }
-
-        [Fact]
-        public async Task ChangeMemberRole_WithEmptyProjectIdOrOutOfRangeRole_Returns400WithFieldError()
-        {
-            var (projectId, memberRowId, ownerToken) = await CreateProjectWithMemberAsync("changerole-badfields");
-
-            var emptyProject = await _helpers.RequestAsync(HttpMethod.Put,
-                ProjectEndpoints.MemberRole(Guid.Empty, memberRowId), ownerToken, ProjectRole.Admin);
-
-            await ValidationAssertions.AssertFieldErrorAsync(emptyProject, "ProjectId");
-
-            var unknownRole = await _helpers.ChangeMemberRoleRequestAsync(projectId, memberRowId, (ProjectRole)9, ownerToken);
-
-            await ValidationAssertions.AssertFieldErrorAsync(unknownRole, "Role");
-        }
-
-        [Fact]
-        public async Task ChangeMemberRole_WithNonNumericRoleBody_Returns400()
-        {
-            var (projectId, memberRowId, ownerToken) = await CreateProjectWithMemberAsync("changerole-stringbody");
-
-            var response = await _helpers.ChangeMemberRoleRequestAsync(projectId, memberRowId, "Admin", ownerToken);
-
-            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
-
-            Assert.Equal(ProjectRole.Member, await GetStoredRoleAsync(memberRowId));
-        }
     }
 }

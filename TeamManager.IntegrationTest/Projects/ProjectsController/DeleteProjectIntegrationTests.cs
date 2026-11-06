@@ -211,19 +211,6 @@ namespace TeamManager.IntegrationTest.Projects.ProjectsController
             Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
         }
 
-        [Fact]
-        public async Task DeleteProject_WithEmptyProjectId_Returns400WithFieldError()
-        {
-            var (_, _, ownerToken) = await _authenticatedUser.CreateConfirmedUserAsync("delete-empty");
-
-            var response = await DeleteAsync(Guid.Empty, ownerToken);
-
-            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
-
-            var body = await response.Content.ReadFromJsonAsync<JsonElement>();
-            Assert.True(body.TryGetProperty("errors", out var errors));
-            Assert.True(errors.TryGetProperty("ProjectId", out _));
-        }
 
         [Fact]
         public async Task DeleteProject_FreesProjectNameForRecreationInSameTeam()

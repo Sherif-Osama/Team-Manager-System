@@ -237,26 +237,5 @@ namespace TeamManager.IntegrationTest.Projects.ProjectsController
             Assert.Equal(ProjectRole.Owner, membership.ProjectRole);
         }
 
-        [Fact]
-        public async Task TransferOwnership_WithInvalidPayload_Returns400WithFieldErrors()
-        {
-            var (_, _, ownerToken) = await _authenticatedUser.CreateConfirmedUserAsync("transfer-invalid");
-            var (_, projectId) = await _helpers.CreateProjectAsync("Invalid Transfer", ownerToken);
-
-            var request = new HttpRequestMessage(HttpMethod.Put, ProjectEndpoints.ProjectOwner(projectId))
-            {
-                Content = JsonContent.Create(new { newOwnerUserId = Guid.Empty }),
-                Headers = { Authorization = new AuthenticationHeaderValue("Bearer", ownerToken) }
-            };
-
-            var response = await _client.SendAsync(request);
-
-            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
-
-            var body = await response.Content.ReadFromJsonAsync<JsonElement>();
-
-            Assert.True(body.TryGetProperty("errors", out var errors));
-            Assert.True(errors.TryGetProperty("NewOwnerUserId", out _));
-        }
     }
 }

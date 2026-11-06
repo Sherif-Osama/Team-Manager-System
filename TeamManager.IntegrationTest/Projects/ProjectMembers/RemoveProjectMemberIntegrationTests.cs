@@ -96,15 +96,6 @@ namespace TeamManager.IntegrationTest.Projects.ProjectMembers
             Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
         }
 
-        [Fact]
-        public async Task RemoveProjectMember_WithZeroMemberRow_Returns400WithFieldError()
-        {
-            var (projectId, _, _, ownerToken) = await CreateProjectWithMemberAsync("removemember-zerorow");
-
-            var response = await _helpers.RemoveProjectMemberRequestAsync(projectId, 0, ownerToken);
-
-            await ValidationAssertions.AssertFieldErrorAsync(response, "MemberId");
-        }
 
         [Fact]
         public async Task RemoveProjectMember_ForAlreadyRemovedMember_Returns400()

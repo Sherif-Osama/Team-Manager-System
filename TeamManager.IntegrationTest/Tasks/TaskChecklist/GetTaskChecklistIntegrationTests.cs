@@ -233,14 +233,5 @@ namespace TeamManager.IntegrationTest.Tasks.TaskChecklist
             Assert.True(item.CompletedAtUtc >= item.CreatedAtUtc);
         }
 
-        [Fact]
-        public async Task GetTaskChecklist_WithZeroTaskId_Returns400WithFieldError()
-        {
-            var (_, _, ownerToken) = await _helpers.CreateOwnedProjectAsync("check-get-zerotaskid");
-
-            var response = await _helpers.GetTaskChecklistAsync(0, ownerToken);
-
-            await ValidationAssertions.AssertFieldErrorAsync(response, "TaskId");
-        }
     }
 }

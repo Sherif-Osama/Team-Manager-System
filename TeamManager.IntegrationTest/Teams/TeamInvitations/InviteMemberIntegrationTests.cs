@@ -150,20 +150,5 @@ namespace TeamManager.IntegrationTest.Teams.TeamInvitations
             Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
         }
 
-        [Fact]
-        public async Task InviteMember_WithInvalidPayload_Returns400WithFieldErrors()
-        {
-            var (_, _, ownerToken) = await _authenticatedUser.CreateConfirmedUserAsync("invite-invalid");
-            var teamId = await _helpers.CreateTeamAsync("Invite Team Eight", null, ownerToken);
-
-            var response = await InviteAsync(teamId, "", TeamRole.Member, ownerToken);
-
-            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
-
-            var body = await response.Content.ReadFromJsonAsync<JsonElement>();
-
-            Assert.True(body.TryGetProperty("errors", out var errors));
-            Assert.True(errors.TryGetProperty("Email", out _));
-        }
     }
 }

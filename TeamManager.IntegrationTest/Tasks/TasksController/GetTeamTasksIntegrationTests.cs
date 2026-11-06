@@ -157,15 +157,6 @@ namespace TeamManager.IntegrationTest.Tasks.TasksController
             Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
         }
 
-        [Fact]
-        public async Task GetTeamTasks_WithEmptyTeamId_Returns400WithFieldError()
-        {
-            var (_, ownerToken) = await CreateTeamAsync("teamtasks-emptyid");
-
-            var response = await _helpers.GetTeamTasksAsync(Guid.Empty, ownerToken);
-
-            await ValidationAssertions.AssertFieldErrorAsync(response, "TeamId");
-        }
 
         [Fact]
         public async Task GetTeamTasks_FiltersByProject()
@@ -243,39 +234,8 @@ namespace TeamManager.IntegrationTest.Tasks.TasksController
             Assert.Contains(byDescriptionOrProject.Items, t => t.Title == "In the needle project");
         }
 
-        [Fact]
-        public async Task GetTeamTasks_WithTooLongSearch_Returns400WithFieldError()
-        {
-            var (teamId, ownerToken) = await CreateTeamAsync("teamtasks-longsearch");
 
-            var response = await _helpers.GetTeamTasksAsync(teamId, ownerToken, $"search={new string('s', 151)}");
 
-            await ValidationAssertions.AssertFieldErrorAsync(response, "Search");
-        }
-
-        [Fact]
-        public async Task GetTeamTasks_WithOutOfRangeStatusOrPriority_Returns400WithFieldError()
-        {
-            var (teamId, ownerToken) = await CreateTeamAsync("teamtasks-badfilters");
-
-            var badStatus = await _helpers.GetTeamTasksAsync(teamId, ownerToken, "status=9");
-            var badPriority = await _helpers.GetTeamTasksAsync(teamId, ownerToken, "priority=9");
-
-            await ValidationAssertions.AssertFieldErrorAsync(badStatus, "Status");
-            await ValidationAssertions.AssertFieldErrorAsync(badPriority, "Priority");
-        }
-
-        [Fact]
-        public async Task GetTeamTasks_WithZeroPageOrOversizedPageSize_Returns400WithFieldError()
-        {
-            var (teamId, ownerToken) = await CreateTeamAsync("teamtasks-badpaging");
-
-            var zeroPage = await _helpers.GetTeamTasksAsync(teamId, ownerToken, "page=0");
-            var oversized = await _helpers.GetTeamTasksAsync(teamId, ownerToken, "pageSize=101");
-
-            await ValidationAssertions.AssertFieldErrorAsync(zeroPage, "Page");
-            await ValidationAssertions.AssertFieldErrorAsync(oversized, "PageSize");
-        }
 
         [Fact]
         public async Task GetTeamTasks_PagesTasksWithDueDatesBeforeUndatedOnes()

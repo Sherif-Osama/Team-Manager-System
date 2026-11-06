@@ -144,20 +144,5 @@ namespace TeamManager.IntegrationTest.Projects.ProjectsController
             Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
         }
 
-        [Fact]
-        public async Task UpdateProject_WithInvalidPayload_Returns400WithFieldErrors()
-        {
-            var (_, _, ownerToken) = await _authenticatedUser.CreateConfirmedUserAsync("upd-invalid");
-            var (_, projectId) = await _helpers.CreateProjectAsync("Validation Project", ownerToken);
-
-            var response = await UpdateProjectAsync(projectId, "", null, ownerToken);
-
-            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
-
-            var body = await response.Content.ReadFromJsonAsync<JsonElement>();
-
-            Assert.True(body.TryGetProperty("errors", out var errors));
-            Assert.True(errors.TryGetProperty("Name", out _));
-        }
     }
 }

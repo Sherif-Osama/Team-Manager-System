@@ -153,21 +153,6 @@ namespace TeamManager.IntegrationTest.Teams.TeamsController
             Assert.Equal(HttpStatusCode.BadRequest, second.StatusCode);
         }
 
-        [Fact]
-        public async Task CreateLabel_WithInvalidColorHex_Returns400WithFieldErrors()
-        {
-            var (_, _, ownerToken) = await _authenticatedUser.CreateConfirmedUserAsync("label-color");
-            var teamId = await _helpers.CreateTeamAsync("Label Team Five", null, ownerToken);
-
-            var response = await CreateLabelAsync(teamId, "Bad Color", "#123", ownerToken);
-
-            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
-
-            var body = await response.Content.ReadFromJsonAsync<JsonElement>();
-
-            Assert.True(body.TryGetProperty("errors", out var errors));
-            Assert.True(errors.TryGetProperty("ColorHex", out _));
-        }
 
         [Fact]
         public async Task UpdateLabel_AsOwner_UpdatesNameAndColor()

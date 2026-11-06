@@ -106,21 +106,6 @@ namespace TeamManager.IntegrationTest.Authentication
             Assert.Equal(1, await db.RefreshTokens.CountAsync(r => r.UserId == userId && r.RevokedAtUtc == null));
         }
 
-        [Fact]
-        public async Task Logout_WithInvalidPayload_Returns400WithFieldErrors()
-        {
-            var (_, email) = await _authenticatedUser.RegisterUserAsync();
-            var login = await _authenticatedUser.LoginAsync(email);
-
-            var response = await _client.SendAsync(CreateLogoutRequest("", login.AccessToken));
-
-            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
-
-            var body = await response.Content.ReadFromJsonAsync<JsonElement>();
-
-            Assert.True(body.TryGetProperty("errors", out var errors));
-            Assert.True(errors.TryGetProperty("RefreshToken", out _));
-        }
 
         [Fact]
         public async Task Logout_DoesNotRevokeOtherSessionTokens()

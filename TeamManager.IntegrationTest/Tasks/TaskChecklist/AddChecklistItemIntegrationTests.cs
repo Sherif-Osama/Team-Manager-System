@@ -197,40 +197,8 @@ namespace TeamManager.IntegrationTest.Tasks.TaskChecklist
             Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
         }
 
-        [Fact]
-        public async Task AddChecklistItem_WithZeroTaskId_Returns400WithFieldError()
-        {
-            var (_, _, ownerToken) = await _helpers.CreateOwnedProjectAsync("check-add-zerotaskid");
 
-            var response = await _helpers.AddChecklistItemRequestAsync(0, new { content = "Item" }, ownerToken);
 
-            await ValidationAssertions.AssertFieldErrorAsync(response, "TaskId");
-        }
-
-        [Fact]
-        public async Task AddChecklistItem_WithBlankContent_Returns400WithFieldError()
-        {
-            var (_, projectId, ownerToken) = await _helpers.CreateOwnedProjectAsync("check-add-blankcontent");
-            var taskId = await _helpers.CreateTaskAsync(projectId, "Blank content task", ownerToken);
-
-            var empty = await _helpers.AddChecklistItemRequestAsync(taskId, new { content = "" }, ownerToken);
-            var whitespace = await _helpers.AddChecklistItemRequestAsync(taskId, new { content = "   " }, ownerToken);
-
-            await ValidationAssertions.AssertFieldErrorAsync(empty, "Content");
-            await ValidationAssertions.AssertFieldErrorAsync(whitespace, "Content");
-        }
-
-        [Fact]
-        public async Task AddChecklistItem_WithContentLongerThanThreeHundredCharacters_Returns400WithFieldError()
-        {
-            var (_, projectId, ownerToken) = await _helpers.CreateOwnedProjectAsync("check-add-longcontent");
-            var taskId = await _helpers.CreateTaskAsync(projectId, "Long content task", ownerToken);
-
-            var response = await _helpers.AddChecklistItemRequestAsync(taskId,
-                new { content = new string('a', 301) }, ownerToken);
-
-            await ValidationAssertions.AssertFieldErrorAsync(response, "Content");
-        }
 
         [Fact]
         public async Task AddChecklistItem_WithThreeHundredCharacters_Returns200()

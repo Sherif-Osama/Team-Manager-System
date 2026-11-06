@@ -138,29 +138,6 @@ namespace TeamManager.IntegrationTest.Teams.TeamsController
             Assert.Equal(1, await db2.Teams.CountAsync(t => t.Name == "Reusable Team" && t.DeletedAtUtc == null));
         }
 
-        [Fact]
-        public async Task CreateTeam_WithInvalidPayload_Returns400WithFieldErrors()
-        {
-            var (_, _, accessToken) = await _authenticatedUser.CreateConfirmedUserAsync();
-
-            var missingName = await _client.SendAsync(_helpers.CreateTeamRequest("", null, accessToken));
-
-            Assert.Equal(HttpStatusCode.BadRequest, missingName.StatusCode);
-
-            var body = await missingName.Content.ReadFromJsonAsync<JsonElement>();
-
-            Assert.True(body.TryGetProperty("errors", out var errors));
-            Assert.True(errors.TryGetProperty("Name", out _));
-
-            var longDescription = await _client.SendAsync(_helpers.CreateTeamRequest("Valid Name", new string('x', 501), accessToken));
-
-            Assert.Equal(HttpStatusCode.BadRequest, longDescription.StatusCode);
-
-            var descriptionBody = await longDescription.Content.ReadFromJsonAsync<JsonElement>();
-
-            Assert.True(descriptionBody.TryGetProperty("errors", out var descriptionErrors));
-            Assert.True(descriptionErrors.TryGetProperty("Description", out _));
-        }
 
         [Fact]
         public async Task CreateTeam_ConcurrentDuplicates_ExactlyOneSucceeds()

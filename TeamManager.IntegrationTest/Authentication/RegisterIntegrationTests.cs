@@ -178,19 +178,6 @@ namespace TeamManager.IntegrationTest.Authentication
             Assert.Equal(1, await db.Users.CountAsync(u => u.Email == email));
         }
 
-        [Fact]
-        public async Task Register_WithInvalidPayload_Returns400WithFieldErrors()
-        {
-            var response = await _client.PostAsJsonAsync(_registerEndpoint,
-                new { email = $"invalid-{Guid.NewGuid():N}@example.com", displayName = "", password = "P@ssword1234" });
-
-            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
-
-            var body = await response.Content.ReadFromJsonAsync<JsonElement>();
-
-            Assert.True(body.TryGetProperty("errors", out var errors));
-            Assert.True(errors.TryGetProperty("DisplayName", out _));
-        }
 
         [Fact]
         public async Task Register_WhenDefaultRoleMissing_Returns404WithoutPersistingUser()

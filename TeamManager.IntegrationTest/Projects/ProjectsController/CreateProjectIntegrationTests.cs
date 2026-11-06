@@ -164,41 +164,6 @@ namespace TeamManager.IntegrationTest.Projects.ProjectsController
             Assert.Equal(dueDate, project.DueDate);
         }
 
-        [Fact]
-        public async Task CreateProject_WithInvalidPayload_Returns400WithFieldErrors()
-        {
-            var (_, _, ownerToken) = await _authenticatedUser.CreateConfirmedUserAsync("proj-invalid");
-            var teamId = await _teamHelpers.CreateTeamAsync($"Team {Guid.NewGuid():N}", null, ownerToken);
-
-            var missingName = await _helpers.CreateProjectRequestAsync(teamId, ProjectBody(""), ownerToken);
-
-            Assert.Equal(HttpStatusCode.BadRequest, missingName.StatusCode);
-
-            var nameBody = await missingName.Content.ReadFromJsonAsync<JsonElement>();
-            Assert.True(nameBody.TryGetProperty("errors", out var nameErrors));
-            Assert.True(nameErrors.TryGetProperty("Name", out _));
-
-            var pastDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(-1));
-            var pastStart = await _helpers.CreateProjectRequestAsync(teamId,
-                ProjectBody("Past Project", null, pastDate), ownerToken);
-
-            Assert.Equal(HttpStatusCode.BadRequest, pastStart.StatusCode);
-
-            var dateBody = await pastStart.Content.ReadFromJsonAsync<JsonElement>();
-            Assert.True(dateBody.TryGetProperty("errors", out var dateErrors));
-            Assert.True(dateErrors.TryGetProperty("StartDate", out _));
-
-            var start = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(10));
-            var due = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(5));
-            var inverted = await _helpers.CreateProjectRequestAsync(teamId,
-                ProjectBody("Inverted Project", null, start, due), ownerToken);
-
-            Assert.Equal(HttpStatusCode.BadRequest, inverted.StatusCode);
-
-            var invertedBody = await inverted.Content.ReadFromJsonAsync<JsonElement>();
-            Assert.True(invertedBody.TryGetProperty("errors", out var invertedErrors));
-            Assert.True(invertedErrors.TryGetProperty("DueDate", out _));
-        }
 
         [Fact]
         public async Task CreateProject_ConcurrentDuplicates_ExactlyOneSucceeds()

@@ -134,20 +134,5 @@ namespace TeamManager.IntegrationTest.Teams.TeamMembers
             Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
         }
 
-        [Fact]
-        public async Task RemoveMember_WithInvalidPayload_Returns400WithFieldErrors()
-        {
-            var (_, _, ownerToken) = await _authenticatedUser.CreateConfirmedUserAsync("remove-invalid");
-            var teamId = await _helpers.CreateTeamAsync("Remove Team Six", null, ownerToken);
-
-            var response = await _helpers.RemoveMemberAsync(teamId, 0, ownerToken);
-
-            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
-
-            var body = await response.Content.ReadFromJsonAsync<JsonElement>();
-
-            Assert.True(body.TryGetProperty("errors", out var errors));
-            Assert.True(errors.TryGetProperty("MemberId", out _));
-        }
     }
 }

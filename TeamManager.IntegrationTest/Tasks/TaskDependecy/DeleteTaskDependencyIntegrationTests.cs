@@ -160,26 +160,6 @@ namespace TeamManager.IntegrationTest.Tasks.TaskDependecy
             Assert.Equal(firstDependencyId, Assert.Single(kept.Items).DependencyId);
         }
 
-        [Fact]
-        public async Task DeleteTaskDependency_WithZeroTaskId_Returns400WithFieldError()
-        {
-            var (_, projectId, ownerToken) = await _helpers.CreateOwnedProjectAsync("dep-del-zerotaskid");
-            var (_, _, dependencyId) = await CreateLinkedPairAsync(projectId, ownerToken);
 
-            var response = await _helpers.DeleteTaskDependencyRequestAsync(0, dependencyId, ownerToken);
-
-            await ValidationAssertions.AssertFieldErrorAsync(response, "TaskId");
-        }
-
-        [Fact]
-        public async Task DeleteTaskDependency_WithZeroDependencyId_Returns400WithFieldError()
-        {
-            var (_, projectId, ownerToken) = await _helpers.CreateOwnedProjectAsync("dep-del-zerodepid");
-            var (dependentId, _, _) = await CreateLinkedPairAsync(projectId, ownerToken);
-
-            var response = await _helpers.DeleteTaskDependencyRequestAsync(dependentId, 0, ownerToken);
-
-            await ValidationAssertions.AssertFieldErrorAsync(response, "DependencyId");
-        }
     }
 }

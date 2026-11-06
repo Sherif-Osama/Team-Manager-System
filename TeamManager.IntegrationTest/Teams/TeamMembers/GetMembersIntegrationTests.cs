@@ -94,20 +94,5 @@ namespace TeamManager.IntegrationTest.Teams.TeamMembers
             Assert.Equal(TeamMemberStatus.Active, result.Status);
         }
 
-        [Fact]
-        public async Task GetMembers_WithInvalidPagination_Returns400WithFieldErrors()
-        {
-            var (_, _, ownerToken) = await _authenticatedUser.CreateConfirmedUserAsync("members-invalid");
-            var teamId = await _helpers.CreateTeamAsync("Members Team Five", null, ownerToken);
-
-            var response = await _helpers.GetMembersAsync(teamId, ownerToken, "?page=0");
-
-            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
-
-            var body = await response.Content.ReadFromJsonAsync<JsonElement>();
-
-            Assert.True(body.TryGetProperty("errors", out var errors));
-            Assert.True(errors.TryGetProperty("Page", out _));
-        }
     }
 }

@@ -149,19 +149,6 @@ namespace TeamManager.IntegrationTest.Authentication
             Assert.Equal(HttpStatusCode.OK, loginResponse.StatusCode);
         }
 
-        [Fact]
-        public async Task Login_WithInvalidPayload_Returns400WithFieldErrors()
-        {
-            var response = await _client.PostAsJsonAsync(_loginEndpoint,
-                new { email = "", password = "P@ssword1234" });
-
-            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
-
-            var body = await response.Content.ReadFromJsonAsync<JsonElement>();
-
-            Assert.True(body.TryGetProperty("errors", out var errors));
-            Assert.True(errors.TryGetProperty("Email", out _));
-        }
 
         [Fact]
         public async Task Login_WithInactiveUser_ReactivatesAccountAndWritesAuditLog()

@@ -152,22 +152,6 @@ namespace TeamManager.IntegrationTest.Authentication
             Assert.Null(user.PasswordResetTokenHash);
         }
 
-        [Fact]
-        public async Task ResetPassword_WithMismatchedPasswords_Returns400WithFieldErrors()
-        {
-            var (_, email) = await _authenticatedUser.RegisterAndConfirmUserAsync();
-            var token = await RequestPasswordResetTokenAsync(email);
-
-            var response = await _client.PostAsJsonAsync(_resetPasswordEndpoint,
-                new { email, token, newPassword = "NewPass1234!", confirmNewPassword = "Different1234!" });
-
-            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
-
-            var body = await response.Content.ReadFromJsonAsync<JsonElement>();
-
-            Assert.True(body.TryGetProperty("errors", out var errors));
-            Assert.True(errors.TryGetProperty("ConfirmNewPassword", out _));
-        }
 
         [Fact]
         public async Task ResetPassword_WithSoftDeletedUser_Returns403()

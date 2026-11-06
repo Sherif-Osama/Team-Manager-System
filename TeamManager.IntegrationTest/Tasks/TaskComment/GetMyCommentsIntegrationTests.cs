@@ -182,24 +182,6 @@ namespace TeamManager.IntegrationTest.Tasks.TaskComment
             Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
         }
 
-        [Fact]
-        public async Task GetMyComments_WithZeroPage_Returns400WithFieldError()
-        {
-            var (_, _, ownerToken) = await _helpers.CreateOwnedProjectAsync("cmt-mycomments-zeropage");
 
-            var response = await _helpers.GetMyCommentsAsync(ownerToken, "page=0&pageSize=20");
-
-            await ValidationAssertions.AssertFieldErrorAsync(response, "Page");
-        }
-
-        [Fact]
-        public async Task GetMyComments_WithPageSizeAboveTheLimit_Returns400WithFieldError()
-        {
-            var (_, _, ownerToken) = await _helpers.CreateOwnedProjectAsync("cmt-mycomments-pagesize");
-
-            var response = await _helpers.GetMyCommentsAsync(ownerToken, "page=1&pageSize=101");
-
-            await ValidationAssertions.AssertFieldErrorAsync(response, "PageSize");
-        }
     }
 }

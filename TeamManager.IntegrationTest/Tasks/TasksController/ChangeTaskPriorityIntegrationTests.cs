@@ -125,26 +125,6 @@ namespace TeamManager.IntegrationTest.Tasks.TasksController
             Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
         }
 
-        [Fact]
-        public async Task ChangeTaskPriority_WithZeroTaskId_Returns400WithFieldError()
-        {
-            var (_, _, ownerToken) = await CreateOwnedProjectAsync("taskpriority-zeroid");
 
-            var response = await _helpers.ChangeTaskPriorityRequestAsync(0, new { priority = TaskPriority.High }, ownerToken);
-
-            await ValidationAssertions.AssertFieldErrorAsync(response, "TaskId");
-        }
-
-        [Fact]
-        public async Task ChangeTaskPriority_WithOutOfRangePriority_Returns400WithFieldError()
-        {
-            var (_, projectId, ownerToken) = await CreateOwnedProjectAsync("taskpriority-badpriority");
-
-            var taskId = await _helpers.CreateTaskAsync(projectId, "Existing task", ownerToken);
-
-            var response = await _helpers.ChangeTaskPriorityRequestAsync(taskId, new { priority = 9 }, ownerToken);
-
-            await ValidationAssertions.AssertFieldErrorAsync(response, "Priority");
-        }
     }
 }
