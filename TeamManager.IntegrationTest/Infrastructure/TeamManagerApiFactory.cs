@@ -38,25 +38,32 @@ namespace TeamManager.IntegrationTest.Infrastructure
             builder.UseEnvironment("Testing");
 
             builder.ConfigureAppConfiguration((_, configuration) =>
-            {
-                configuration.AddInMemoryCollection(
-                    new Dictionary<string, string?>
-                    {
-                        ["Jwt:Key"] = "test-only-signing-key-at-least-32-characters!",
-                        ["Jwt:Issuer"] = "TeamManager.Tests",
-                        ["Jwt:Audience"] = "TeamManager.Tests",
-                        ["RateLimiting:Authentication:Register:PermitLimit"] = "100000",
-                        ["RateLimiting:Authentication:Register:WindowSeconds"] = "6",
-                        ["RateLimiting:Authentication:Login:PermitLimit"] = "100000",
-                        ["RateLimiting:Authentication:Login:WindowSeconds"] = "6",
-                        ["RateLimiting:Authentication:Refresh:PermitLimit"] = "100000",
-                        ["RateLimiting:Authentication:Refresh:WindowSeconds"] = "6",
-                        ["RateLimiting:Authentication:ForgotPassword:PermitLimit"] = "100000",
-                        ["RateLimiting:Authentication:ForgotPassword:WindowSeconds"] = "6",
-                        ["RateLimiting:Authentication:ResetPassword:PermitLimit"] = "100000",
-                        ["RateLimiting:Authentication:ResetPassword:WindowSeconds"] = "6"
-                    });
-            });
+                {
+                    configuration.AddInMemoryCollection(
+                        new Dictionary<string, string?>
+                        {
+                            ["Jwt:Key"] = "test-only-signing-key-at-least-32-characters!",
+                            ["Jwt:Issuer"] = "TeamManager.Tests",
+                            ["Jwt:Audience"] = "TeamManager.Tests",
+
+                            ["RateLimiting:Authentication:Register:PermitLimit"] = "100000",
+                            ["RateLimiting:Authentication:Register:WindowSeconds"] = "6",
+
+                            ["RateLimiting:Authentication:Login:PermitLimit"] = "100000",
+                            ["RateLimiting:Authentication:Login:WindowSeconds"] = "6",
+
+                            ["RateLimiting:Authentication:Refresh:PermitLimit"] = "100000",
+                            ["RateLimiting:Authentication:Refresh:WindowSeconds"] = "6",
+
+                            ["RateLimiting:Authentication:ForgotPassword:PermitLimit"] = "100000",
+                            ["RateLimiting:Authentication:ForgotPassword:WindowSeconds"] = "6",
+
+                            ["RateLimiting:Authentication:ResetPassword:PermitLimit"] = "100000",
+                            ["RateLimiting:Authentication:ResetPassword:WindowSeconds"] = "6",
+
+                            ["Bootstrap:AdminSecret"] = "YOUR_NEW_ADMIN_SECRET"
+                        });
+                });
 
             builder.ConfigureTestServices(services =>
               {
@@ -65,7 +72,7 @@ namespace TeamManager.IntegrationTest.Infrastructure
                   options.UseSqlServer(_msSqlContainer.GetConnectionString()));
 
                   // Disable background jobs for regular API integration tests.
-                  var backgroundJobs = services.Where(descriptor => 
+                  var backgroundJobs = services.Where(descriptor =>
                   descriptor.ServiceType == typeof(IHostedService) && descriptor.ImplementationType?.Namespace?.StartsWith(
                               "TeamManager.Infrastructure.BackgroundJobs", StringComparison.Ordinal) == true).ToList();
 
