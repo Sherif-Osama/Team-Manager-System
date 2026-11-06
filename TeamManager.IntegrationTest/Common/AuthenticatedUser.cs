@@ -5,6 +5,7 @@ using System.Net.Http.Json;
 using System.Text;
 using System.Text.Json;
 using TeamManager.Application.Abstractions.Security;
+using TeamManager.Application.Common.DefaultValues;
 using TeamManager.Infrastructure.Persistence;
 using TeamManager.IntegrationTest.Authentication.Configuration;
 using TeamManager.IntegrationTest.Infrastructure;
@@ -105,7 +106,7 @@ namespace TeamManager.IntegrationTest.Common
             using var scope = factory.Services.CreateScope();
             var db = scope.ServiceProvider.GetRequiredService<TeamManagerDbContext>();
 
-            var adminRole = await db.Roles.SingleAsync(r => r.Name == "SystemAdmin");
+            var adminRole = await db.Roles.SingleAsync(r => r.Name == DefaultRoles.Admin);
             var user = await db.Users.SingleAsync(u => u.Id == userId);
 
             user.AssignRole(adminRole.Id);
