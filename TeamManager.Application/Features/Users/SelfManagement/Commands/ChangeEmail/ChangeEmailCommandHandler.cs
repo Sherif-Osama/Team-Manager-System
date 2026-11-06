@@ -8,8 +8,7 @@ using TeamManager.Application.Common.Outbox;
 
 namespace TeamManager.Application.Features.Users.SelfManagement.Commands.ChangeEmail
 {
-    public sealed class ChangeEmailCommandHandler(ICurrentUser currentUser, IUserRepository userRepository,
-        IPasswordHasher passwordHasher, IEmailConfirmationTokenService tokenService, IOutbox outbox,
+    public sealed class ChangeEmailCommandHandler(ICurrentUser currentUser, IUserRepository userRepository, IPasswordHasher passwordHasher, IEmailConfirmationTokenService tokenService, IOutbox outbox,
         IUnitOfWork unitOfWork) : IRequestHandler<ChangeEmailCommand>
     {
         public async Task Handle(ChangeEmailCommand request, CancellationToken cancellationToken)
@@ -29,7 +28,7 @@ namespace TeamManager.Application.Features.Users.SelfManagement.Commands.ChangeE
 
             var emailTaken = await userRepository.ExistsByEmailAsync(request.NewEmail, cancellationToken);
 
-            if (emailTaken)
+            if (emailTaken && !string.Equals(user.Email, request.NewEmail, StringComparison.OrdinalIgnoreCase))
                 throw new EmailAlreadyExistsException(request.NewEmail);
 
             var token = tokenService.GenerateToken();

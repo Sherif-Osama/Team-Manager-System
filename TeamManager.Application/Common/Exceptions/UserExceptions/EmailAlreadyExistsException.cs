@@ -2,6 +2,6 @@
 {
     public sealed class EmailAlreadyExistsException : ApplicationExceptionBase
     {
-        public EmailAlreadyExistsException(string email) : base($"The email '{email}' is already registered.") { }
+        public EmailAlreadyExistsException(string email) : base($"Invalid email address.") { }
     }
 }
