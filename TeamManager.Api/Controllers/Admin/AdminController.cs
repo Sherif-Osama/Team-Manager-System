@@ -118,7 +118,7 @@ namespace TeamManager.Api.Controllers.Admin
         {
             var roleId = await sender.Send(command, cancellationToken);
 
-            return CreatedAtAction(nameof(GetRoleById), new { RoleId = roleId });
+            return CreatedAtAction(nameof(GetRoleById), new { roleId }, new { RoleId = roleId });
         }
 
         [HttpPut("roles/{roleId:int}/name")]
