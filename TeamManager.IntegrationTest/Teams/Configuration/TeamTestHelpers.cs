@@ -47,6 +47,19 @@ namespace TeamManager.IntegrationTest.Teams.Configuration
             return await _client.SendAsync(request);
         }
 
+        public async Task<HttpResponseMessage> TransferOwnershipAsync(Guid teamId, Guid newOwnerUserId, string? accessToken = null)
+        {
+            var request = new HttpRequestMessage(HttpMethod.Put, TeamEndpoints.TeamOwner(teamId))
+            {
+                Content = JsonContent.Create(new { newOwnerUserId })
+            };
+
+            if (accessToken is not null)
+                request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+
+            return await _client.SendAsync(request);
+        }
+
         public async Task<HttpResponseMessage> GetByNameAsync(string name, string? accessToken = null)
         {
             var request = new HttpRequestMessage(HttpMethod.Get, $"{TeamEndpoints.TeamsByName}?name={Uri.EscapeDataString(name)}");
