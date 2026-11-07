@@ -1,20 +1,24 @@
 ﻿using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
+using Respawn;
+using Respawn.Graph;
 using TeamManager.Infrastructure.Persistence;
 using Testcontainers.MsSql;
 
 namespace TeamManager.IntegrationTest.Infrastructure
 {
-    public class TeamManagerApiFactory(string ContainerName) : WebApplicationFactory<Api.Program>, IAsyncLifetime
+    public class TeamManagerApiFactory() : WebApplicationFactory<Api.Program>, IAsyncLifetime
     {
+        private Respawner _respawner = null!;
         private readonly MsSqlContainer _msSqlContainer = new MsSqlBuilder(
-            "mcr.microsoft.com/mssql/server:2022-CU14-ubuntu-22.04").WithName(ContainerName)
+            "mcr.microsoft.com/mssql/server:2022-CU14-ubuntu-22.04").WithName("teammanager-integration-tests")
             .WithPassword("Test_password!123").WithDatabase("TeamManager_Test").Build();
 
         static TeamManagerApiFactory()
@@ -89,12 +93,28 @@ namespace TeamManager.IntegrationTest.Infrastructure
         {
             await _msSqlContainer.StartAsync();
 
+            await using var connection = new SqlConnection(_msSqlContainer.GetConnectionString());
+
+            await connection.OpenAsync();
             // Start the application and apply real EF Core migrations.
             using var scope = Services.CreateScope();
 
             var db = scope.ServiceProvider.GetRequiredService<TeamManagerDbContext>();
 
             await db.Database.MigrateAsync();
+
+            _respawner = await Respawner.CreateAsync(connection, new RespawnerOptions
+            {
+                DbAdapter = DbAdapter.SqlServer,
+                TablesToIgnore = [new Table("__EFMigrationsHistory"), new Table("Roles"), new Table("Permissions"), new Table("RolePermissions")]
+            });
+        }
+
+        public async Task ResetDatabaseAsync()
+        {
+            await using var connection = new SqlConnection(_msSqlContainer.GetConnectionString());
+            await connection.OpenAsync();
+            await _respawner.ResetAsync(connection);
         }
 
         async Task IAsyncLifetime.DisposeAsync()

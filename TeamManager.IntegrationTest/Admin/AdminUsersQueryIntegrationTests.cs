@@ -6,11 +6,12 @@ using TeamManager.Application.Common.DefaultValues;
 using TeamManager.Application.Features.Users.AdminUserManagement.Queries.GetUserByEmail;
 using TeamManager.Infrastructure.Persistence;
 using TeamManager.IntegrationTest.Admin.Configuration;
+using TeamManager.IntegrationTest.Infrastructure;
 
 namespace TeamManager.IntegrationTest.Admin
 {
-    [Collection("Admin")]
-    public sealed class AdminUsersQueryIntegrationTests(AdminFixture factory)
+    [Collection("Common")]
+    public sealed class AdminUsersQueryIntegrationTests(TeamManagerApiFactory factory) : IntegrationTestBase(factory)
     {
         private readonly AdminTestHelpers _helpers = new(factory);
 

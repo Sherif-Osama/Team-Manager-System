@@ -1,12 +1,13 @@
 using System.Net;
 using TeamManager.Domain.Enums;
+using TeamManager.IntegrationTest.Infrastructure;
 using TeamManager.IntegrationTest.Notifications.Configuration;
 using TeamManager.IntegrationTest.Projects.Configuration;
 
 namespace TeamManager.IntegrationTest.Notifications.NotificationsController
 {
-    [Collection("Projects")]
-    public sealed class MarkAllAsReadIntegrationTests(ProjectsFixture factory)
+    [Collection("Common")]
+    public sealed class MarkAllAsReadIntegrationTests(TeamManagerApiFactory factory) : IntegrationTestBase(factory)
     {
         private readonly ProjectTestHelpers _helpers = new(factory);
         private readonly NotificationTestHelpers _notifications = new(factory);

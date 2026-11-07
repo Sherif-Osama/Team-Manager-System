@@ -2,17 +2,16 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using System.Net;
 using System.Net.Http.Json;
-using System.Text.Json;
 using TeamManager.Infrastructure.Persistence;
 using TeamManager.IntegrationTest.Common;
+using TeamManager.IntegrationTest.Infrastructure;
 using TeamManager.IntegrationTest.Teams.Configuration;
 
 namespace TeamManager.IntegrationTest.Teams.TeamsController
 {
-    [Collection("Team")]
-    public sealed class GetTeamByNameIntegrationTests(TeamsFixture factory)
+    [Collection("Common")]
+    public sealed class GetTeamByNameIntegrationTests(TeamManagerApiFactory factory) : IntegrationTestBase(factory)
     {
-        private readonly HttpClient _client = factory.CreateClient();
         private readonly TeamTestHelpers _helpers = new TeamTestHelpers(factory);
         private readonly AuthenticatedUser _authenticatedUser = new AuthenticatedUser(factory);
         private sealed record GetTeamByNameResponseDto(Guid Id, string Name, string? Description, bool IsActive,

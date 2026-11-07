@@ -5,14 +5,15 @@ using TeamManager.Domain.Enums;
 using TeamManager.Infrastructure.Persistence;
 using TeamManager.IntegrationTest.Authentication.Configuration;
 using TeamManager.IntegrationTest.Common;
+using TeamManager.IntegrationTest.Infrastructure;
 using TeamManager.IntegrationTest.Projects.Configuration;
 using TeamManager.IntegrationTest.Teams.Configuration;
 using TeamManager.IntegrationTest.Users.Configuration;
 
 namespace TeamManager.IntegrationTest.Users.UsersController
 {
-    [Collection("Users")]
-    public sealed class DeleteMyAccountIntegrationTests(UsersFixture factory)
+    [Collection("Common")]
+    public sealed class DeleteMyAccountIntegrationTests(TeamManagerApiFactory factory) : IntegrationTestBase(factory)
     {
         private readonly UserTestHelpers _helpers = new(factory);
         private readonly TeamTestHelpers _teamHelpers = new(factory);

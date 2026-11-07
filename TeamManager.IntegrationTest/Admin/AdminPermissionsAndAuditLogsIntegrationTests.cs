@@ -3,11 +3,12 @@ using System.Net.Http.Json;
 using TeamManager.Application.Features.AuditLogs.Queries;
 using TeamManager.Application.Features.Permissions.Queries.GetPermissionById;
 using TeamManager.IntegrationTest.Admin.Configuration;
+using TeamManager.IntegrationTest.Infrastructure;
 
 namespace TeamManager.IntegrationTest.Admin
 {
-    [Collection("Admin")]
-    public sealed class AdminPermissionsAndAuditLogsIntegrationTests(AdminFixture factory)
+    [Collection("Common")]
+    public sealed class AdminPermissionsAndAuditLogsIntegrationTests(TeamManagerApiFactory factory) : IntegrationTestBase(factory)
     {
         private readonly AdminTestHelpers _helpers = new(factory);
 

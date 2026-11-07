@@ -4,18 +4,18 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using System.Net;
 using System.Net.Http.Json;
-using System.Text.Json;
 using TeamManager.Application.Abstractions.Persistence;
 using TeamManager.Application.Common.Outbox;
 using TeamManager.Domain.Entities;
 using TeamManager.Domain.Enums;
 using TeamManager.Infrastructure.Persistence;
 using TeamManager.IntegrationTest.Authentication.Configuration;
+using TeamManager.IntegrationTest.Infrastructure;
 
 namespace TeamManager.IntegrationTest.Authentication
 {
-    [Collection("Authentication")]
-    public sealed class RegisterIntegrationTests(AuthenticationFixture factory)
+    [Collection("Common")]
+    public sealed class RegisterIntegrationTests(TeamManagerApiFactory factory) : IntegrationTestBase(factory)
     {
         private readonly HttpClient _client = factory.CreateClient();
         private readonly string _registerEndpoint = AuthenticationEndpoints.Register;

@@ -3,15 +3,15 @@ using Microsoft.Extensions.DependencyInjection;
 using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
-using System.Text.Json;
 using TeamManager.Infrastructure.Persistence;
 using TeamManager.IntegrationTest.Authentication.Configuration;
 using TeamManager.IntegrationTest.Common;
+using TeamManager.IntegrationTest.Infrastructure;
 
 namespace TeamManager.IntegrationTest.Authentication
 {
-    [Collection("Authentication")]
-    public sealed class LogoutIntegrationTests(AuthenticationFixture factory)
+    [Collection("Common")]
+    public sealed class LogoutIntegrationTests(TeamManagerApiFactory factory) : IntegrationTestBase(factory)
     {
         private readonly HttpClient _client = factory.CreateClient();
         private readonly AuthenticatedUser _authenticatedUser = new AuthenticatedUser(factory);
