@@ -89,3 +89,62 @@ jobs:
           path: coveragereport/
           if-no-files-found: warn
           retention-days: 7
+
+  integration-tests:
+    name: Integration Tests
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    needs: unit-tests
+
+    env:
+      DOTNET_CLI_TELEMETRY_OPTOUT: 1
+      DOTNET_NOLOGO: true
+
+    steps:
+      # 1. Checkout repository
+      - name: Checkout code
+        uses: actions/checkout@v7
+
+      # 2. Setup .NET 10
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: '10.0.x'
+
+      # 3. Verify Docker is available (Testcontainers starts a SQL Server container)
+      - name: Check Docker
+        run: docker info
+
+      # 4. Restore dependencies
+      - name: Restore dependencies
+        run: >
+          dotnet restore
+          TeamManager.IntegrationTest/TeamManager.IntegrationTest.csproj
+
+      # 5. Build
+      - name: Build
+        run: >
+          dotnet build
+          TeamManager.IntegrationTest/TeamManager.IntegrationTest.csproj
+          --configuration Release
+          --no-restore
+
+      # 6. Run Integration Tests
+      - name: Run Integration Tests
+        run: |
+          dotnet test TeamManager.IntegrationTest/TeamManager.IntegrationTest.csproj \
+            --configuration Release \
+            --no-build \
+            --no-restore \
+            --logger "trx;LogFileName=integration-tests.trx" \
+            --results-directory ./TestResults/Integration
+
+      # 7. Upload Test Results
+      - name: Upload Test Results
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: integration-test-results
+          path: TestResults/Integration/
+          if-no-files-found: warn
+          retention-days: 7
