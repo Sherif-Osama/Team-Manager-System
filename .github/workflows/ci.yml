@@ -2,6 +2,7 @@ name: TeamManager CI
 
 on:
   push:
+    branches: [main]
   pull_request:
   workflow_dispatch:
 
