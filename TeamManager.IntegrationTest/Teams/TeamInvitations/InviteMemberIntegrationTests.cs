@@ -7,12 +7,13 @@ using System.Text.Json;
 using TeamManager.Domain.Enums;
 using TeamManager.Infrastructure.Persistence;
 using TeamManager.IntegrationTest.Common;
+using TeamManager.IntegrationTest.Infrastructure;
 using TeamManager.IntegrationTest.Teams.Configuration;
 
 namespace TeamManager.IntegrationTest.Teams.TeamInvitations
 {
-    [Collection("Team")]
-    public sealed class InviteMemberIntegrationTests(TeamsFixture factory)
+    [Collection("Common")]
+    public sealed class InviteMemberIntegrationTests(TeamManagerApiFactory factory) : IntegrationTestBase(factory)
     {
         private readonly HttpClient _client = factory.CreateClient();
         private readonly TeamTestHelpers _helpers = new(factory);

@@ -1,11 +1,12 @@
 using System.Net;
 using TeamManager.IntegrationTest.Common;
+using TeamManager.IntegrationTest.Infrastructure;
 using TeamManager.IntegrationTest.Users.Configuration;
 
 namespace TeamManager.IntegrationTest.Users.UsersController
 {
-    [Collection("Users")]
-    public sealed class ChangeEmailIntegrationTests(UsersFixture factory)
+    [Collection("Common")]
+    public sealed class ChangeEmailIntegrationTests(TeamManagerApiFactory factory) : IntegrationTestBase(factory)
     {
         private readonly UserTestHelpers _helpers = new(factory);
         private readonly AuthenticatedUser _authenticatedUser = new(factory);

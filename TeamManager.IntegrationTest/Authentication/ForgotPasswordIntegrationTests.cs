@@ -6,10 +6,11 @@ using System.Text.Json;
 using TeamManager.Infrastructure.Persistence;
 using TeamManager.IntegrationTest.Authentication.Configuration;
 using TeamManager.IntegrationTest.Common;
+using TeamManager.IntegrationTest.Infrastructure;
 namespace TeamManager.IntegrationTest.Authentication
 {
-    [Collection("Authentication")]
-    public sealed class ForgotPasswordIntegrationTests(AuthenticationFixture factory)
+    [Collection("Common")]
+    public sealed class ForgotPasswordIntegrationTests(TeamManagerApiFactory factory) : IntegrationTestBase(factory)
     {
         private readonly HttpClient _client = factory.CreateClient();
 

@@ -7,10 +7,11 @@ using TeamManager.Application.Features.Roles.Queries.GetRoles;
 using TeamManager.Application.Features.Users.AdminUserManagement.Queries.GetUserById;
 using TeamManager.Application.Features.Users.AdminUserManagement.Queries.GetUsers;
 using TeamManager.IntegrationTest.Common;
+using TeamManager.IntegrationTest.Infrastructure;
 
 namespace TeamManager.IntegrationTest.Admin.Configuration
 {
-    public sealed class AdminTestHelpers(AdminFixture factory)
+    public sealed class AdminTestHelpers(TeamManagerApiFactory factory)
     {
         private readonly HttpClient _client = factory.CreateClient();
         private readonly AuthenticatedUser _authenticatedUser = new(factory);

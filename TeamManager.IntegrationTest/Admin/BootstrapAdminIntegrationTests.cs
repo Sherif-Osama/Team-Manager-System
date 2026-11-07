@@ -4,19 +4,21 @@ using System.Net;
 using TeamManager.Application.Common.DefaultValues;
 using TeamManager.Infrastructure.Persistence;
 using TeamManager.IntegrationTest.Admin.Configuration;
+using TeamManager.IntegrationTest.Infrastructure;
 
 namespace TeamManager.IntegrationTest.Admin
 {
-    [Collection("Admin")]
-    public sealed class BootstrapAdminIntegrationTests(AdminFixture factory)
+    [Collection("Common")]
+    public sealed class BootstrapAdminIntegrationTests(TeamManagerApiFactory factory) : IntegrationTestBase(factory)
     {
         private readonly AdminTestHelpers _helpers = new(factory);
+        public const string AdminSecret = "YOUR_NEW_ADMIN_SECRET";
 
         [Fact]
         public async Task Bootstrap_WithoutToken_Returns401()
         {
             var response = await _helpers.RequestAsync(HttpMethod.Post, AdminEndpoints.Bootstrap,
-                accessToken: null, body: new { email = "nobody@example.com", secret = AdminFixture.AdminSecret });
+                accessToken: null, body: new { email = "nobody@example.com", secret = AdminSecret });
 
             Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
         }
@@ -46,7 +48,7 @@ namespace TeamManager.IntegrationTest.Admin
             }
 
             var response = await _helpers.RequestAsync(HttpMethod.Post, AdminEndpoints.Bootstrap,
-                accessToken: token, body: new { email, secret = AdminFixture.AdminSecret });
+                accessToken: token, body: new { email, secret = AdminSecret });
 
             Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
         }
@@ -60,7 +62,7 @@ namespace TeamManager.IntegrationTest.Admin
             var (_, email, token) = await _helpers.CreateRegularUserAsync("boot-blocked");
 
             var response = await _helpers.RequestAsync(HttpMethod.Post, AdminEndpoints.Bootstrap,
-                accessToken: token, body: new { email, secret = AdminFixture.AdminSecret });
+                accessToken: token, body: new { email, secret = AdminSecret });
 
             Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
         }
@@ -86,9 +88,9 @@ namespace TeamManager.IntegrationTest.Admin
             }
 
             var task1 = _helpers.RequestAsync(HttpMethod.Post, AdminEndpoints.Bootstrap, token1,
-                new { email = email1, secret = AdminFixture.AdminSecret });
+                new { email = email1, secret = AdminSecret });
             var task2 = _helpers.RequestAsync(HttpMethod.Post, AdminEndpoints.Bootstrap, token2,
-                new { email = email2, secret = AdminFixture.AdminSecret });
+                new { email = email2, secret = AdminSecret });
 
             var responses = await Task.WhenAll(task1, task2);
             var statuses = responses.Select(r => r.StatusCode).OrderBy(c => c).ToArray();

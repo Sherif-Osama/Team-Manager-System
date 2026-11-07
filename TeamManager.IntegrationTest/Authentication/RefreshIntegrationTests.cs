@@ -3,15 +3,15 @@ using Microsoft.Extensions.DependencyInjection;
 using System.Net;
 using System.Net.Http.Json;
 using System.Security.Claims;
-using System.Text.Json;
 using TeamManager.Infrastructure.Persistence;
 using TeamManager.IntegrationTest.Authentication.Configuration;
 using TeamManager.IntegrationTest.Common;
+using TeamManager.IntegrationTest.Infrastructure;
 
 namespace TeamManager.IntegrationTest.Authentication
 {
-    [Collection("Authentication")]
-    public sealed class RefreshIntegrationTests(AuthenticationFixture factory)
+    [Collection("Common")]
+    public sealed class RefreshIntegrationTests(TeamManagerApiFactory factory) : IntegrationTestBase(factory)
     {
         private readonly HttpClient _client = factory.CreateClient();
         private readonly string _refreshTokenEndpoint = AuthenticationEndpoints.Refresh;

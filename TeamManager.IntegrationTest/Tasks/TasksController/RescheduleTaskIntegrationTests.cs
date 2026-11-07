@@ -1,13 +1,14 @@
 using System.Net;
 using TeamManager.Domain.Enums;
 using TeamManager.IntegrationTest.Common;
+using TeamManager.IntegrationTest.Infrastructure;
 using TeamManager.IntegrationTest.Projects.Configuration;
 using TeamManager.IntegrationTest.Teams.Configuration;
 
 namespace TeamManager.IntegrationTest.Tasks.TasksController
 {
-    [Collection("Projects")]
-    public sealed class RescheduleTaskIntegrationTests(ProjectsFixture factory)
+    [Collection("Common")]
+    public sealed class RescheduleTaskIntegrationTests(TeamManagerApiFactory factory) : IntegrationTestBase(factory)
     {
         private readonly ProjectTestHelpers _helpers = new(factory);
         private readonly TeamTestHelpers _teamHelpers = new(factory);
