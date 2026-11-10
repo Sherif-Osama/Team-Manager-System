@@ -23,7 +23,13 @@ namespace TeamManager.Api
             builder.Services.AddHttpContextAccessor();
 
             builder.Services.AddScoped<ICurrentUser, CurrentUser>();
-            builder.Services.AddSignalR();
+
+            var redis = builder.Configuration.GetConnectionString("Redis");
+            if (string.IsNullOrWhiteSpace(redis))
+                builder.Services.AddSignalR();
+            else
+                builder.Services.AddSignalR().AddStackExchangeRedis(redis);
+
             builder.Services.AddScoped<IRealtimeNotifier, SignalRRealtimeNotifier>();
             builder.Services.AddControllers();
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -32,11 +38,8 @@ namespace TeamManager.Api
             builder.Services.AddHealthChecks();
             var app = builder.Build();
             // Configure the HTTP request pipeline.
-            if (app.Environment.IsDevelopment())
-            {
-                app.UseSwagger();
-                app.UseSwaggerUI();
-            }
+            app.UseSwagger();
+            app.UseSwaggerUI();
 
             app.UseHttpsRedirection();
 
