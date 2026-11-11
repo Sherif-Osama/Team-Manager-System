@@ -7,12 +7,13 @@ using TeamManager.Domain.Enums;
 using TeamManager.Infrastructure.Persistence;
 using TeamManager.IntegrationTest.Common;
 using TeamManager.IntegrationTest.Infrastructure;
+using TeamManager.IntegrationTest.Infrastructure.Collections.Team;
 using TeamManager.IntegrationTest.Teams.Configuration;
 
 namespace TeamManager.IntegrationTest.Teams.TeamsController
 {
-    [Collection("Common")]
-    public sealed class LabelsIntegrationTests(TeamManagerApiFactory factory) : IntegrationTestBase(factory)
+    [Collection("Teams")]
+    public sealed class LabelsIntegrationTests(TeamFactory factory) : IntegrationTestBase(factory)
     {
         private readonly HttpClient _client = factory.CreateClient();
         private readonly TeamTestHelpers _helpers = new(factory);
@@ -93,7 +94,7 @@ namespace TeamManager.IntegrationTest.Teams.TeamsController
             var list = await GetLabelsAsync(teamId, ownerToken);
             var listResult = await list.Content.ReadFromJsonAsync<GetLabelsResponseDto>();
 
-            Assert.Contains(listResult!.Items, i => i.LabelId == result.LabelId);
+            Assert.Contains(listResult!.Items, i => i.LabelId == result?.LabelId);
         }
 
         [Fact]

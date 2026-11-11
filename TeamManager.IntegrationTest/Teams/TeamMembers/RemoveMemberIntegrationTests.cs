@@ -6,12 +6,13 @@ using TeamManager.Domain.Enums;
 using TeamManager.Infrastructure.Persistence;
 using TeamManager.IntegrationTest.Common;
 using TeamManager.IntegrationTest.Infrastructure;
+using TeamManager.IntegrationTest.Infrastructure.Collections.Team;
 using TeamManager.IntegrationTest.Teams.Configuration;
 
 namespace TeamManager.IntegrationTest.Teams.TeamMembers
 {
-    [Collection("Common")]
-    public sealed class RemoveMemberIntegrationTests(TeamManagerApiFactory factory) : IntegrationTestBase(factory)
+    [Collection("Teams")]
+    public sealed class RemoveMemberIntegrationTests(TeamFactory factory) : IntegrationTestBase(factory)
     {
         private readonly TeamTestHelpers _helpers = new(factory);
         private readonly AuthenticatedUser _authenticatedUser = new(factory);

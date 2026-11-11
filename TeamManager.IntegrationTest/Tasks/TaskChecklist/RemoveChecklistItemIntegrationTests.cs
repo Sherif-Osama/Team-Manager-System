@@ -2,13 +2,14 @@ using System.Net;
 using TeamManager.Domain.Enums;
 using TeamManager.IntegrationTest.Common;
 using TeamManager.IntegrationTest.Infrastructure;
+using TeamManager.IntegrationTest.Infrastructure.Collections.Task;
 using TeamManager.IntegrationTest.Projects.Configuration;
 using TeamManager.IntegrationTest.Teams.Configuration;
 
 namespace TeamManager.IntegrationTest.Tasks.TaskChecklist
 {
-    [Collection("Common")]
-    public sealed class RemoveChecklistItemIntegrationTests(TeamManagerApiFactory factory) : IntegrationTestBase(factory)
+    [Collection("Tasks")]
+    public sealed class RemoveChecklistItemIntegrationTests(TaskItemFactory factory) : IntegrationTestBase(factory)
     {
         private readonly ProjectTestHelpers _helpers = new(factory);
         private readonly TeamTestHelpers _teamHelpers = new(factory);

@@ -4,12 +4,13 @@ using System.Net.Http.Json;
 using TeamManager.Domain.Enums;
 using TeamManager.IntegrationTest.Common;
 using TeamManager.IntegrationTest.Infrastructure;
+using TeamManager.IntegrationTest.Infrastructure.Collections.Team;
 using TeamManager.IntegrationTest.Teams.Configuration;
 
 namespace TeamManager.IntegrationTest.Teams.TeamInvitations
 {
-    [Collection("Common")]
-    public sealed class GetInvitationsIntegrationTests(TeamManagerApiFactory factory) : IntegrationTestBase(factory)
+    [Collection("Teams")]
+    public sealed class GetInvitationsIntegrationTests(TeamFactory factory) : IntegrationTestBase(factory)
     {
         private readonly HttpClient _client = factory.CreateClient();
         private readonly TeamTestHelpers _helpers = new(factory);

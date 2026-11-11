@@ -966,4 +966,4 @@ The workflow performs build and test only. It does not publish images or deploy 
 - Attachment storage is S3-only. The `FileStorage:Provider` setting does not select another implementation, and attachments require a resolvable AWS credentials profile.
 - Upload validation uses fixed limits (10 MB, six extensions); the corresponding `FileStorage` size and extension options are not applied to validation.
 - Cache invalidation is best-effort. Failed invalidations are logged and not retried; stale entries expire by TTL.
-- Integration tests share one SQL Server container and run sequentially within a single collection; there is no parallel database isolation.
+- Integration tests run in four parallel collections (`Teams`, `Tasks`, `Projects`, `Users`), each with its own SQL Server container; tests within a collection still share one database.

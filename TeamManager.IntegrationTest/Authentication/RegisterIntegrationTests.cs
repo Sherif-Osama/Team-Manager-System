@@ -11,11 +11,12 @@ using TeamManager.Domain.Enums;
 using TeamManager.Infrastructure.Persistence;
 using TeamManager.IntegrationTest.Authentication.Configuration;
 using TeamManager.IntegrationTest.Infrastructure;
+using TeamManager.IntegrationTest.Infrastructure.Collections.User;
 
 namespace TeamManager.IntegrationTest.Authentication
 {
-    [Collection("Common")]
-    public sealed class RegisterIntegrationTests(TeamManagerApiFactory factory) : IntegrationTestBase(factory)
+    [Collection("Users")]
+    public sealed class RegisterIntegrationTests(UserFactory factory) : IntegrationTestBase(factory)
     {
         private readonly HttpClient _client = factory.CreateClient();
         private readonly string _registerEndpoint = AuthenticationEndpoints.Register;

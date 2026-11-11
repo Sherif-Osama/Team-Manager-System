@@ -4,11 +4,12 @@ using TeamManager.Application.Features.AuditLogs.Queries;
 using TeamManager.Application.Features.Permissions.Queries.GetPermissionById;
 using TeamManager.IntegrationTest.Admin.Configuration;
 using TeamManager.IntegrationTest.Infrastructure;
+using TeamManager.IntegrationTest.Infrastructure.Collections.User;
 
 namespace TeamManager.IntegrationTest.Admin
 {
-    [Collection("Common")]
-    public sealed class AdminPermissionsAndAuditLogsIntegrationTests(TeamManagerApiFactory factory) : IntegrationTestBase(factory)
+    [Collection("Users")]
+    public sealed class AdminPermissionsAndAuditLogsIntegrationTests(UserFactory factory) : IntegrationTestBase(factory)
     {
         private readonly AdminTestHelpers _helpers = new(factory);
 

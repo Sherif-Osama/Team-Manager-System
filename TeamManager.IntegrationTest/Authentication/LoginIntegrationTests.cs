@@ -8,11 +8,12 @@ using TeamManager.Infrastructure.Persistence;
 using TeamManager.IntegrationTest.Authentication.Configuration;
 using TeamManager.IntegrationTest.Common;
 using TeamManager.IntegrationTest.Infrastructure;
+using TeamManager.IntegrationTest.Infrastructure.Collections.User;
 
 namespace TeamManager.IntegrationTest.Authentication
 {
-    [Collection("Common")]
-    public sealed class LoginIntegrationTests(TeamManagerApiFactory factory) : IntegrationTestBase(factory)
+    [Collection("Users")]
+    public sealed class LoginIntegrationTests(UserFactory factory) : IntegrationTestBase(factory)
     {
         private readonly HttpClient _client = factory.CreateClient();
         private readonly string _loginEndpoint = AuthenticationEndpoints.Login;

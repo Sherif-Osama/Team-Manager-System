@@ -3,13 +3,14 @@ using System.Net.Http.Json;
 using System.Text.Json;
 using TeamManager.Domain.Enums;
 using TeamManager.IntegrationTest.Infrastructure;
+using TeamManager.IntegrationTest.Infrastructure.Collections.Project;
 using TeamManager.IntegrationTest.Notifications.Configuration;
 using TeamManager.IntegrationTest.Projects.Configuration;
 
 namespace TeamManager.IntegrationTest.Notifications.NotificationsController
 {
-    [Collection("Common")]
-    public sealed class GetMyNotificationPreferencesIntegrationTests(TeamManagerApiFactory factory) : IntegrationTestBase(factory)
+    [Collection("Projects")]
+    public sealed class GetMyNotificationPreferencesIntegrationTests(ProjectFactory factory) : IntegrationTestBase(factory)
     {
         private readonly ProjectTestHelpers _helpers = new(factory);
         private readonly NotificationTestHelpers _notifications = new(factory);

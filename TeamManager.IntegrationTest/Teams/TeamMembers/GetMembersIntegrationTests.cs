@@ -3,12 +3,13 @@ using System.Net.Http.Json;
 using TeamManager.Domain.Enums;
 using TeamManager.IntegrationTest.Common;
 using TeamManager.IntegrationTest.Infrastructure;
+using TeamManager.IntegrationTest.Infrastructure.Collections.Team;
 using TeamManager.IntegrationTest.Teams.Configuration;
 
 namespace TeamManager.IntegrationTest.Teams.TeamMembers
 {
-    [Collection("Common")]
-    public sealed class GetMembersIntegrationTests(TeamManagerApiFactory factory) : IntegrationTestBase(factory)
+    [Collection("Teams")]
+    public sealed class GetMembersIntegrationTests(TeamFactory factory) : IntegrationTestBase(factory)
     {
         private readonly TeamTestHelpers _helpers = new(factory);
         private readonly AuthenticatedUser _authenticatedUser = new(factory);
