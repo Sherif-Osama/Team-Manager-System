@@ -903,12 +903,12 @@ The API is then available at `http://localhost:8080`, with the health endpoint a
 
 `TeamManager.IntegrationTest` runs the real HTTP pipeline through `WebApplicationFactory<Api.Program>`:
 
-- **Database**: a single `Testcontainers.MsSql` container (`mcr.microsoft.com/mssql/server:2022-CU14-ubuntu-22.04`, database `TeamManager_Test`) shared by the `Common` xUnit collection.
+- **Database**: four `Testcontainers.MsSql` containers (`mcr.microsoft.com/mssql/server:2022-CU14-ubuntu-22.04`, database `TeamManager_Test`), one per xUnit collection (`Teams`, `Tasks`, `Projects`, `Users`), each with a fixed container name.
 - **Schema**: real EF Core migrations are applied once when the fixture starts.
 - **Isolation**: Respawn resets data before every test, ignoring `__EFMigrationsHistory`, `Roles`, `Permissions`, and `RolePermissions`.
 - **Test configuration**: a dedicated test JWT key and issuer/audience, an in-memory configuration source, raised rate limits, and removal of hosted background jobs.
 - **Scope**: authentication, users, teams, members, invitations, projects, project members, tasks, comments, checklists, dependencies, notifications, admin endpoints, authorization rules, and validation behavior.
-- **Execution model**: tests share one SQL container and run sequentially within the collection.
+- **Execution model**: the four collections run in parallel, each on its own SQL container; tests within a collection share that collection's database and run sequentially.
 
 Docker must be running for the integration suite. The suite is executed in CI on Ubuntu, where Docker is available.
 
@@ -936,7 +936,7 @@ The workflow uses read-only repository permissions and cancels superseded runs f
 | Job | Runner | Timeout | Steps |
 |---|---|---|---|
 | `Build and Unit Tests` | `ubuntu-24.04` | 20 min | Checkout, .NET 10 setup, restore/build/test the unit project in Release with TRX logging and code coverage, upload test results and an HTML coverage report. |
-| `Integration Tests` | `ubuntu-24.04` | 30 min | Runs after the unit job; checks Docker, restore/build/test the integration project in Release with TRX logging, uploads results. |
+| `Integration Tests` | `ubuntu-24.04` | 45 min | Runs after the unit job; checks Docker, restore/build/test the integration project in Release with TRX logging, uploads results. |
 
 The workflow performs build and test only. It does not publish images or deploy the application.
 
@@ -954,11 +954,10 @@ The workflow performs build and test only. It does not publish images or deploy 
 | Explicit soft-delete filtering | Repositories and query handlers filter `DeletedAtUtc` inline; no global query filters. | Predictable SQL and clear intent per query; every new query must apply the filter correctly. |
 | Targeted caching | Only label queries are cache-aside; authorization decisions and permission codes are cached separately. | Avoids stale general-purpose caches; membership and permission changes can remain stale until TTL if invalidation fails. |
 | Post-commit cache invalidation | Domain-event handlers enqueue tags; `SaveChangesAsync` dispatches tag removal after commit. | Prevents invalidating on rolled-back transactions; best-effort delivery with TTL as fallback. |
-| Real SQL Server in integration tests | Testcontainers with migrations and Respawn resets. | Tests exercise real SQL behavior and constraints; the suite requires Docker and runs sequentially on a shared container. |
+| Real SQL Server in integration tests | Testcontainers with migrations and Respawn resets. | Tests exercise real SQL behavior and constraints; the suite requires Docker and runs four collections in parallel, one SQL container each. |
 
 ## Known Limitations
 
-- The repository contains no `LICENSE` file; reuse terms are not declared.
 - CI builds and tests only; there is no image publishing or deployment workflow.
 - SQL Server is the only configured persistence provider. Migrations target SQL Server.
 - Docker Compose does not include a SQL Server service; an external database is required.
