@@ -274,6 +274,7 @@ flowchart TB
 | Database | SQL Server | 2022 (integration tests) |
 | Caching | Microsoft HybridCache | 10.11.0 |
 | Distributed cache | Redis via `Microsoft.Extensions.Caching.StackExchangeRedis` | 10.0.14 |
+| SignalR backplane | Redis via `Microsoft.AspNetCore.SignalR.StackExchangeRedis` | 10.0.15 |
 | Authentication | JWT Bearer / `System.IdentityModel.Tokens.Jwt` | 10.0.13 / 8.23.0 |
 | Password hashing | BCrypt.Net-Next | 4.2.0 |
 | Real-time | ASP.NET Core SignalR | 10.0 |
@@ -286,7 +287,7 @@ flowchart TB
 | CI | GitHub Actions | — |
 | Containerization | Docker, Docker Compose, Redis 7 Alpine | — |
 
-Swagger is enabled only in the Development environment.
+Swagger is available in all environments.
 
 ## Repository Structure
 
@@ -434,6 +435,7 @@ erDiagram
 - JWT validation checks issuer, audience, lifetime, and signing key with zero clock skew. The signing key is not committed and must be supplied through configuration.
 - The JWT contains the user ID, email, and role claims. `MapInboundClaims` is disabled.
 - SignalR accepts the access token from the `access_token` query string only for the `/hubs/notifications` path.
+- The notifications hub uses a Redis backplane when `ConnectionStrings:Redis` is configured, so notifications reach clients connected to any API replica. Without Redis, connection tracking is in-process.
 
 ### Authorization Layers
 
@@ -723,7 +725,7 @@ Other failures use Problem Details:
 
 ### API Documentation
 
-Swagger is available in the Development environment at `/swagger`. The Swagger definition includes a Bearer security scheme for authorized requests.
+Swagger is available at `/swagger` in all environments. The Swagger definition includes a Bearer security scheme for authorized requests.
 
 ## Getting Started
 
@@ -734,7 +736,7 @@ Swagger is available in the Development environment at `/swagger`. The Swagger d
 | .NET 10 SDK | Build and run the solution. |
 | SQL Server | Primary database. A local instance or container is sufficient. |
 | Docker (optional) | Run the integration tests; Testcontainers starts SQL Server. |
-| Redis (optional) | Distributed L2 cache. Without it, an in-memory distributed cache is used. |
+| Redis (optional) | Distributed L2 cache and SignalR backplane. Without it, an in-memory distributed cache and in-process SignalR connection tracking are used. |
 | AWS credentials profile | Required for attachment upload/download through S3. |
 | SMTP account | Required for email delivery (confirmation, invitations, password reset, account emails). |
 
@@ -774,7 +776,7 @@ Swagger is available in the Development environment at `/swagger`. The Swagger d
 dotnet run --project TeamManager.Api
 ```
 
-The default `http` launch profile listens on `http://localhost:5062` and opens Swagger in the browser. In Development, the Swagger UI is also available at `/swagger`.
+The default `http` launch profile listens on `http://localhost:5062` and opens Swagger in the browser. The Swagger UI is also available at `/swagger`.
 
 ### Bootstrap the First Administrator
 
@@ -811,7 +813,7 @@ Configuration is read from standard ASP.NET Core sources: `appsettings.json`, `a
 | Key | Description | Required | Default / example |
 |---|---|---|---|
 | `ConnectionStrings:DefaultConnection` | SQL Server connection string | Yes | `Server=localhost;Database=TeamManager;Trusted_Connection=True;TrustServerCertificate=True` |
-| `ConnectionStrings:Redis` | Redis connection for the L2 cache | No | `localhost:6379`; omitted means in-memory distributed cache |
+| `ConnectionStrings:Redis` | Redis connection for the L2 cache and the SignalR backplane | No | `localhost:6379`; omitted means in-memory distributed cache and in-process SignalR connection tracking |
 | `Jwt:Key` | HMAC-SHA256 signing key | Yes | Not present in the repository; provide via secrets or environment |
 | `Jwt:Issuer` | Expected JWT issuer | Yes | `TeamManager.Api` |
 | `Jwt:Audience` | Expected JWT audience | Yes | `TeamManager.Client` |
@@ -825,7 +827,7 @@ Configuration is read from standard ASP.NET Core sources: `appsettings.json`, `a
 | `Email:FromEmail` | Sender email address | Yes for email | Not present in the repository |
 | `Email:UseSsl` | Use STARTTLS when `true`; otherwise no encryption | No | `true` |
 | `AppUrl:BaseUrl` | Base URL used in email links | Yes for email | `https://team-manager-app.com` |
-| `Bootstrap:AdminSecret` | Secret required by the bootstrap endpoint | Yes to bootstrap | Replace the placeholder before use |
+| `Bootstrap:AdminSecret` | Secret required by the bootstrap endpoint | Yes to bootstrap | Not present in the repository; provide via secrets or environment |
 | `FileStorage:BucketName` | S3 bucket for attachments | Yes for attachments | A bucket name |
 | `FileStorage:Region` | AWS region for S3 | Yes for attachments | `eu-north-1` |
 | `FileStorage:ProfileName` | AWS credentials profile name | Yes for attachments | `teammanager-dev` |
@@ -961,7 +963,6 @@ The workflow performs build and test only. It does not publish images or deploy 
 - SQL Server is the only configured persistence provider. Migrations target SQL Server.
 - Docker Compose does not include a SQL Server service; an external database is required.
 - Rate limiting is in-process, so limits are enforced per application instance.
-- SignalR uses in-process connection tracking without a backplane. When the API runs as multiple replicas, a real-time notification is delivered only to clients connected to the instance that produced it.
 - Attachment storage is S3-only. The `FileStorage:Provider` setting does not select another implementation, and attachments require a resolvable AWS credentials profile.
 - Upload validation uses fixed limits (10 MB, six extensions); the corresponding `FileStorage` size and extension options are not applied to validation.
 - Cache invalidation is best-effort. Failed invalidations are logged and not retried; stale entries expire by TTL.
