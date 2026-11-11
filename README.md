@@ -834,7 +834,7 @@ Configuration is read from standard ASP.NET Core sources: `appsettings.json`, `a
 | `Cors:AllowedOrigins` | Allowed browser origins | Yes for browser clients | `["https://team-manager-app.com", "http://localhost:5173"]` |
 | `AllowedHosts` | ASP.NET Core host filtering | No | `*` |
 
-`FileStorage:Provider` also exists in configuration, but the registered storage implementation is always S3. `FileStorage:MaxFileSizeBytes` and `FileStorage:AllowedExtensions` are bound to options, but upload validation currently uses fixed values in the validator (10 MB and the six extensions listed above).
+`FileStorage:Provider` also exists in configuration, but the registered storage implementation is always S3. `FileStorage:MaxFileSizeBytes` and `FileStorage:AllowedExtensions` are bound to options and drive attachment upload validation.
 
 ### Rate-Limiting Settings
 
@@ -963,6 +963,5 @@ The workflow performs build and test only. It does not publish images or deploy 
 - Docker Compose does not include a SQL Server service; an external database is required.
 - Rate limiting is in-process, so limits are enforced per application instance.
 - Attachment storage is S3-only. The `FileStorage:Provider` setting does not select another implementation, and attachments require a resolvable AWS credentials profile.
-- Upload validation uses fixed limits (10 MB, six extensions); the corresponding `FileStorage` size and extension options are not applied to validation.
 - Cache invalidation is best-effort. Failed invalidations are logged and not retried; stale entries expire by TTL.
 - Integration tests run in four parallel collections (`Teams`, `Tasks`, `Projects`, `Users`), each with its own SQL Server container; tests within a collection still share one database.

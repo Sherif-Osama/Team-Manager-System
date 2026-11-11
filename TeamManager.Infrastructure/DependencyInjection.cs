@@ -85,7 +85,7 @@ namespace TeamManager.Infrastructure
             services.AddScoped<ExpiredRefreshTokenCleanupService>();
             services.AddHostedService<RefreshTokenCleanupJob>();
             services.Configure<FileStorageOptions>(configuration.GetSection(FileStorageOptions.SectionName));
-
+            services.AddSingleton<IFileStorageOptions>(sp => sp.GetRequiredService<IOptions<FileStorageOptions>>().Value);
             services.AddScoped<IFileStorage, S3FileStorage>();
 
             services.AddSingleton<IAmazonS3>(sp =>
