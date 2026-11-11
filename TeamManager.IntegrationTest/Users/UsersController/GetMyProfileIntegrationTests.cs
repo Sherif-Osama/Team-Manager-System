@@ -2,13 +2,14 @@ using System.Net;
 using TeamManager.Application.Common.DefaultValues;
 using TeamManager.IntegrationTest.Common;
 using TeamManager.IntegrationTest.Infrastructure;
+using TeamManager.IntegrationTest.Infrastructure.Collections.User;
 using TeamManager.IntegrationTest.Teams.Configuration;
 using TeamManager.IntegrationTest.Users.Configuration;
 
 namespace TeamManager.IntegrationTest.Users.UsersController
 {
-    [Collection("Common")]
-    public sealed class GetMyProfileIntegrationTests(TeamManagerApiFactory factory) : IntegrationTestBase(factory)
+    [Collection("Users")]
+    public sealed class GetMyProfileIntegrationTests(UserFactory factory) : IntegrationTestBase(factory)
     {
         private readonly UserTestHelpers _helpers = new(factory);
         private readonly TeamTestHelpers _teamHelpers = new(factory);

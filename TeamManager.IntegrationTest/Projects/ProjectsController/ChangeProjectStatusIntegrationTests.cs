@@ -7,12 +7,13 @@ using TeamManager.Domain.Enums;
 using TeamManager.Infrastructure.Persistence;
 using TeamManager.IntegrationTest.Common;
 using TeamManager.IntegrationTest.Infrastructure;
+using TeamManager.IntegrationTest.Infrastructure.Collections.Project;
 using TeamManager.IntegrationTest.Projects.Configuration;
 
 namespace TeamManager.IntegrationTest.Projects.ProjectsController
 {
-    [Collection("Common")]
-    public sealed class ChangeProjectStatusIntegrationTests(TeamManagerApiFactory factory) : IntegrationTestBase(factory)
+    [Collection("Projects")]
+    public sealed class ChangeProjectStatusIntegrationTests(ProjectFactory factory) : IntegrationTestBase(factory)
     {
         private readonly HttpClient _client = factory.CreateClient();
         private readonly ProjectTestHelpers _helpers = new(factory);

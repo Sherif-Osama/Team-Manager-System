@@ -14,12 +14,12 @@ using Testcontainers.MsSql;
 
 namespace TeamManager.IntegrationTest.Infrastructure
 {
-    public class TeamManagerApiFactory() : WebApplicationFactory<Api.Program>, IAsyncLifetime
+    public class TeamManagerApiFactory(string containerName) : WebApplicationFactory<Api.Program>, IAsyncLifetime
     {
         private Respawner _respawner = null!;
         private readonly MsSqlContainer _msSqlContainer = new MsSqlBuilder(
-            "mcr.microsoft.com/mssql/server:2022-CU14-ubuntu-22.04").WithName("teammanager-integration-tests")
-            .WithPassword("Test_password!123").WithDatabase("TeamManager_Test").Build();
+            "mcr.microsoft.com/mssql/server:2022-CU14-ubuntu-22.04").WithName(containerName).WithPassword("Test_password!123")
+            .WithDatabase("TeamManager_Test").Build();
 
         static TeamManagerApiFactory()
         {

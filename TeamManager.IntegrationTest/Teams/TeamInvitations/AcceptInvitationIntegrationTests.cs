@@ -8,12 +8,13 @@ using TeamManager.Domain.Enums;
 using TeamManager.Infrastructure.Persistence;
 using TeamManager.IntegrationTest.Common;
 using TeamManager.IntegrationTest.Infrastructure;
+using TeamManager.IntegrationTest.Infrastructure.Collections.Team;
 using TeamManager.IntegrationTest.Teams.Configuration;
 
 namespace TeamManager.IntegrationTest.Teams.TeamInvitations
 {
-    [Collection("Common")]
-    public sealed class AcceptInvitationIntegrationTests(TeamManagerApiFactory factory) : IntegrationTestBase(factory)
+    [Collection("Teams")]
+    public sealed class AcceptInvitationIntegrationTests(TeamFactory factory) : IntegrationTestBase(factory)
     {
         private readonly HttpClient _client = factory.CreateClient();
         private readonly TeamTestHelpers _helpers = new(factory);

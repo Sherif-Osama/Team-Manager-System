@@ -6,12 +6,13 @@ using System.Net.Http.Json;
 using TeamManager.Infrastructure.Persistence;
 using TeamManager.IntegrationTest.Common;
 using TeamManager.IntegrationTest.Infrastructure;
+using TeamManager.IntegrationTest.Infrastructure.Collections.Team;
 using TeamManager.IntegrationTest.Teams.Configuration;
 
 namespace TeamManager.IntegrationTest.Teams.TeamsController
 {
-    [Collection("Common")]
-    public sealed class GetTeamsIntegrationTests(TeamManagerApiFactory factory) : IntegrationTestBase(factory)
+    [Collection("Teams")]
+    public sealed class GetTeamsIntegrationTests(TeamFactory factory) : IntegrationTestBase(factory)
     {
         private readonly HttpClient _client = factory.CreateClient();
         private readonly TeamTestHelpers _helpers = new(factory);

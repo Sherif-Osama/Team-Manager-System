@@ -3,13 +3,14 @@ using System.Net.Http.Json;
 using TeamManager.Domain.Enums;
 using TeamManager.IntegrationTest.Common;
 using TeamManager.IntegrationTest.Infrastructure;
+using TeamManager.IntegrationTest.Infrastructure.Collections.Task;
 using TeamManager.IntegrationTest.Projects.Configuration;
 using TeamManager.IntegrationTest.Teams.Configuration;
 
 namespace TeamManager.IntegrationTest.Tasks.TaskComment
 {
-    [Collection("Common")]
-    public sealed class DeleteTaskCommentIntegrationTests(TeamManagerApiFactory factory) : IntegrationTestBase(factory)
+    [Collection("Tasks")]
+    public sealed class DeleteTaskCommentIntegrationTests(TaskItemFactory factory) : IntegrationTestBase(factory)
     {
         private readonly ProjectTestHelpers _helpers = new(factory);
         private readonly TeamTestHelpers _teamHelpers = new(factory);

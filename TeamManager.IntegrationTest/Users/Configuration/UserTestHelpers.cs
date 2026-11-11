@@ -12,6 +12,10 @@ namespace TeamManager.IntegrationTest.Users.Configuration
 {
     public sealed class UserTestHelpers(TeamManagerApiFactory factory)
     {
+        public sealed record GetMyProfileResponseDto(Guid Id, string Email, string DisplayName, bool IsEmailConfirmed,
+    bool IsActive, DateTime? LastLoginUtc, DateTime CreatedAtUtc, int ActiveTeamMembersCount, int OwnedTeamsCount,
+    IReadOnlyCollection<string> SystemRolesNames);
+
         private readonly HttpClient _client = factory.CreateClient();
 
         public async Task<HttpResponseMessage> RequestAsync(HttpMethod method, string url, string? accessToken = null,

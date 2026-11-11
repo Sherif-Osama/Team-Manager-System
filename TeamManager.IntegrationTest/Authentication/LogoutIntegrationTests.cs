@@ -7,11 +7,12 @@ using TeamManager.Infrastructure.Persistence;
 using TeamManager.IntegrationTest.Authentication.Configuration;
 using TeamManager.IntegrationTest.Common;
 using TeamManager.IntegrationTest.Infrastructure;
+using TeamManager.IntegrationTest.Infrastructure.Collections.User;
 
 namespace TeamManager.IntegrationTest.Authentication
 {
-    [Collection("Common")]
-    public sealed class LogoutIntegrationTests(TeamManagerApiFactory factory) : IntegrationTestBase(factory)
+    [Collection("Users")]
+    public sealed class LogoutIntegrationTests(UserFactory factory) : IntegrationTestBase(factory)
     {
         private readonly HttpClient _client = factory.CreateClient();
         private readonly AuthenticatedUser _authenticatedUser = new AuthenticatedUser(factory);

@@ -4,13 +4,14 @@ using TeamManager.Domain.Enums;
 using TeamManager.Infrastructure.Persistence;
 using TeamManager.IntegrationTest.Common;
 using TeamManager.IntegrationTest.Infrastructure;
+using TeamManager.IntegrationTest.Infrastructure.Collections.Project;
 using TeamManager.IntegrationTest.Notifications.Configuration;
 using TeamManager.IntegrationTest.Projects.Configuration;
 
 namespace TeamManager.IntegrationTest.Notifications
 {
-    [Collection("Common")]
-    public sealed class NotificationGenerationIntegrationTests(TeamManagerApiFactory factory) : IntegrationTestBase(factory)
+    [Collection("Projects")]
+    public sealed class NotificationGenerationIntegrationTests(ProjectFactory factory) : IntegrationTestBase(factory)
     {
         private readonly ProjectTestHelpers _helpers = new(factory);
         private readonly NotificationTestHelpers _notifications = new(factory);

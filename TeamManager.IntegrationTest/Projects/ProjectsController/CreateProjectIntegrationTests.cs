@@ -6,13 +6,14 @@ using TeamManager.Domain.Enums;
 using TeamManager.Infrastructure.Persistence;
 using TeamManager.IntegrationTest.Common;
 using TeamManager.IntegrationTest.Infrastructure;
+using TeamManager.IntegrationTest.Infrastructure.Collections.Project;
 using TeamManager.IntegrationTest.Projects.Configuration;
 using TeamManager.IntegrationTest.Teams.Configuration;
 
 namespace TeamManager.IntegrationTest.Projects.ProjectsController
 {
-    [Collection("Common")]
-    public sealed class CreateProjectIntegrationTests(TeamManagerApiFactory factory) : IntegrationTestBase(factory)
+    [Collection("Projects")]
+    public sealed class CreateProjectIntegrationTests(ProjectFactory factory) : IntegrationTestBase(factory)
     {
         private readonly ProjectTestHelpers _helpers = new(factory);
         private readonly TeamTestHelpers _teamHelpers = new(factory);

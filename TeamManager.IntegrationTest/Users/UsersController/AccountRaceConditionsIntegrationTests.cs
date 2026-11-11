@@ -6,13 +6,14 @@ using TeamManager.Domain.Enums;
 using TeamManager.Infrastructure.Persistence;
 using TeamManager.IntegrationTest.Common;
 using TeamManager.IntegrationTest.Infrastructure;
+using TeamManager.IntegrationTest.Infrastructure.Collections.User;
 using TeamManager.IntegrationTest.Teams.Configuration;
 using TeamManager.IntegrationTest.Users.Configuration;
 
 namespace TeamManager.IntegrationTest.Users.UsersController
 {
-    [Collection("Common")]
-    public sealed class AccountRaceConditionsIntegrationTests(TeamManagerApiFactory factory) : IntegrationTestBase(factory)
+    [Collection("Users")]
+    public sealed class AccountRaceConditionsIntegrationTests(UserFactory factory) : IntegrationTestBase(factory)
     {
         private readonly UserTestHelpers _helpers = new(factory);
         private readonly TeamTestHelpers _teamHelpers = new(factory);
