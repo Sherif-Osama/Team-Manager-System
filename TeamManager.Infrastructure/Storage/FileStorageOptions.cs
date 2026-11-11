@@ -1,6 +1,8 @@
-﻿namespace TeamManager.Infrastructure.Storage
+﻿using TeamManager.Application.Abstractions.Storage;
+
+namespace TeamManager.Infrastructure.Storage
 {
-    public sealed class FileStorageOptions
+    public sealed class FileStorageOptions : IFileStorageOptions
     {
         public string Provider { get; set; } = "Local";
         public string BucketName { get; set; } = string.Empty;
@@ -8,7 +10,6 @@
         public string ProfileName { get; set; } = string.Empty;
         public const string SectionName = "FileStorage";
         public long MaxFileSizeBytes { get; set; } = 10 * 1024 * 1024;
-
-        public string[] AllowedExtensions { get; set; } = [".pdf", ".png", ".jpg", ".jpeg", ".docx", ".xlsx"];
+        public IReadOnlyCollection<string> AllowedExtensions { get; set; } = [".pdf", ".png", ".jpg", ".jpeg", ".docx", ".xlsx"];
     }
 }
