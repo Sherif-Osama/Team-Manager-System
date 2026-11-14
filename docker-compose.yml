@@ -13,12 +13,6 @@ services:
       retries: 3
       start_period: 10s
 
-    deploy:
-      replicas: 2
-      update_config:
-        parallelism: 1
-        delay: 10s
-
     env_file:
       - .env
     depends_on:
@@ -51,5 +45,5 @@ volumes:
 
 networks:
   CachingNetwork:
-    driver: overlay
+    driver: bridge
     attachable: true

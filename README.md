@@ -871,10 +871,10 @@ The runtime image listens on `http://0.0.0.0:8080`, installs `curl` for health c
 
 | Service | Image | Ports | Notes |
 |---|---|---|---|
-| `team-manager` | `sherif172/team-manager` | `80:8080` | Reads `.env`; depends on Redis; health check calls `/health`; two replicas are declared under `deploy`. |
+| `team-manager` | `sherif172/team-manager` | `80:8080` | Reads `.env`; depends on Redis; health check calls `/health`. |
 | `Cache-Service` | `redis:7-alpine` | Not published | AOF persistence enabled; named volume `redis-data`; health check uses `redis-cli ping`. |
 
-Both services join the attachable overlay network `CachingNetwork`. Docker Compose does **not** start SQL Server; the API must be pointed at an external SQL Server instance through `.env` or the environment. The `.env` file is gitignored and must contain the configuration values described above, including the JWT key, connection string, SMTP settings, and storage settings.
+Both services join the bridge network `CachingNetwork`. Docker Compose does **not** start SQL Server; the API must be pointed at an external SQL Server instance through `.env` or the environment. The `.env` file is gitignored and must contain the configuration values described above, including the JWT key, connection string, SMTP settings, and storage settings.
 
 ### Run with Docker Compose
 
