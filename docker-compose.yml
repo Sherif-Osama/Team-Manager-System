@@ -4,7 +4,7 @@ services:
 
     ports:
       - target: 8080
-        published: 8080
+        published: 80
 
     healthcheck:
       test: [ "CMD", "curl", "-fsS", "http://localhost:8080/health" ]

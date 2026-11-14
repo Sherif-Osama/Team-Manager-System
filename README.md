@@ -871,7 +871,7 @@ The runtime image listens on `http://0.0.0.0:8080`, installs `curl` for health c
 
 | Service | Image | Ports | Notes |
 |---|---|---|---|
-| `team-manager` | `sherif172/team-manager` | `8080:8080` | Reads `.env`; depends on Redis; health check calls `/health`; two replicas are declared under `deploy`. |
+| `team-manager` | `sherif172/team-manager` | `80:8080` | Reads `.env`; depends on Redis; health check calls `/health`; two replicas are declared under `deploy`. |
 | `Cache-Service` | `redis:7-alpine` | Not published | AOF persistence enabled; named volume `redis-data`; health check uses `redis-cli ping`. |
 
 Both services join the attachable overlay network `CachingNetwork`. Docker Compose does **not** start SQL Server; the API must be pointed at an external SQL Server instance through `.env` or the environment. The `.env` file is gitignored and must contain the configuration values described above, including the JWT key, connection string, SMTP settings, and storage settings.
@@ -883,7 +883,7 @@ docker build -t sherif172/team-manager .
 docker compose up -d
 ```
 
-The API is then available at `http://localhost:8080`, with the health endpoint at `http://localhost:8080/health`.
+The API is then available at `http://localhost`, with the health endpoint at `http://localhost/health` and Swagger at `http://localhost/swagger`.
 
 ## Testing Strategy
 
