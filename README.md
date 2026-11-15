@@ -8,6 +8,7 @@ A REST API for managing teams, projects, and tasks, built with ASP.NET Core 10 u
 ## Table of Contents
 
 - [Project Overview](#project-overview)
+- [Live Demo](#live-demo)
 - [Core Features](#core-features)
 - [Architecture Overview](#architecture-overview)
 - [Technology Stack](#technology-stack)
@@ -46,6 +47,15 @@ The API is designed for a separate client application. No frontend is included i
 - Preserve data integrity with SQL Server constraints, transactions, and optimistic concurrency.
 - Dispatch side effects (emails, cache invalidation, real-time notifications) without losing transactional consistency.
 - Verify behavior with both isolated unit tests and end-to-end integration tests against a real SQL Server instance.
+
+## Live Demo
+
+A live deployment runs on AWS EC2 and is updated automatically on every push to `main`:
+
+- **Swagger UI**: <http://13.63.126.255/swagger/index.html>
+- **Health check**: <http://13.63.126.255/health>
+
+To try the protected endpoints: register a user (`POST /api/authentication/register`), confirm the email, log in (`POST /api/authentication/login`), and paste the returned access token into Swagger's **Authorize** dialog (Bearer scheme).
 
 ## Core Features
 
@@ -923,22 +933,22 @@ Both test projects reference `coverlet.collector`. CI runs the unit suite with X
 
 ## CI/CD
 
-The repository contains one GitHub Actions workflow: `.github/workflows/ci.yml` (`TeamManager CI`).
+The repository contains two GitHub Actions workflows: `.github/workflows/ci.yml` (`TeamManager CI`) and `.github/workflows/deploy.yml` (`Deploy`).
 
 **Triggers**
 
-- push to `main`;
-- pull requests;
-- manual `workflow_dispatch`.
+- `TeamManager CI` — pull requests and pushes to `main`, plus manual `workflow_dispatch`.
+- `Deploy` — pushes to `main` and manual `workflow_dispatch`.
 
-The workflow uses read-only repository permissions and cancels superseded runs for the same workflow and ref.
+Both workflows use read-only repository permissions and cancel superseded runs for the same workflow and ref.
 
-| Job | Runner | Timeout | Steps |
-|---|---|---|---|
-| `Build and Unit Tests` | `ubuntu-24.04` | 20 min | Checkout, .NET 10 setup, restore/build/test the unit project in Release with TRX logging and code coverage, upload test results and an HTML coverage report. |
-| `Integration Tests` | `ubuntu-24.04` | 45 min | Runs after the unit job; checks Docker, restore/build/test the integration project in Release with TRX logging, uploads results. |
+| Workflow | Job | Runner | Timeout | Steps |
+|---|---|---|---|---|
+| `TeamManager CI` | `Build and Unit Tests` | `ubuntu-24.04` | 20 min | Checkout, .NET 10 setup, restore/build/test the unit project in Release with TRX logging and code coverage, upload test results and an HTML coverage report. |
+| `TeamManager CI` | `Integration Tests` | `ubuntu-24.04` | 45 min | Runs after the unit job; checks Docker, restore/build/test the integration project in Release with TRX logging, uploads results. |
+| `Deploy` | `Build and Deploy` | `ubuntu-24.04` | 20 min | Checkout, build the image and push it to Docker Hub (`latest` and commit-SHA tags), copy `docker-compose.yml` to the EC2 host over SSH, pull and redeploy the stack, verify `/health`. |
 
-The workflow performs build and test only. It does not publish images or deploy the application.
+The Deploy workflow requires the `DOCKERHUB_USERNAME`, `DOCKERHUB_TOKEN`, `EC2_HOST`, `EC2_USER`, and `EC2_SSH_KEY` secrets; an optional `DEPLOY_DIR` variable overrides the server path (default `/home/ubuntu/team-manager`).
 
 ## Engineering Decisions
 
@@ -958,7 +968,6 @@ The workflow performs build and test only. It does not publish images or deploy 
 
 ## Known Limitations
 
-- CI builds and tests only; there is no image publishing or deployment workflow.
 - SQL Server is the only configured persistence provider. Migrations target SQL Server.
 - Docker Compose does not include a SQL Server service; an external database is required.
 - Rate limiting is in-process, so limits are enforced per application instance.
