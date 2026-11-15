@@ -52,8 +52,8 @@ The API is designed for a separate client application. No frontend is included i
 
 A live deployment runs on AWS EC2 and is updated automatically on every push to `main`:
 
-- **Swagger UI**: <http://13.63.126.255/swagger/index.html>
-- **Health check**: <http://13.63.126.255/health>
+- **Swagger UI**: <http://13.61.56.182/swagger/index.html>
+- **Health check**: <http://13.61.56.182/health>
 
 To try the protected endpoints: register a user (`POST /api/authentication/register`), confirm the email, log in (`POST /api/authentication/login`), and paste the returned access token into Swagger's **Authorize** dialog (Bearer scheme).
 
