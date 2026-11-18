@@ -20,6 +20,8 @@ namespace TeamManager.IntegrationTest.Tasks.TaskChecklist
             var (_, projectId, ownerToken) = await _helpers.CreateOwnedProjectAsync("check-add");
             var taskId = await _helpers.CreateTaskAsync(projectId, "Owner task", ownerToken);
 
+            Assert.Empty(await _helpers.GetTaskChecklistResultAsync(taskId, ownerToken));
+
             var itemId = await _helpers.AddChecklistItemAsync(taskId, "Write the docs", ownerToken);
 
             Assert.True(itemId > 0);

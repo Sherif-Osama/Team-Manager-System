@@ -386,7 +386,7 @@ namespace TeamManager.Domain.Entities
                 throw new DomainException("Checklist item is already completed");
 
             item.Complete(completedBy);
-            Touch();
+            Touch(new TaskChecklistChangedDomainEvent(Id));
         }
 
         public void ReopenChecklistItem(long checklistItemId)
@@ -403,7 +403,7 @@ namespace TeamManager.Domain.Entities
                 throw new DomainException("Checklist item is already incomplete");
 
             item.Reopen();
-            Touch();
+            Touch(new TaskChecklistChangedDomainEvent(Id));
         }
 
         public void RemoveChecklistItem(long checklistItemId)
@@ -418,7 +418,7 @@ namespace TeamManager.Domain.Entities
 
             _checklistItems.Remove(item);
 
-            Touch();
+            Touch(new TaskChecklistChangedDomainEvent(Id));
         }
 
         public TaskChecklistItem AddChecklistItem(string content)
@@ -433,7 +433,7 @@ namespace TeamManager.Domain.Entities
 
             _checklistItems.Add(item);
 
-            Touch();
+            Touch(new TaskChecklistChangedDomainEvent(Id));
 
             return item;
         }

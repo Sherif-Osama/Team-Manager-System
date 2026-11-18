@@ -28,6 +28,8 @@ namespace TeamManager.IntegrationTest.Tasks.TaskChecklist
 
             await _helpers.CompleteChecklistItemAsync(taskId, itemId, memberToken);
 
+            Assert.True(Assert.Single(await _helpers.GetTaskChecklistResultAsync(taskId, ownerToken)).IsCompleted);
+
             var response = await _helpers.ReopenChecklistItemRequestAsync(taskId, itemId, ownerToken);
 
             Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);

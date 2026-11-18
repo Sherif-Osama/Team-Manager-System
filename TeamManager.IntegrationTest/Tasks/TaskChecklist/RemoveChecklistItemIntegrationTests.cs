@@ -25,6 +25,8 @@ namespace TeamManager.IntegrationTest.Tasks.TaskChecklist
             var removableItemId = await _helpers.AddChecklistItemAsync(taskId, "Remove me", ownerToken);
             await _helpers.AddChecklistItemAsync(taskId, "Keep two", ownerToken);
 
+            Assert.Equal(3, (await _helpers.GetTaskChecklistResultAsync(taskId, ownerToken)).Count);
+
             var response = await _helpers.RemoveChecklistItemRequestAsync(taskId, removableItemId, ownerToken);
 
             Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
