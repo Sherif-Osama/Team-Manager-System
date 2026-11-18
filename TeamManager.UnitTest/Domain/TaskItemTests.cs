@@ -702,6 +702,22 @@ namespace TeamManager.UnitTest.Domain
         }
 
         [Fact]
+        public void ChecklistMutations_RaiseTaskChecklistChangedDomainEvent()
+        {
+            var task = CreateTask();
+            var item = task.AddChecklistItem("Item");
+
+            task.CompleteChecklistItem(item.Id, Creator);
+            task.ReopenChecklistItem(item.Id);
+            task.RemoveChecklistItem(item.Id);
+
+            Assert.Equal(4, task.DomainEvents.Count(e => e is TaskChecklistChangedDomainEvent
+            {
+                TaskId: var taskId
+            } && taskId == task.Id));
+        }
+
+        [Fact]
         public void AddChecklistItem_WhenCancelled_Throws()
         {
             var task = CreateTaskInStatus(TaskItemStatus.Cancelled);

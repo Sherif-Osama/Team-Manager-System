@@ -512,12 +512,13 @@ The application uses `HybridCache`:
 - **L1** — in-process memory cache, with a local expiration of one minute.
 - **L2** — Redis when `ConnectionStrings:Redis` is configured; otherwise an in-memory distributed cache. The Redis instance name is `teammanager:`.
 
-Only queries implementing `ICacheableQuery` pass through `CachingBehavior`. Currently these are the team label queries:
+Only queries implementing `ICacheableQuery` pass through `CachingBehavior`. Currently these are the team label and task checklist queries:
 
 | Query | Key | TTL | Tags |
 |---|---|---|---|
 | `GetLabelsQuery` | `teammanager:labels:team:{teamId}:search:{search}:page:{page}:pageSize:{pageSize}` | 30 minutes | `TeamLabels(teamId)` |
 | `GetLabelByIdQuery` | `teammanager:labels:team:{teamId}:label:{labelId}` | 30 minutes | `TeamLabels(teamId)` |
+| `GetTaskChecklistQuery` | `teammanager:tasks:checklist:{taskId}:search:{search}:isCompleted:{isCompleted}` | 10 minutes | `TaskChecklist(taskId)` |
 
 Authorization and permission checks use the same cache service:
 
@@ -532,6 +533,7 @@ Authorization and permission checks use the same cache service:
 Domain-event handlers enqueue cache tags when relevant state changes:
 
 - label changes → `TeamLabels(teamId)`;
+- task checklist changes (add, complete, reopen, remove) → `TaskChecklist(taskId)`;
 - team membership and ownership changes → `TeamAuthorization(teamId)` and affected `UserAuthorization(userId)` tags;
 - project membership and ownership changes → `ProjectAuthorization(projectId)` and affected `UserAuthorization(userId)` tags;
 - role assignment, revocation, and role-permission changes → `UserPermissions(userId)` or `AllUserPermissions`.
@@ -962,7 +964,7 @@ The Deploy workflow requires the `DOCKERHUB_USERNAME`, `DOCKERHUB_TOKEN`, `EC2_H
 | Serializable transactions for cross-entity rules | Task creation/status changes, project deletion, account deletion/deactivation, and bootstrap use serializable isolation with deadlock retries. | Stronger invariants under concurrency; higher contention and retry complexity. |
 | Optimistic concurrency | `RowVersion` tokens on core aggregates and memberships; conflicts return HTTP 409. | Prevents lost updates without long-lived locks; clients must retry after conflicts. |
 | Explicit soft-delete filtering | Repositories and query handlers filter `DeletedAtUtc` inline; no global query filters. | Predictable SQL and clear intent per query; every new query must apply the filter correctly. |
-| Targeted caching | Only label queries are cache-aside; authorization decisions and permission codes are cached separately. | Avoids stale general-purpose caches; membership and permission changes can remain stale until TTL if invalidation fails. |
+| Targeted caching | Only label and task checklist queries are cache-aside; authorization decisions and permission codes are cached separately. | Avoids stale general-purpose caches; membership and permission changes can remain stale until TTL if invalidation fails. |
 | Post-commit cache invalidation | Domain-event handlers enqueue tags; `SaveChangesAsync` dispatches tag removal after commit. | Prevents invalidating on rolled-back transactions; best-effort delivery with TTL as fallback. |
 | Real SQL Server in integration tests | Testcontainers with migrations and Respawn resets. | Tests exercise real SQL behavior and constraints; the suite requires Docker and runs four collections in parallel, one SQL container each. |
 

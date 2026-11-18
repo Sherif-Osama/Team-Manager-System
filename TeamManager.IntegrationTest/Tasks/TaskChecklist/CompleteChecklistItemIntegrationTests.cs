@@ -25,6 +25,8 @@ namespace TeamManager.IntegrationTest.Tasks.TaskChecklist
             var taskId = await _helpers.CreateTaskAsync(projectId, "Complete task", ownerToken);
             var itemId = await _helpers.AddChecklistItemAsync(taskId, "Ship it", ownerToken);
 
+            Assert.False(Assert.Single(await _helpers.GetTaskChecklistResultAsync(taskId, ownerToken)).IsCompleted);
+
             var response = await _helpers.CompleteChecklistItemRequestAsync(taskId, itemId, memberToken);
 
             Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);

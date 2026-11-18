@@ -6,6 +6,7 @@ using TeamManager.Application.Common.Events.EventHandlers.Caching;
 using TeamManager.Domain.Common.Events.Invitations;
 using TeamManager.Domain.Common.Events.Projects;
 using TeamManager.Domain.Common.Events.Roles;
+using TeamManager.Domain.Common.Events.Tasks;
 using TeamManager.Domain.Common.Events.Teams;
 using TeamManager.Domain.Common.Events.Users;
 using TeamManager.Domain.Enums;
@@ -89,6 +90,18 @@ public sealed class CachingHandlersTests
             new TeamLabelsChangedDomainEvent(teamId)), CancellationToken.None);
 
         _dispatcher.Verify(x => x.EnqueueTag(CacheTags.TeamLabels(teamId)), Times.Once);
+    }
+
+    [Fact]
+    public async Task OnTaskChecklistChanged_EnqueuesTaskChecklistTag()
+    {
+        var handler = new InvalidateTaskChecklistCacheHandler(_dispatcher.Object);
+        const long taskId = 42;
+
+        await handler.Handle(new DomainEventNotification<TaskChecklistChangedDomainEvent>(
+            new TaskChecklistChangedDomainEvent(taskId)), CancellationToken.None);
+
+        _dispatcher.Verify(x => x.EnqueueTag(CacheTags.TaskChecklist(taskId)), Times.Once);
     }
 
     [Fact]
