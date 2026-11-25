@@ -1,4 +1,5 @@
 ﻿using Amazon;
+using Amazon.Runtime;
 using Amazon.Runtime.CredentialManagement;
 using Amazon.S3;
 using Microsoft.EntityFrameworkCore;
@@ -91,17 +92,26 @@ namespace TeamManager.Infrastructure
             services.AddSingleton<IAmazonS3>(sp =>
             {
                 var options = sp.GetRequiredService<IOptions<FileStorageOptions>>().Value;
-
                 var region = RegionEndpoint.GetBySystemName(options.Region);
 
-                var chain = new CredentialProfileStoreChain();
-
-                if (!chain.TryGetAWSCredentials(options.ProfileName, out var credentials))
+                // 1. Direct AccessKey & SecretKey (from .env, appsettings, or user-secrets)
+                if (!string.IsNullOrWhiteSpace(options.AccessKey) && !string.IsNullOrWhiteSpace(options.SecretKey))
                 {
-                    throw new InvalidOperationException($"AWS profile '{options.ProfileName}' was not found.");
+                    return new AmazonS3Client(new BasicAWSCredentials(options.AccessKey, options.SecretKey), region);
                 }
 
-                return new AmazonS3Client(credentials, region);
+                // 2. Profile name if specified
+                if (!string.IsNullOrWhiteSpace(options.ProfileName))
+                {
+                    var chain = new CredentialProfileStoreChain();
+                    if (chain.TryGetAWSCredentials(options.ProfileName, out var credentials))
+                    {
+                        return new AmazonS3Client(credentials, region);
+                    }
+                }
+
+                // 3. Fallback to standard AWS chain (Environment variables or EC2 IAM Role)
+                return new AmazonS3Client(region);
             });
 
             services.AddScoped<IActivityLogRepository, ActivityLogRepository>();
